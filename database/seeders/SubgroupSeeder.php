@@ -16,7 +16,7 @@ class SubgroupSeeder extends Seeder
     {
         $speciality = Speciality::first();
 
-        Subgroup::create(['name' => 'Group A', 'speciality_id' => $speciality->id, 'study_year' => 1, 'index' => 'A1']);
-        Subgroup::create(['name' => 'Group B', 'speciality_id' => $speciality->id, 'study_year' => 2, 'index' => 'B2']);
+        Subgroup::create(['name' => '3111', 'speciality_id' => $speciality->id, 'study_year' => 1, 'index' => 'a', 'number' => 1]);
+        Subgroup::create(['name' => '3121', 'speciality_id' => $speciality->id, 'study_year' => 2, 'index' => 'a', 'number' => 2]);
     }
 }

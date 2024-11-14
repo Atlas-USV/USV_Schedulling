@@ -50,6 +50,7 @@ return new class extends Migration
             $table->id();
             $table->string('name');
             $table->foreignId('speciality_id')->constrained('specialities')->onDelete('cascade');
+            $table->smallInteger('number');
             $table->smallInteger('study_year');
             $table->string('index');
             $table->timestamps();

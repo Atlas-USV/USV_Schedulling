@@ -13,7 +13,7 @@ use Illuminate\Database\Eloquent\Relations\BelongsToMany;
 class Subgroup extends Model
 {
     use HasFactory;
-    protected $fillable = ['name', 'speciality_id', 'study_year', 'index'];
+    protected $fillable = ['name', 'speciality_id', 'study_year', 'index', 'number'];
 
     public function speciality(): BelongsTo
     {
