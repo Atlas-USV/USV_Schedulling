@@ -9,10 +9,10 @@ use Database\Seeders\RoomSeeder;
 use Database\Seeders\UserSeeder;
 use Database\Seeders\FacultySeeder;
 use Database\Seeders\SubjectSeeder;
-use Database\Seeders\SubgroupSeeder;
+use Database\Seeders\GroupSeeder;
 use Database\Seeders\EvaluationSeeder;
 use Database\Seeders\SpecialitySeeder;
-use Database\Seeders\UserSubgroupSeeder;
+use Database\Seeders\UserGroupSeeder;
 
 class DatabaseSeeder extends Seeder
 {
@@ -27,10 +27,10 @@ class DatabaseSeeder extends Seeder
             UserRoles::class,
             UserSeeder::class,
             SubjectSeeder::class,
-            SubgroupSeeder::class,
+            GroupSeeder::class,
             RoomSeeder::class,
             EvaluationSeeder::class,
-            UserSubgroupSeeder::class,
+            UserGroupSeeder::class,
         ]);
     }
 }

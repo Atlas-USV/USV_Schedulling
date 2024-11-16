@@ -45,14 +45,13 @@ return new class extends Migration
         //TODO user specialty
 
        
-
-        Schema::create('subgroups', function (Blueprint $table) {
+        
+        Schema::create('groups', function (Blueprint $table) {
             $table->id();
             $table->string('name');
             $table->foreignId('speciality_id')->constrained('specialities')->onDelete('cascade');
             $table->smallInteger('number');
             $table->smallInteger('study_year');
-            $table->string('index');
             $table->timestamps();
         });
 
@@ -78,19 +77,19 @@ return new class extends Migration
             $table->date('exam_date');
             $table->dateTime('start_time');
             $table->dateTime('end_time');
-            $table->foreignId('group_id')->constrained('subgroups')->onDelete('cascade');
+            $table->foreignId('group_id')->constrained('groups')->onDelete('cascade');
             $table->text('description')->nullable();
             $table->foreignId('room_id')->nullable()->constrained('rooms')->onDelete('set null');
             $table->json('other_examinators')->nullable();
             $table->timestamps();
         });
-
-        Schema::create('user_subgroups', function (Blueprint $table) {
-            $table->id();
-            $table->foreignId('user_id')->constrained('users')->onDelete('cascade');
-            $table->foreignId('subgroup_id')->constrained('subgroups')->onDelete('cascade');
+        Schema::create('user_group', function (Blueprint $table) {
+            $table->id(); // Optional
+            $table->foreignId('user_id')->constrained()->onDelete('cascade');
+            $table->foreignId('group_id')->constrained()->onDelete('cascade');
             $table->timestamps();
         });
+       
     }
 
     /**
@@ -109,7 +108,7 @@ return new class extends Migration
             $table->dropForeign(['teacher_id']);
             $table->dropForeign(['subject_id']);
         });
-        Schema::dropIfExists('user_subgroups');
+        Schema::dropIfExists('user_group');
         Schema::table('evaluation_schedules', function (Blueprint $table) {
             // Dropping columns if rolling back
             $table->dropForeign(['evaluation_id']);
@@ -120,7 +119,7 @@ return new class extends Migration
         Schema::dropIfExists('evaluation_schedules');
         Schema::dropIfExists('evaluations');
         Schema::dropIfExists('rooms');
-        Schema::dropIfExists('subgroups');
+        Schema::dropIfExists('groups');
         Schema::dropIfExists('subjects');
         Schema::dropIfExists('specialities');
         Schema::dropIfExists('faculties');

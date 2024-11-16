@@ -4,18 +4,20 @@ namespace App\Models;
 
 // use Illuminate\Contracts\Auth\MustVerifyEmail;
 use App\Models\Faculty;
-use App\Models\Subgroup;
+use App\Models\Group;
 use App\Models\Evaluation;
 use App\Models\Speciality;
 use Spatie\Permission\Traits\HasRoles;
 use Illuminate\Notifications\Notifiable;
+use Illuminate\Contracts\Auth\MustVerifyEmail;
 use Illuminate\Database\Eloquent\Relations\HasMany;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Foundation\Auth\User as Authenticatable;
 use Illuminate\Database\Eloquent\Relations\BelongsToMany;
+use App\Notifications\CustomEmailVerificationNotification;
 
-class User extends Authenticatable
+class User extends Authenticatable implements MustVerifyEmail
 {
     use HasFactory, Notifiable, HasRoles;
 
@@ -66,13 +68,19 @@ class User extends Authenticatable
         return $this->belongsTo(Faculty::class, 'teacher_faculty_id');
     }
 
-    public function subgroups(): BelongsToMany
+    public function groups(): BelongsToMany
     {
-        return $this->belongsToMany(Subgroup::class, 'user_subgroups');
+        return $this->belongsToMany(Group::class, 'user_group', 'user_id', 'group_id')
+                    ->withTimestamps();
     }
 
     public function evaluations(): HasMany
     {
         return $this->hasMany(Evaluation::class, 'teacher_id');
+    }
+
+    public function sendEmailVerificationNotification()
+    {
+        $this->notify(new CustomEmailVerificationNotification());
     }
 }
