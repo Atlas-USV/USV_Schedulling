@@ -3,11 +3,11 @@
 namespace Database\Seeders;
 
 use App\Models\User;
-use App\Models\Subgroup;
+use App\Models\Group;
 use Illuminate\Database\Seeder;
 use Illuminate\Database\Console\Seeds\WithoutModelEvents;
 
-class UserSubgroupSeeder extends Seeder
+class UserGroupSeeder extends Seeder
 {
     /**
      * Run the database seeds.
@@ -15,8 +15,8 @@ class UserSubgroupSeeder extends Seeder
     public function run()
     {
         $user = User::first();
-        $subgroup = Subgroup::first();
+        $group = Group::first();
 
-        $user->subgroups()->attach($subgroup->id);
+        $user->groups()->attach($group->id);
     }
 }

@@ -3,8 +3,8 @@
 namespace App\Models;
 
 use App\Models\Room;
-use App\Models\Subgroup;
 
+use App\Models\Group;
 use App\Models\Evaluation;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
@@ -26,7 +26,7 @@ class EvaluationSchedule extends Model
 
     public function group(): BelongsTo
     {
-        return $this->belongsTo(Subgroup::class, 'group_id');
+        return $this->belongsTo(Group::class, 'group_id');
     }
 
     public function room(): BelongsTo

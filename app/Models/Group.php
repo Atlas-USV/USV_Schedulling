@@ -10,10 +10,10 @@ use Illuminate\Database\Eloquent\Relations\BelongsTo;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Relations\BelongsToMany;
 
-class Subgroup extends Model
+class Group extends Model
 {
     use HasFactory;
-    protected $fillable = ['name', 'speciality_id', 'study_year', 'index', 'number'];
+    protected $fillable = ['name', 'speciality_id', 'study_year', 'number'];
 
     public function speciality(): BelongsTo
     {
@@ -22,7 +22,8 @@ class Subgroup extends Model
 
     public function users(): BelongsToMany
     {
-        return $this->belongsToMany(User::class, 'user_subgroups');
+        return $this->belongsToMany(User::class, 'user_group', 'group_id', 'user_id')
+                    ->withTimestamps();
     }
 
     public function evaluationSchedules(): HasMany
