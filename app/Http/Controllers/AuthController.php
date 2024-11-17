@@ -37,7 +37,7 @@ class AuthController extends Controller
 
         if (Auth::attempt($request->only('email', 'password'))) {
             $request->session()->regenerate();
-            return redirect()->intended('/dashboard');
+            return redirect()->intended('/');
         }
 
         return back()->withErrors([
@@ -99,7 +99,7 @@ class AuthController extends Controller
         $request->session()->regenerate();
 
         // Redirect to the desired page (e.g., dashboard)
-        return redirect()->route('side');
+        return redirect()->route('/');
     }
 
     // Handle logout request

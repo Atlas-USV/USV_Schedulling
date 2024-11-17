@@ -20,14 +20,12 @@ Route::middleware(['guest'])->group(function () {
 
     Route::get('login', [AuthController::class, 'showLoginForm'])->name('login');
     Route::post('login', [AuthController::class, 'login']);
+    
 });
 
-Route::get('side', function () {
-    return view('side');
-})->middleware(['auth']);
-
-// $this->middleware('auth'); // Only authenticated users can access this controller
-// $this->middleware('role:admin|secretary')->only('store'); // Only admin and secretary can access store method
+Route::middleware(['auth'])->group(function(){
+    Route::get('logout', [AuthController::class, 'logout'])->name('logout');
+});
 
 Route::middleware(['role:admin|secretary'])->group(function() {
     Route::post('/create-invitation',[ InvitationController::class,'store'])->name('invitation.store');

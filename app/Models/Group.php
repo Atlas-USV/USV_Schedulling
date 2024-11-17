@@ -26,8 +26,5 @@ class Group extends Model
                     ->withTimestamps();
     }
 
-    public function evaluationSchedules(): HasMany
-    {
-        return $this->hasMany(EvaluationSchedule::class, 'group_id');
-    }
+    
 }
