@@ -5,7 +5,7 @@ use App\Http\Controllers\InvitationController;
 
 Route::get('/', function () {
     return view('welcome');
-});
+})->name('home');
 // Auth::routes(['verify' => true]);
 
 

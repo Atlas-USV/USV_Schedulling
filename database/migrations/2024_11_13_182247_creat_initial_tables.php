@@ -30,7 +30,7 @@ return new class extends Migration
 
         Schema::table('users', function (Blueprint $table) {
             // Adding new fields to the users table
-            $table->foreignId('specialty_id')->nullable()->constrained('specialities')->onDelete('set null');
+            $table->foreignId('speciality_id')->nullable()->constrained('specialities')->onDelete('set null');
             $table->foreignId('teacher_faculty_id')->nullable()->constrained('faculties')->onDelete('set null');
         });
 
@@ -100,8 +100,8 @@ return new class extends Migration
     {
         Schema::table('users', function (Blueprint $table) {
             // Dropping columns if rolling back
-            $table->dropForeign(['specialty_id']);
-            $table->dropColumn('specialty_id');
+            $table->dropForeign(['speciality_id']);
+            $table->dropColumn('speciality_id');
             $table->dropForeign(['teacher_faculty_id']);
             $table->dropColumn('teacher_faculty_id');
         });
