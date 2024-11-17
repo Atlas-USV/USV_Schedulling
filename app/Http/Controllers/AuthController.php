@@ -2,6 +2,7 @@
 
 namespace App\Http\Controllers;
 use App\Models\User;
+use App\Models\Group;
 use App\Models\Invitation;
 use Illuminate\Http\Request;
 use App\Http\Controllers\Controller;
@@ -53,7 +54,7 @@ class AuthController extends Controller
 
         // If invitation doesn't exist, handle accordingly
         if (!$invitation) {
-            return redirect()->route('home')->with('error', 'Invalid invitation.');
+            abort(419);
         }
         if (User::where('email', $invitation->email)->first() || $invitation->expires_at != null && $invitation->expires_at < now()) {
             abort(419);
@@ -86,12 +87,24 @@ class AuthController extends Controller
             'password' => Hash::make($request->password),
         ]);
 
-        // Assign the user to the group associated with the invitation
-        $group_id = $invitation->group_id;  // Assuming the invitation has a group_id attribute
-
-        if( $group_id != null){
-            $user->groups()->attach($group_id);
+        if ($invitation->group_id) {
+            $group = Group::find($invitation->group_id); // Find the group by ID
+        
+            if ($group) {
+                // Assign group speciality_id to the user
+                $user->speciality_id = $group->speciality_id;
+                $user->groups()->attach($group->id);
+            }
+            
+        
+            // If a teacher_faculty_id is present, assign it
+            if ($invitation->teacher_faculty_id) {
+                $user->teacher_faculty_id = $invitation->teacher_faculty_id;
+            }
         }
+        
+        $user->save();
+       
         Invitation::where('email', $invitation->email)->delete();
         Auth::login($user);
 
@@ -99,7 +112,7 @@ class AuthController extends Controller
         $request->session()->regenerate();
 
         // Redirect to the desired page (e.g., dashboard)
-        return redirect()->route('/');
+        return redirect()->route('home');
     }
 
     // Handle logout request

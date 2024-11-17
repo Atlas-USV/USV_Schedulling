@@ -2,7 +2,7 @@
 
 @section('title', 'Create nvitation')
 @section('content')
-    <form action="{{ route('invitation.store') }}" method="POST">
+    <form id="invitation-form" action="{{ route('invitation.store') }}" method="POST">
         @csrf <!-- CSRF token for security -->
         <div class="grid gap-6 mb-6 md:grid-cols-2">
 
@@ -75,7 +75,16 @@
         </div>
     @endif
     <script>
+        
+
         $(document).ready(function() {
+            $('#invitation-form').submit(function(e) {
+                $('#role_dropdown').prop('disabled', false);
+                 $('#role_dropdown').attr('name', 'role_id');
+                 $('#teacher_faculty_dropdown').attr('name', 'teacher_faculty_id');
+                 $('#speciality_dropdown').attr('name', 'speciality_id');
+                 $('#group_dropdown').attr('name', 'group_id');
+            });
             $('#speciality_dropdown').change(function(){
                 var selectedOption = $(this).find('option:selected');
                 if(selectedOption.val() !== ''){

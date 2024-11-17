@@ -48,13 +48,13 @@ class InvitationController extends Controller
                     new FacultySpecialityGroupRule($request->teacher_faculty_id, $request->role_id, $request->group_id, $request->speciality_id )],
                     ]);
            
-            Log::info('Validated Data:', $validated);
+            
             // Create the invitation
             $invitation = Invitation::create([
                 'email' => $request->email,
                 'teacher_faculty_id' => $request->teacher_faculty_id,
                 'group_id' =>$request->group_id,
-                'role_id' => $request->role_id,
+                'role_id' => $request->role_id ,
                 'speciality_id' => $request->speciality_id,
                 'created_by' => auth()->id(),
                 'expires_at' => now()->addDays(90),
