@@ -18,7 +18,7 @@ class RedirectAuthenticated
     {
         if (Auth::check()) {
             // Redirect to the dashboard or any other page if the user is already authenticated
-            return redirect('/dashboard');
+            return redirect('/side');
         }
 
         return $next($request);

@@ -67,22 +67,23 @@ return new class extends Migration
             $table->id();
             $table->foreignId('subject_id')->constrained('subjects')->onDelete('cascade');
             $table->foreignId('teacher_id')->constrained('users')->onDelete('cascade');
-            $table->enum('type', ['exam', 'colocviu']);
-            $table->timestamps();
-        });
-
-        Schema::create('evaluation_schedules', function (Blueprint $table) {
-            $table->id();
-            $table->foreignId('evaluation_id')->constrained('evaluations')->onDelete('cascade');
+            $table->foreignId('group_id')->nullable()->constrained('groups')->onDelete('cascade');
+            $table->foreignId('room_id')->nullable()->constrained('rooms')->onDelete('set null');
+            $table->foreignId('speciality_id')->constrained('specialities')->onDelete('cascade');
+            $table->smallInteger('attempt')->default(1); //<- higher than 1 = reexamination
             $table->date('exam_date');
             $table->dateTime('start_time');
             $table->dateTime('end_time');
-            $table->foreignId('group_id')->constrained('groups')->onDelete('cascade');
-            $table->text('description')->nullable();
-            $table->foreignId('room_id')->nullable()->constrained('rooms')->onDelete('set null');
+            $table->enum('type', ['exam', 'colocviu']);
             $table->json('other_examinators')->nullable();
+            $table->text('description')->nullable();
+            $table->smallInteger('year_of_study')->nullable(); // <- nullable in case when not reexamination 
+
+            $table->index(['subject_id', 'teacher_id', 'group_id']);
             $table->timestamps();
         });
+
+       
         Schema::create('user_group', function (Blueprint $table) {
             $table->id(); // Optional
             $table->foreignId('user_id')->constrained()->onDelete('cascade');
@@ -109,14 +110,7 @@ return new class extends Migration
             $table->dropForeign(['subject_id']);
         });
         Schema::dropIfExists('user_group');
-        Schema::table('evaluation_schedules', function (Blueprint $table) {
-            // Dropping columns if rolling back
-            $table->dropForeign(['evaluation_id']);
-            $table->dropForeign(['room_id']);
-            $table->dropForeign(['group_id']);
-            
-        });
-        Schema::dropIfExists('evaluation_schedules');
+       
         Schema::dropIfExists('evaluations');
         Schema::dropIfExists('rooms');
         Schema::dropIfExists('groups');
