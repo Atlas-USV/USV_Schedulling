@@ -3,6 +3,7 @@ use Illuminate\Support\Facades\Route;
 use App\Http\Controllers\AuthController;
 use App\Http\Controllers\CalendarController;
 use App\Http\Controllers\InvitationController;
+use App\Http\Controllers\DashboardController;
 
 Route::get('/', function () {
     return view('welcome');
@@ -36,6 +37,4 @@ Route::middleware(['role:admin|secretary'])->group(function() {
     Route::get('/invitation', [ InvitationController::class,'create'])->name('invitation');
 });
 
-Route::get('/dashboard', function () {
-    return view('dashboard'); // Asigură-te că numele view-ului este corect (dashboard.blade.php)
-})->name('dashboard');
+Route::get('/dashboard', [DashboardController::class, 'index'])->name('dashboard');

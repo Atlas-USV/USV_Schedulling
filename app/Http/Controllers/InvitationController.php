@@ -66,6 +66,7 @@ class InvitationController extends Controller
             return back()->with('success','Invitation created successfully!');
 
         }catch(Exception $e){
+            Log::error($e->getMessage());
             
         }
       
