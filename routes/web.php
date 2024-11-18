@@ -16,3 +16,7 @@ Route::middleware(['guest'])->group(function () {
 Route::get('side', function(){
     return view('side');
 });
+
+Route::get('/dashboard', function () {
+    return view('dashboard'); // Asigură-te că numele view-ului este corect (dashboard.blade.php)
+})->name('dashboard');
