@@ -3,9 +3,15 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <script src="
+      https://ajax.googleapis.com/ajax/libs/jquery/3.3.1/jquery.min.js">
+    </script>  
+      <title>@yield('title', 'App')</title>
     @vite(['resources/css/app.css','resources/js/app.js'])
 </head>
 
+<body class="bg-gray-50 dark:bg-gray-800">
+<div class="flex pt-16  bg-gray-50 dark:bg-gray-900">
 <button data-drawer-target="default-sidebar" data-drawer-toggle="default-sidebar" aria-controls="default-sidebar" type="button" class="inline-flex items-center p-2 mt-2 ml-3 text-sm text-gray-500 rounded-lg sm:hidden hover:bg-gray-100 focus:outline-none focus:ring-2 focus:ring-gray-200 dark:text-gray-400 dark:hover:bg-gray-700 dark:focus:ring-gray-600">
    <span class="sr-only">Open sidebar</span>
    <svg class="w-6 h-6" aria-hidden="true" fill="currentColor" viewBox="0 0 20 20" xmlns="http://www.w3.org/2000/svg">
@@ -75,16 +81,18 @@
               </button>
               <ul id="dropdown-authentication" class="hidden py-2 space-y-2">
               @if(Auth::check())
-                  <li>
-                      <a href="#" class="flex items-center p-2 pl-11 w-full text-base font-normal text-gray-900 rounded-lg transition duration-75 group hover:bg-gray-100 dark:text-white dark:hover:bg-gray-700">Sign In</a>
-                  </li>
-                  <li>
-                      <a href="#" class="flex items-center p-2 pl-11 w-full text-base font-normal text-gray-900 rounded-lg transition duration-75 group hover:bg-gray-100 dark:text-white dark:hover:bg-gray-700">Sign Up</a>
-                  </li>
-            @endif
-                  <li>
-                      <a href="#" class="flex items-center p-2 pl-11 w-full text-base font-normal text-gray-900 rounded-lg transition duration-75 group hover:bg-gray-100 dark:text-white dark:hover:bg-gray-700">Forgot Password</a>
-                  </li>
+              <li>
+                <a href="#" class="flex items-center p-2 pl-11 w-full text-base font-normal text-gray-900 rounded-lg transition duration-75 group hover:bg-gray-100 dark:text-white dark:hover:bg-gray-700">Forgot Password</a>
+              </li>
+              <li>
+                <a href="{{ route('logout') }}" class="flex items-center p-2 pl-11 w-full text-base font-normal text-gray-900 rounded-lg transition duration-75 group hover:bg-gray-100 dark:text-white dark:hover:bg-gray-700">Log Out</a>
+              </li>  
+              @endif
+              @if(!Auth::check())
+              <li>
+                  <a href="{{ route('login') }}" class="flex items-center p-2 pl-11 w-full text-base font-normal text-gray-900 rounded-lg transition duration-75 group hover:bg-gray-100 dark:text-white dark:hover:bg-gray-700">Sign In</a>
+              </li>
+              @endif       
               </ul>
           </li>
       </ul>
@@ -191,4 +199,11 @@
       </div>
   </div>
 </aside>
+<div id="main-content" class="sm:ml-64 relative w-full h-full overflow-y-auto bg-gray-50 lg:ml-64 dark:bg-gray-900">
+    <div class="px-4 pt-6">
+        @yield('content')
+    </div>
+</div>
+</div>
+</body>
 </html>
