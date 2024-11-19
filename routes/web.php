@@ -4,6 +4,7 @@ use App\Http\Controllers\AuthController;
 use App\Http\Controllers\CalendarController;
 use App\Http\Controllers\InvitationController;
 use App\Http\Controllers\DashboardController;
+use App\Http\Controllers\TaskController;
 
 Route::get('/', function () {
     return view('welcome');
@@ -37,4 +38,11 @@ Route::middleware(['role:admin|secretary'])->group(function() {
     Route::get('/invitation', [ InvitationController::class,'create'])->name('invitation');
 });
 
-Route::get('/dashboard', [DashboardController::class, 'index'])->name('dashboard');
+Route::middleware(['auth'])->group(function () {
+    Route::get('/dashboard', [DashboardController::class, 'index'])->name('dashboard');
+    Route::post('/tasks', [DashboardController::class, 'storeTask'])->name('tasks.store');
+    Route::delete('/tasks/{id}', [DashboardController::class, 'deleteTask'])->name('tasks.delete');
+    Route::put('/tasks/{id}', [TaskController::class, 'update'])->name('tasks.update');
+
+});
+
