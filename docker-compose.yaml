@@ -1,37 +1,37 @@
 version: '3.8'
 services:
   db:
-    image: mysql
-    container_name: erp_mysql
-    restart: always
+    image: mysql:8.0.40
+    container_name: atlas_mysql
+    # restart: always
     environment:
-      MYSQL_ROOT_PASSWORD: 'erp_p'
-      MYSQL_DATABASE: 'erp_p'
-      MYSQL_USER: 'erp_p'
-      MYSQL_PASSWORD: 'erp_p'
+      MYSQL_ROOT_PASSWORD: '1q2w3E*'
+      MYSQL_DATABASE: 'atlas_db'
+      MYSQL_USER: 'atlas_p'
+      MYSQL_PASSWORD: '1q2w3E*'
     volumes:
       - mysqldata:/var/lib/mysql
     ports:
-      - 3308:3306
+      - 3306:3306
     networks:
-      - erp
+      - atlas
   redis:
-    container_name: erp_redis
+    container_name: atlas_redis
     image: redis
     hostname: redis
     ports:
-     - 6377:6379
+     - 6380:6380
     volumes:
       - redisdata:/data
     networks:
-      - erp
+      - atlas
     healthcheck:
       test: ["CMD", "redis-cli", "ping"]
       retries: 3
       timeout: 5s
 
 networks:
-  erp:
+  atlas:
 volumes:
   mysqldata:
     driver: local
