@@ -35,3 +35,8 @@ Route::middleware(['role:admin|secretary'])->group(function() {
     Route::post('/create-invitation',[ InvitationController::class,'store'])->name('invitation.store');
     Route::get('/invitation', [ InvitationController::class,'create'])->name('invitation');
 });
+
+Route::middleware(['auth'])->group(function () {
+    Route::get('/evaluations', [CalendarController::class, 'getAllEvents']);
+    Route::post('/evaluation', [CalendarController::class, 'create']);
+});
