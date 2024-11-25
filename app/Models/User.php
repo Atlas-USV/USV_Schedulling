@@ -17,6 +17,11 @@ use Illuminate\Foundation\Auth\User as Authenticatable;
 use Illuminate\Database\Eloquent\Relations\BelongsToMany;
 use App\Notifications\CustomEmailVerificationNotification;
 
+/**
+ * @method bool save() Salvează modelul în baza de date.
+ */
+
+
 class User extends Authenticatable implements MustVerifyEmail
 {
     use HasFactory, Notifiable, HasRoles;
@@ -32,6 +37,8 @@ class User extends Authenticatable implements MustVerifyEmail
         'password',
         'speciality_id',
         'teacher_faculty_id',
+        'background_color', 
+        'avatar',     // Adaugă și avatar dacă vrei să îl salvezi
         
     ];
 
@@ -58,9 +65,9 @@ class User extends Authenticatable implements MustVerifyEmail
         ];
     }
 
-    public function specialty(): BelongsTo
+    public function speciality(): BelongsTo
     {
-        return $this->belongsTo(Speciality::class);
+        return $this->belongsTo(Speciality::class,'speciality_id');
     }
 
     public function faculty(): BelongsTo

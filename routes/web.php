@@ -2,11 +2,17 @@
 use Illuminate\Support\Facades\Route;
 use App\Http\Controllers\AuthController;
 use App\Http\Controllers\InvitationController;
+use App\Http\Controllers\UserController;
 
-Route::get('/', function () {
-    return view('welcome');
+/*Route::get('/', function () {
+    return view('my-account');
 })->name('home');
 // Auth::routes(['verify' => true]);
+*/
+Route::middleware(['auth'])->group(function () {
+    Route::get('/user/my-account', [App\Http\Controllers\UserController::class, 'myAccount'])->name('user.my-account');
+    Route::post('/user/my-account/update', [App\Http\Controllers\UserController::class, 'updateAccount'])->name('user.update-account');
+});
 
 
 Route::middleware(['guest'])->group(function () {
@@ -31,3 +37,4 @@ Route::middleware(['role:admin|secretary'])->group(function() {
     Route::post('/create-invitation',[ InvitationController::class,'store'])->name('invitation.store');
     Route::get('/invitation', [ InvitationController::class,'create'])->name('invitation');
 });
+
