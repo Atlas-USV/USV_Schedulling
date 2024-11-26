@@ -1,7 +1,7 @@
 <form class="p-4 md:p-5">
 <div class="grid gap-4 mb-4 grid-cols-2">
                 <!-- Faculty Dropdown -->
-    <div class="col-span-2 sm:col-span-1">
+    <!-- <div class="col-span-2 sm:col-span-1">
         <label for="faculty_id" class="block mb-2 text-sm font-medium text-gray-900 dark:text-white">Facultate</label>
         <select name="faculty_id" id="faculty_id" class="bg-gray-50 border border-gray-300 text-gray-900 text-sm rounded-lg focus:ring-primary-600 focus:border-primary-600 block w-full p-2.5 dark:bg-gray-600 dark:border-gray-500 dark:placeholder-gray-400 dark:text-white dark:focus:ring-primary-500 dark:focus:border-primary-500">
             <option value="" selected>Alege o facultate</option>
@@ -9,19 +9,19 @@
                 <option value="{{ $faculty->id }}">{{ $faculty->name }}</option>
             @endforeach
         </select>
-    </div>
+    </div> -->
 
     <div class="col-span-2 sm:col-span-1">
         <label for="group_id" class="block mb-2 text-sm font-medium text-gray-900 dark:text-white">Grupa</label>
         <select name="group_id" id="group_id" class="bg-gray-50 border border-gray-300 text-gray-900 text-sm rounded-lg focus:ring-primary-600 focus:border-primary-600 block w-full p-2.5 dark:bg-gray-600 dark:border-gray-500 dark:placeholder-gray-400 dark:text-white dark:focus:ring-primary-500 dark:focus:border-primary-500">
             <option value="" selected>Alege o grupa</option>
             @foreach($groups as $group)
-                <option value="{{ $group->id }}">{{ $group->name }}</option>
+                <option value="{{ $group->id }}">{{ $group->name }} • {{ $group->speciality->short_name ?? 'N/A' }} • an {{ $group->study_year }}</option>
             @endforeach
         </select>
     </div> 
 
-    <div class="col-span-2 sm:col-span-1">
+    <!-- <div class="col-span-2 sm:col-span-1">
         <label for="speciality_id" class="block mb-2 text-sm font-medium text-gray-900 dark:text-white">Specialitate</label>
         <select name="speciality_id" id="speciality_id" class="bg-gray-50 border border-gray-300 text-gray-900 text-sm rounded-lg focus:ring-primary-600 focus:border-primary-600 block w-full p-2.5 dark:bg-gray-600 dark:border-gray-500 dark:placeholder-gray-400 dark:text-white dark:focus:ring-primary-500 dark:focus:border-primary-500">
             <option value="" selected>Alege o specialitate</option>
@@ -29,7 +29,7 @@
                 <option value="{{ $speciality->id }}">{{ $speciality->name }}</option>
             @endforeach
         </select>
-    </div> 
+    </div>  -->
 
     <!-- Subject Dropdown -->
     <div class="col-span-2 sm:col-span-1">
@@ -59,7 +59,7 @@
         <select name="room_id" id="room_id" class="bg-gray-50 border border-gray-300 text-gray-900 text-sm rounded-lg focus:ring-primary-600 focus:border-primary-600 block w-full p-2.5 dark:bg-gray-600 dark:border-gray-500 dark:placeholder-gray-400 dark:text-white dark:focus:ring-primary-500 dark:focus:border-primary-500">
             <option value="" selected>Alege o sala</option>
             @foreach($rooms as $room)
-                <option value="{{ $room->id }}">{{ $room->name }}</option>
+                <option value="{{ $room->id }}">{{ $room->short_name }} • corp {{ $room->block }}</option>
             @endforeach
         </select>
     </div>
@@ -92,11 +92,10 @@
       var csrfToken = $('meta[name="csrf-token"]').attr('content');
 
       // Log it to the console
-      console.log('CSRF Token:', csrfToken);
             e.preventDefault(); // Prevent form from submitting normally
 
             // Get form field values
-            const faculty_id = $('#faculty_id').val();
+           // const faculty_id = $('#faculty_id').val();
             const group_id = $('#group_id').val();
             const subject_id = $('#subject_id').val();
             const teacher_id = $('#teacher_id').val();
@@ -104,10 +103,9 @@
             const start_time = new Date($('#start_time').val()).toISOString();
             const end_time = new Date($('#end_time').val()).toISOString();
             const description = $('#description').val();
-            const speciality_id = $('#speciality_id').val();
+         //   const speciality_id = $('#speciality_id').val();
             // Prepare data to be sent in POST request
             const formData = {
-                faculty_id: faculty_id,
                 group_id: group_id,
                 subject_id: subject_id,
                 teacher_id: teacher_id,
@@ -115,8 +113,7 @@
                 start_time: start_time,
                 end_time: end_time,
                 description: description,
-                speciality_id: speciality_id,
-               // exam_date: new Date($('#start_time').val()).toISOString().slice(0, 10);
+              
                 type: 'exam'
                 //_token: "{{ csrf_token() }}" // Laravel CSRF token
             };
@@ -131,11 +128,12 @@
                 success: function (response) {
                     $('#calendar').fullCalendar('refetchEvents');
 
-                    alert('Data submitted successfully: ' + response);
+                    toastr.success('Examen salvat cu succes');
                 },
                 error: function (xhr, status, error) {
-                    // Handle error
-                    alert('Error: ' + error);
+                    console.log(xhr)
+                    console.log(error)
+                    toastr.error('Eroare: ' + xhr);
                 }
             });
         });

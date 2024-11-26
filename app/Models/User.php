@@ -58,9 +58,9 @@ class User extends Authenticatable implements MustVerifyEmail
         ];
     }
 
-    public function specialty(): BelongsTo
+    public function speciality(): BelongsTo
     {
-        return $this->belongsTo(Speciality::class);
+        return $this->belongsTo(Speciality::class, 'speciality_id');
     }
 
     public function faculty(): BelongsTo

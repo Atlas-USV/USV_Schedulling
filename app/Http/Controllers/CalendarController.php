@@ -14,16 +14,37 @@ use Illuminate\Http\Request;
 use Spatie\Permission\Models\Role;
 use Illuminate\Support\Facades\Log;
 use App\Http\Controllers\Controller;
+use Illuminate\Support\Facades\Auth;
+use Illuminate\Support\Facades\Validator;
 
 class CalendarController extends Controller
 {
     public function load(Request $request){
         
-        
-        $groups = Group::all();
+        $user = Auth::user();
         $faculties = Faculty::all();
         $specialities = Speciality::all();
-        $teachers = User::role('admin')->get(); // Assuming you use roles
+        if ($user->hasRole('secretary')) {
+            // Filter users by faculty_id and role 'teacher'
+            $teachers = User::role('teacher') // Filters users with the 'teacher' role
+                ->where('teacher_faculty_id', $user->teacher_faculty_id)
+                ->get();
+                $groups = Group::with('speciality') // Eager load the speciality relationship
+                ->whereHas('speciality.faculty', function ($query) use ($user) {
+                    $query->where('id', $user->teacher_faculty_id); // Filter by faculty ID
+                })->orderBy('speciality_id') // Sort by speciality_id
+                ->orderBy('study_year')   // Then by study_year
+                ->get();
+                
+        } else {
+            // Fetch all users or apply other logic for different roles
+            $teachers = User::role('teacher')->get();
+            $groups = Group::with('speciality')
+            ->orderBy('speciality_id') // Sort by speciality_id
+            ->orderBy('study_year')   // Then by study_year
+            ->get();
+            
+        }
         $subjects = Subject::all();
         $rooms = Room::all();
     
@@ -35,7 +56,13 @@ class CalendarController extends Controller
         Log::info('Request events: ', ['request' =>$request]);
         try {
             // Fetch evaluations from the database
-            $evaluations = \App\Models\Evaluation::all();
+            $evaluations = \App\Models\Evaluation::with([
+                'subject:id,name',
+                'group:id,name',
+                'speciality:id,name',
+                'teacher:id,name',
+                'room:id,name',
+            ])->get();
 
             // Transform evaluations into event format
             $events = $evaluations->map(function ($evaluation) {
@@ -46,7 +73,7 @@ class CalendarController extends Controller
                     'end' => $evaluation->end_time,
                     'type' => $evaluation->type,
                     'group' => $evaluation->group->name ?? null,
-                    'speciality' => $evaluation->speciality->name,
+                    'speciality' => $evaluation->speciality->name ?? null,
                     'teacher' => $evaluation->teacher->name,
                     'room' => $evaluation->room->name ?? null,
                     'description' => $evaluation->description,
@@ -72,24 +99,38 @@ class CalendarController extends Controller
     public function create(Request $request)
     {
        // Log::info('Request: ', ['request' =>$request->all()]);
+    //    'exam_date' => Carbon::parse($data['start_time'])->format('Y-m-d'),
     try {
-        // Validation
-        $validatedData = $request->validate([
+        $baseRules = [
+            'type' => 'required|in:exam,colloquium,project,reexamination,retake',
             'subject_id' => 'required|exists:subjects,id',
             'teacher_id' => 'required|exists:users,id',
-            'group_id' => 'nullable|exists:groups,id',
-            'room_id' => 'nullable|exists:rooms,id',
-            'speciality_id' => 'required|exists:specialities,id',
-            'start_time' => 'required|date||before:end_time',
+            'start_time' => 'required|date|before:end_time',
             'end_time' => 'required|date|after:start_time',
-            'type' => 'required|in:exam,colloquium,project,reexamination,retake',
-            'other_examinators' => 'nullable|array',
-            'other_examinators.*' => 'exists:users,id', // Validate each examiner
+            'room_id' => 'required|exists:rooms,id',
             'description' => 'nullable|string|max:500',
-            'year_of_study' => 'nullable|integer|min:1|max:6',
-        ]);
-        // Create the evaluation
-        $evaluation = \App\Models\Evaluation::create($this->handleTypeSpecificFields($validatedData));
+            'other_examinators' => 'nullable|array',
+            'other_examinators.*' => 'exists:users,id'
+        ];
+        // Perform base validation
+        $validator = Validator::make($request->all(), $baseRules);
+          // Add conditional rules based on type
+        $this->addConditionalRules($request, $validator);
+
+        $validatedData = $validator->validated();
+
+        // Add 'exam_date' to the validated data
+        $validatedData['exam_date'] = Carbon::parse($validatedData['start_time'])->format('Y-m-d');
+        if($this->checkForOverlaps($validatedData)){
+             return response()->json([
+            'message' => 'Eroare de suprapunere',
+            'errors' => [
+                'schedule' => ['The schedule overlaps with an existing one.']
+            ]
+        ], 400); // HTTP 400: Bad Request
+        }
+        // Handle the specific type
+        $evaluation = \App\Models\Evaluation::create($validatedData);
 
         // Return success response
         return response()->json([
@@ -110,43 +151,64 @@ class CalendarController extends Controller
         return response()->json([
             'success' => false,
             'message' => 'An unexpected error occurred.',
-            'error' => $e->getMessage(),
+            'errors' => [$e->getMessage()],
         ], 500);
     }
 }
+protected function checkForOverlaps($data): bool{
+    return Evaluation::whereYear('exam_date', now()->year)
+            ->where(function($query) use ($data){
+            $query->where('start_time', '<', $data['end_time'])
+            ->where('end_time', '>', $data['start_time']);
+        })
+        ->where(function ($query) use ($data) {
+            $query->where('room_id', $data['room_id'])
+                  ->orWhere('teacher_id', $data['teacher_id'])
+                  ->orWhere(function ($subQuery) use ($data) {
+                      // Case 1: When group_id is null, check specialty_id + year_of_study
+                      if (empty($data['group_id']) &&  isset($data['speciality_id'], $data['year_of_study'])) {
+                          $subQuery->whereNull('group_id')
+                                   ->where('speciality_id', $data['speciality_id'])
+                                   ->where('year_of_study', $data['year_of_study']);
+                      }
+                  })
+                  ->orWhere(function ($subQuery) use ($data) {
+                      // Case 2: When specialty_id and year_of_study are null, check group_id
+                      if (empty($data['speciality_id']) && empty($data['year_of_study']) && isset($data['group_id'])) {
+                          $subQuery->where('group_id', $data['group_id']);
+                      }
+                  });
+        })
+        ->exists();
+}
 
-protected function handleTypeSpecificFields(array $data): array
+protected function addConditionalRules(Request $request, $validator): void
 {
-    // Define common fields
-    $fields = [
-        'subject_id' => $data['subject_id'],
-        'teacher_id' => $data['teacher_id'],
-        'group_id' => $data['group_id'] ?? null,
-        'room_id' => $data['room_id'] ?? null,
-        'start_time' => $data['start_time'],
-        'end_time' => $data['end_time'],
-        'type' => $data['type'],
-        'other_examinators' => $data['other_examinators'] ?? null,
-        'description' => $data['description'] ?? null,
-        'year_of_study' => $data['year_of_study'] ?? null,
-    ];
+    $type = $request->input('type');
 
-    // Add type-specific fields if needed
-    switch ($data['type']) {
-        case 'exam':
-        case 'colloquium':
-        case 'project':
-        case 'reexamination':
-        case 'retake':
-            $fields['speciality_id'] = $data['speciality_id'];
-            break;
-        default:
-            throw new \Exception("Invalid type provided");
-    }
+    $rules = match ($type) {
+        'exam' => [
+            'group_id' => 'required|exists:groups,id',
+        ],
+        'colloquium' => [
+            //'speciality_id' => 'required|exists:specialities,id',
+            'group_id' => 'required|exists:groups,id',
+        ],
+        'project' => [
+            'group_id' => 'required_without_all:speciality_id,year_of_study|exists:groups,id',
+            //'description' => 'required|string|max:500',
+        ],
+        'reexamination' => [
+            'speciality_id' => 'nullable|exists:specialities,id|required_with:year_of_study',
+            'year_of_study' => 'nullable|integer|min:1|max:6|required_with:speciality_id',
+        ],
 
-    // Extract exam_date from start_time
-    $fields['exam_date'] = Carbon::parse($fields['start_time'])->format('Y-m-d');
+        'retake' => [
+            'group_id' => 'required_without_all:speciality_id,year_of_study|exists:groups,id',
+        ],
+        default => [],
+    };
 
-    return $fields;
+    $validator->addRules($rules);
 }
 }

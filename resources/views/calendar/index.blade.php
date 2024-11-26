@@ -22,12 +22,15 @@
 </script>
 
 @vite(['resources/css/fullcalendar.custom.css'])
-<div class="container p-4 sm:ml-64">
-   <button data-modal-target="crud-modal" data-modal-toggle="crud-modal" class="block text-white bg-blue-700 hover:bg-blue-800 focus:ring-4 focus:outline-none focus:ring-blue-300 font-medium rounded-lg text-sm px-5 py-2.5 text-center dark:bg-blue-600 dark:hover:bg-blue-700 dark:focus:ring-blue-800" type="button">
-   Adauga
-   </button>
+<div class=" p-4">
+    <div class=" h-24 rounded bg-gray-50 dark:bg-gray-800">
+        <div class="grid gap-4 mb-4 grid-cols-4">
+        <button data-modal-target="crud-modal" data-modal-toggle="crud-modal" class="block text-white bg-blue-700 hover:bg-blue-800 focus:ring-4 focus:outline-none focus:ring-blue-300 font-medium rounded-lg text-sm px-5 py-2.5 text-center dark:bg-blue-600 dark:hover:bg-blue-700 dark:focus:ring-blue-800" type="button">
+            Adauga
+        </button>
+        </div>
+    </div>
    <div id="calendar"></div>
-  
 </div>
 
 
@@ -149,8 +152,36 @@
       right:'month,agendaWeek,agendaDay,list'
      },
      //events: 'load.php',
-     selectable:true,
-     selectHelper:true,
+    selectable:true,
+    selectHelper:true,
+    allDaySlot: true,
+    displayEventTime: true,
+    displayEventEnd: true,
+    firstDay: 1,
+    weekNumbers: false,
+    selectable: true,
+    weekNumberCalculation: "ISO",
+    eventLimitClick: 'week', //popover
+    navLinks: true,
+    timeFormat: 'HH:mm',
+    editable: true,
+    slotLabelFormat: 'HH:mm', 
+    weekends: true,
+    nowIndicator: true,
+    dayPopoverFormat: 'dddd DD/MM', 
+    lazyFetching: true,
+    eventLimit: true, // for all non-TimeGrid views
+    eventBackgroundColor: "",
+    eventTextColor: "white",
+    //dayMaxEvents: 5,
+    views: {
+    timeGrid: {
+      eventLimit: 2 // adjust to 6 only for timeGridWeek/timeGridDay
+    },
+    month: {
+       eventLimit: 5
+     }
+    },
      select: function(start, end, allDay)
      {
       var title = prompt("Enter Event Title");
@@ -189,7 +220,7 @@
                         id: evaluation.id,
                         title: evaluation.title,
                         start:  evaluation.start, // Ensure the property matches your API
-                        end: evaluation.end  // Ensure the property matches your API
+                        end: evaluation.end , // Ensure the property matches your API
                         // allDay: evaluation.all_day    // Optional property
                     }));
                     console.log(events)

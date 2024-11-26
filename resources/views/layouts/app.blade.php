@@ -3,12 +3,25 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/toastr.js/latest/css/toastr.min.css">
     <script src="
       https://ajax.googleapis.com/ajax/libs/jquery/3.3.1/jquery.min.js">
     </script>  
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/toastr.js/latest/js/toastr.min.js"></script>
       <title>@yield('title', 'App')</title>
     @vite(['resources/css/app.css','resources/js/app.js'])
 </head>
+<script>
+  //toastr setup
+   toastr.options = {
+      "closeButton": true,
+      "progressBar": true,
+      "showMethod": "fadeIn",
+      "hideMethod": "fadeOut",
+      "timeOut": "5000", // 5 seconds
+    };
+</script>
+
 
 <body class="bg-gray-50 dark:bg-gray-800">
 <div class="flex pt-16  bg-gray-50 dark:bg-gray-900">
@@ -211,3 +224,35 @@
 </div>
 </body>
 </html>
+
+<!-- for notification -->
+<script>
+// Set up global AJAX error handler
+$(document).ajaxError(function (event, jqXHR) {
+    // Check if response contains JSON errors
+    if (jqXHR.responseJSON && jqXHR.responseJSON.errors) {
+        let errorMessages = jqXHR.responseJSON.errors;
+        for (const field in errorMessages) {
+            if (errorMessages.hasOwnProperty(field)) {
+                errorMessages[field].forEach(message => {
+                    toastr.error(message); // Display each error message
+                });
+            }
+        }
+    } else if (jqXHR.responseJSON && jqXHR.responseJSON.message) {
+        // Display general error message
+        toastr.error(jqXHR.responseJSON.message);
+    } else {
+        // Fallback for unexpected errors
+        toastr.error('Eroare necunoscută: ' + jqXHR.statusText);
+    }
+});
+ 
+  @if(session('toast_success'))
+      toastr.success('{{ session('toast_success') }}');
+  @endif
+
+  @if(session('toast_error'))
+      toastr.error('{{ session('toast_error') }}');
+  @endif
+</script>
