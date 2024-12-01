@@ -46,3 +46,9 @@ Route::middleware(['auth'])->group(function () {
 
 });
 
+
+
+Route::middleware(['auth'])->group(function () {
+    Route::get('/evaluations', [CalendarController::class, 'getAllEvents']);
+    Route::post('/evaluation', [CalendarController::class, 'create']);
+});
