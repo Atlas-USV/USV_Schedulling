@@ -9,7 +9,18 @@ class Task extends Model
 {
     use HasFactory;
 
-    protected $fillable = ['user_id', 'title', 'description', 'is_completed'];
+    protected $fillable = [
+        'user_id',
+        'title',
+        'description',
+        'subject',
+        'deadline',
+        'is_completed',
+    ];
+
+    protected $casts = [
+        'deadline' => 'datetime',
+    ];
 
     // Relație cu utilizatorii
     public function user()

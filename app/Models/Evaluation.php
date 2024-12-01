@@ -35,6 +35,7 @@ class Evaluation extends Model
         'other_examinators',
         'description',
         'year_of_study',
+        'status',
     ];
 
     // Cast the other_examinators field to an array (because it's stored as JSON)
