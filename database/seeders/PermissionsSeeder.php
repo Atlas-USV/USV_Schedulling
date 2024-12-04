@@ -1,7 +1,7 @@
 <?php
 
 namespace Database\Seeders;
-use APP\Enums;
+use App\Shared;
 use Illuminate\Database\Seeder;
 use Illuminate\Database\Console\Seeds\WithoutModelEvents;
 

@@ -11,7 +11,7 @@
       <title>@yield('title', 'App')</title>
     @vite(['resources/css/app.css','resources/js/app.js'])
 </head>
-<script>
+<script type="module">
   //toastr setup
    toastr.options = {
       "closeButton": true,
@@ -227,26 +227,34 @@
 
 <!-- for notification -->
 <script>
-// Set up global AJAX error handler
-$(document).ajaxError(function (event, jqXHR) {
-    // Check if response contains JSON errors
-    if (jqXHR.responseJSON && jqXHR.responseJSON.errors) {
-        let errorMessages = jqXHR.responseJSON.errors;
-        for (const field in errorMessages) {
-            if (errorMessages.hasOwnProperty(field)) {
-                errorMessages[field].forEach(message => {
-                    toastr.error(message); // Display each error message
-                });
-            }
-        }
-    } else if (jqXHR.responseJSON && jqXHR.responseJSON.message) {
-        // Display general error message
-        toastr.error(jqXHR.responseJSON.message);
-    } else {
-        // Fallback for unexpected errors
-        toastr.error('Eroare necunoscută: ' + jqXHR.statusText);
+   $.ajaxSetup({
+    headers: {
+        'X-CSRF-TOKEN': $('meta[name="csrf-token"]').attr('content')
+    },
+    xhrFields: {
+        withCredentials: true // Include session cookies
     }
 });
+// Set up global AJAX error handler
+  $(document).ajaxError(function (event, jqXHR) {
+      // Check if response contains JSON errors
+      if (jqXHR.responseJSON && jqXHR.responseJSON.errors) {
+          let errorMessages = jqXHR.responseJSON.errors;
+          for (const field in errorMessages) {
+              if (errorMessages.hasOwnProperty(field)) {
+                  errorMessages[field].forEach(message => {
+                      toastr.error(message); // Display each error message
+                  });
+              }
+          }
+      } else if (jqXHR.responseJSON && jqXHR.responseJSON.message) {
+          // Display general error message
+          toastr.error(jqXHR.responseJSON.message);
+      } else {
+          // Fallback for unexpected errors
+          toastr.error('Eroare necunoscută: ' + jqXHR.statusText);
+      }
+  });
  
   @if(session('toast_success'))
       toastr.success('{{ session('toast_success') }}');
