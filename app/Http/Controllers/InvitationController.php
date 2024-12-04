@@ -63,7 +63,8 @@ class InvitationController extends Controller
             $signedUrl = URL::signedRoute('register', ['invitation_id' => $invitation->id]);
             
             Mail::to($invitation->email)->send(new InvitationMail($invitation, $signedUrl));
-            return back()->with('success','Invitation created successfully!');
+            session()->flash('toast_success', 'Invitatie trimisa cu succes!');
+            return back();
 
         }catch(Exception $e){
             

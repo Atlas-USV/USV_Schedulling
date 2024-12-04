@@ -27,7 +27,7 @@ class Evaluation extends Model
         'group_id',
         'room_id',
         'speciality_id',
-        'attempt',
+        //'attempt',
         'exam_date',
         'start_time',
         'end_time',
