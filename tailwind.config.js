@@ -15,6 +15,9 @@ export default {
   },
   plugins: [
       require('flowbite/plugin'),
+      require('flowbite-typography')({
+        wysiwyg: true
+      })
       // require('@tailwindcss/forms'),
   ],
 }

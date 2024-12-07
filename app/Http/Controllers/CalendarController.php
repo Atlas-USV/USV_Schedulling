@@ -66,10 +66,10 @@ class CalendarController extends Controller
         try {
             // Fetch evaluations from the database
             $evaluations = \App\Models\Evaluation::with([
-                'subject:id,name',
+                'subject',
                 'group:id,name,speciality_id',
                 'speciality:id,name',
-                'teacher:id,name,teacher_faculty_id',
+                'teacher',
                 'room:id,name',
             ])->get();
             // Transform evaluations into event format
@@ -83,11 +83,12 @@ class CalendarController extends Controller
                     'type' => $evaluation->type,
                     'group' => $evaluation->group ?? null,
                     'speciality' => $evaluation->group ? $evaluation->group->speciality : ($evaluation->speciality ?? null),
-                    'teacher' => $evaluation->teacher->name,
+                    'teacher' => $evaluation->teacher,
                     'faculty_id' => $evaluation->teacher->teacher_faculty_id,
                     'room' => $evaluation->room ?? null,
                     'description' => $evaluation->description,
                     'teacher_id' => $evaluation->teacher_id,
+                    'subject' => $evaluation->subject,
                     'color' => $eventColor, // Add color to the event
                 ];
             });
@@ -119,7 +120,7 @@ class CalendarController extends Controller
             'start_time' => 'required|date|before:end_time',
             'end_time' => 'required|date|after:start_time',
             'room_id' => 'required|exists:rooms,id',
-            'description' => 'nullable|string|max:500',
+            'description' => 'nullable|string|max:65533',
             'other_examinators' => 'nullable|array',
             'other_examinators.*' => 'exists:users,id'
         ];
@@ -142,7 +143,8 @@ class CalendarController extends Controller
         }
         $evaluation = \App\Models\Evaluation::create($validatedData);
         // Handle the specific type
-        $evaluationEvent = [
+        $eventColor = EvaluationTypes::from($evaluation->type)->getColor();
+        $evaluationEvent =  [
             'id' => $evaluation->id,
             'title' => $evaluation->type . ': ' . $evaluation->subject->name,
             'start' => $evaluation->start_time,
@@ -150,11 +152,13 @@ class CalendarController extends Controller
             'type' => $evaluation->type,
             'group' => $evaluation->group ?? null,
             'speciality' => $evaluation->group ? $evaluation->group->speciality : ($evaluation->speciality ?? null),
-            'teacher' => $evaluation->teacher->name,
+            'teacher' => $evaluation->teacher,
             'faculty_id' => $evaluation->teacher->teacher_faculty_id,
             'room' => $evaluation->room ?? null,
             'description' => $evaluation->description,
-            'teacher_id' => $evaluation->teacher_id
+            'teacher_id' => $evaluation->teacher_id,
+            'subject' => $evaluation->subject,
+            'color' => $eventColor, // Add color to the event
         ];
 
         // Return success response with the created evaluation in event format

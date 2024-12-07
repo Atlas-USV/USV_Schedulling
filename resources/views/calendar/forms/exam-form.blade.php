@@ -56,16 +56,21 @@
     </div>
 
     <div class="col-span-2 sm:col-span-1">
-    <label for="number-input" class="block mb-2 text-sm font-medium text-gray-900 dark:text-white">Durata:</label>
+    <label for="number-input" class="block mb-2 text-sm font-medium text-gray-900 dark:text-white">Deurata (min)</label>
     <input type="number" id="number-input" aria-describedby="helper-text-explanation" class="bg-gray-50 border border-gray-300 text-gray-900 text-sm rounded-lg focus:ring-blue-500 focus:border-blue-500 block w-full p-2.5 dark:bg-gray-700 dark:border-gray-600 dark:placeholder-gray-400 dark:text-white dark:focus:ring-blue-500 dark:focus:border-blue-500" placeholder="120" required />
         <p id='durata-error-message'class="mt-2 text-sm text-red-600 dark:text-red-500 hidden">Durate trebuie sa fie cuprinsa intre 10 si 360 min</p>    
     </div>
 
         <div class="col-span-2">
-            <label for="description" class="block mb-2 text-sm font-medium text-gray-900 dark:text-white">Descriere restanta</label>
-            <textarea id="description" rows="4" class="block p-2.5 w-full text-sm text-gray-900 bg-gray-50 rounded-lg border border-gray-300 focus:ring-blue-500 focus:border-blue-500 dark:bg-gray-600 dark:border-gray-500 dark:placeholder-gray-400 dark:text-white dark:focus:ring-blue-500 dark:focus:border-blue-500" placeholder="Write product description here"></textarea>                    
+            <label for="description" class="block mb-2 text-sm font-medium text-gray-900 dark:text-white">Informatii aditionale:</label>
+            @include('calendar.forms.rich-text-editor', ['idSuffix' => 'exam'])
+            
         </div>
     </div>
+    <div class="mb-2">
+
+    </div>
+
     <button type="submit" id="submitExam" class="text-white inline-flex items-center bg-blue-700 hover:bg-blue-800 focus:ring-4 focus:outline-none focus:ring-blue-300 font-medium rounded-lg text-sm px-5 py-2.5 text-center dark:bg-blue-600 dark:hover:bg-blue-700 dark:focus:ring-blue-800">
         <svg class="me-1 -ms-1 w-5 h-5" fill="currentColor" viewBox="0 0 20 20" xmlns="http://www.w3.org/2000/svg"><path fill-rule="evenodd" d="M10 5a1 1 0 011 1v3h3a1 1 0 110 2h-3v3a1 1 0 11-2 0v-3H6a1 1 0 110-2h3V6a1 1 0 011-1z" clip-rule="evenodd"></path></svg>
         Adauga
@@ -134,7 +139,7 @@
             const subject_id = $('#subject_id').val();
             const teacher_id = $('#teacher_id').val();
             const room_id = $('#room_id').val();
-            const description = $('#description').val();
+            const description = $('#text-exam');
          //   const speciality_id = $('#speciality_id').val();
             // Prepare data to be sent in POST request
             const formData = {
@@ -144,7 +149,7 @@
                 room_id: room_id,
                 start_time: start_time_iso,
                 end_time: end_time_iso,
-                description: description,
+                description: description[0].editor?.getHTML(),
               
                 type: 'exam'
                 //_token: "{{ csrf_token() }}" // Laravel CSRF token
