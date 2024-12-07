@@ -4,6 +4,14 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/toastr.js/latest/css/toastr.min.css">
+    <script type="importmap">
+    {
+        "imports": {
+            "https://esm.sh/v135/prosemirror-model@1.22.3/es2022/prosemirror-model.mjs": "https://esm.sh/v135/prosemirror-model@1.19.3/es2022/prosemirror-model.mjs", 
+            "https://esm.sh/v135/prosemirror-model@1.22.1/es2022/prosemirror-model.mjs": "https://esm.sh/v135/prosemirror-model@1.19.3/es2022/prosemirror-model.mjs"
+        }
+    }
+    </script>
     <script src="
       https://ajax.googleapis.com/ajax/libs/jquery/3.3.1/jquery.min.js">
     </script>  
@@ -12,7 +20,11 @@
     @vite(['resources/css/app.css','resources/js/app.js'])
     
 </head>
-<script type="module">
+
+
+<script>
+   
+
   //toastr setup
    toastr.options = {
       "closeButton": true,

@@ -2,22 +2,24 @@
 
 @section('title', 'Calendar')
 @section('content')
-<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/fullcalendar/3.4.0/fullcalendar.css" />
-<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/twitter-bootstrap/4.0.0-alpha.6/css/bootstrap.css" />
-<!-- <script src="https://cdnjs.cloudflare.com/ajax/libs/jquery/3.2.1/jquery.min.js"></script> -->
-<script src="https://cdnjs.cloudflare.com/ajax/libs/jqueryui/1.12.1/jquery-ui.min.js"></script>
-<script src="https://cdnjs.cloudflare.com/ajax/libs/moment.js/2.18.1/moment.min.js"></script>
-<script src="https://cdnjs.cloudflare.com/ajax/libs/fullcalendar/3.4.0/fullcalendar.min.js"></script>
-<meta name="csrf-token" content="{{ csrf_token() }}">
-<script>
-   
+<head>
 
-</script>
+</head>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/fullcalendar/3.4.0/fullcalendar.css" />
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/twitter-bootstrap/4.0.0-alpha.6/css/bootstrap.css" />
+    <!-- <script src="https://cdnjs.cloudflare.com/ajax/libs/jquery/3.2.1/jquery.min.js"></script> -->
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/jqueryui/1.12.1/jquery-ui.min.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/moment.js/2.18.1/moment.min.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/fullcalendar/3.4.0/fullcalendar.min.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/moment-timezone/0.5.34/moment-timezone-with-data.min.js"></script>
+    <meta name="csrf-token" content="{{ csrf_token() }}">
+    @vite(['resources/css/fullcalendar.custom.css'])
 
-@vite(['resources/css/fullcalendar.custom.css'])
+</head>
+
 <div class="p-4">
     
-
+    @include('calendar.forms.event-info')
 
     <div id="accordion-color" data-accordion="collapse">
         <h2 id="accordion-color-heading-1" class="mb-0">
@@ -31,7 +33,7 @@
         <div id="accordion-color-body-1" class="hidden" aria-labelledby="accordion-color-heading-1">
         <form id="filter-form" class="h-auto flex flex-col overflow-auto border border-t-0  border-gray-200 dark:bg-gray-800 mb-6 p-4"> <!-- Added mb-4 for spacing -->
         <div class="grid gap-4 grid-cols-1 sm:grid-cols-2 md:grid-cols-4">
-            <div class="sm:col-span-1rounded bg-gray-50 dark:bg-gray-800">
+            <div class="sm:col-span-1rounded bg-gray-50 dark:bg-gray-800 hidden">
                 <button id="modal-toggle" data-modal-target="crud-modal" data-modal-toggle="crud-modal" class="block text-white bg-blue-700 hover:bg-blue-800 focus:ring-4 focus:outline-none focus:ring-blue-300 font-medium rounded-lg text-sm px-5 py-2.5 text-center dark:bg-blue-600 dark:hover:bg-blue-700 dark:focus:ring-blue-800" type="button">
                 Adauga
                 </button>
@@ -96,7 +98,7 @@
 
 <!-- Main modal -->
 <div id="crud-modal" tabindex="-1" aria-hidden="true" class="hidden overflow-y-auto overflow-x-hidden fixed top-0 right-0 left-0 z-50 justify-center items-center w-full md:inset-0 h-[calc(100%-1rem)] max-h-full">
-    <div class="relative p-4 w-full max-h-full" style="max-width: 42rem;">
+    <div class="relative p-4 w-full max-w-3xl max-h-full" >
       
            
             
@@ -160,8 +162,11 @@
     </div>
 </div> 
 
-
 <script>
+   
+
+
+
     var grupaPlaceholder = 'Alege o grupa';
     var facultatePlaceholder = 'Alege o facultate';
     var specialitatePlaceholder = 'Alege o specialitate';
@@ -249,7 +254,7 @@
     //filters
     $(document).ready(function() {
         initialPopulation()
-
+        
         
 
         $('#filter_faculty_dropdown').change(function(){
@@ -368,15 +373,20 @@
         }));
        
     }
-    var popTemplate = [
-    '<div class="popover" style="max-width:600px;" >',
-    '<div class="arrow"></div>',
-    '<div class="popover-header">',
-    '<button id="closepopover" type="button" class="close" aria-hidden="true">&times;</button>',
-    '<h3 class="popover-title"></h3>',
-    '</div>',
-    '<div class="popover-content"></div>',
-    '</div>'].join('');
+  
+    function populateEventInfo(event){
+        console.log(event)
+        const localizedExamName = JSON.parse(@json($evaluationTypes));
+        $('#event-title-info').text("Info " + localizedExamName[event.type].toLowerCase());
+        $('#event-subject-info').text(event.subject.name);  // Subject
+        $('#event-room-info').text(event.room.name);  // Room
+        $('#event-teacher-info').text(event.teacher.name);  // Teacher
+        $('#event-date-info').text(event.start.local().format('DD-MM-YYYY') + '\n' + event.start.local().format('H(:mm)'));  // Start time (formatted)
+        $('#event-duration-info').text((event.end-event.start)/(1000* 60) + " min");  // Duration
+        !event.group ?? $('#event-group-info').text("Grupa " + event.group.name)
+        $('#description').html(event.description)
+    }
+
    $(document).ready(async function() {
     events = await fetchEvents()
      //--calendar -- 
@@ -422,19 +432,24 @@
      }
     },
     customButtons: {
-    myCustomButton: {
-      text: 'custom!',
-      className: 'my-custom-button-class',
-      click: function() {
-        alert('clicked the custom button!');
+        myCustomButton: {
+        text: 'Adauga', // Button text
+        className: 'bg-blue-700 text-white px-5 py-2 rounded hover:bg-blue-800', // Tailwind classes
+        click: function() {
+            $('#modal-toggle').click()
+        }
       }
-    }
   },
      select: function(start)
      {
         $('#modal-toggle').click()
         const formattedStartTime = moment(start).format('YYYY-MM-DD HH:mm:ss'); // Adjust format as needed
         $('#start_time').val(formattedStartTime);
+     },
+     eventClick:function(event)
+     {
+        populateEventInfo(event)
+        $('#event-details-modal-toggle').click()
      },
      eventResize:function(event)
      {
@@ -471,10 +486,7 @@
       });
      },
  
-     eventClick:function(event)
-     {
-      
-     },
+    
      
      eventRender: function(event, element, view){
      }
@@ -483,7 +495,6 @@
     const cal = $('#calendar').fullCalendar('getCalendar'); // Get the calendar instance
   
    });
-   console.log(document.getElementsByClassName('fc-myCustomButton-button'))
    </script>
 
 
