@@ -55,6 +55,8 @@ Route::middleware(['auth', 'role:admin|secretary'])->group(function () {
     Route::get('/evaluations/pending', [AdminEvaluationController::class, 'index'])->name('evaluations.pending');
     Route::post('/evaluations/{evaluation}/accept', [AdminEvaluationController::class, 'accept'])->name('evaluations.accept');
     Route::delete('/evaluations/{id}', [AdminEvaluationController::class, 'delete'])->name('evaluations.delete');
+    Route::post('/evaluations/{evaluation}/decline', [AdminEvaluationController::class, 'decline'])->name('evaluations.decline');
+
 });
 
 

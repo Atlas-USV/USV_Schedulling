@@ -42,14 +42,13 @@
     Accept
 </button>
     </form>
-    <!-- Delete Button -->
-    <form action="{{ route('evaluations.delete', $evaluation->id) }}" method="POST">
-        @csrf
-        @method('DELETE')
-        <button type="submit" class="focus:outline-none text-white bg-red-700 hover:bg-red-800 focus:ring-4 focus:ring-red-300 font-medium rounded-lg text-sm px-5 py-2.5 me-2 mb-2 dark:bg-red-600 dark:hover:bg-red-700 dark:focus:ring-red-900">
-            Delete
-        </button>
-    </form>
+    <!-- Decline Button -->
+<form action="{{ route('evaluations.decline', $evaluation->id) }}" method="POST">
+    @csrf
+    <button type="submit" class="focus:outline-none text-white bg-yellow-700 hover:bg-yellow-800 focus:ring-4 focus:ring-yellow-300 font-medium rounded-lg text-sm px-5 py-2.5 me-2 mb-2 dark:bg-yellow-600 dark:hover:bg-yellow-700 dark:focus:ring-yellow-900">
+        Decline
+    </button>
+</form>
     <!-- Show More Info Button -->
     <button type="button" class="bg-blue-500 text-white px-4 py-2 rounded-lg hover:bg-blue-600 focus:ring-2 focus:ring-blue-300 focus:outline-none" onclick="alert('More info about the evaluation');">
         More Info

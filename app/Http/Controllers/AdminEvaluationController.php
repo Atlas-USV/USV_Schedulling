@@ -34,5 +34,18 @@ class AdminEvaluationController extends Controller
 
         return redirect()->route('evaluations.pending')->with('success', 'Evaluation deleted successfully.');
     }
+
+    public function decline($id)
+{
+    
+    $evaluation = Evaluation::findOrFail($id);
+
+    
+    $evaluation->status = 'declined';
+    $evaluation->save(); 
+
+    
+    return redirect()->route('evaluations.pending')->with('success', 'Evaluation declined successfully!');
+}
 }
 
