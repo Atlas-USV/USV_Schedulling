@@ -7,7 +7,7 @@ export default defineConfig({
             input: [
                 'resources/css/app.css',
                 'resources/js/app.js',
-                'resources/css/fullcalendar.custom.css',
+                'resources/css/fullcalendar.custom.css'
                 ],
             refresh: true,
         }),

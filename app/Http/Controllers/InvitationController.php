@@ -67,6 +67,7 @@ class InvitationController extends Controller
             return back();
 
         }catch(Exception $e){
+            Log::error($e->getMessage());
             
         }
       
