@@ -4,10 +4,12 @@ use App\Http\Controllers\AuthController;
 use App\Http\Controllers\InvitationController;
 
 Route::get('/', function () {
-    return view('welcome');
+    return view('Home.home');
 })->name('home');
 // Auth::routes(['verify' => true]);
-
+Route::get('/features', function () {
+    return view('Home.features'); // Căutăm în resources/views/Home/features.blade.php
+})->name('features');
 
 Route::middleware(['guest'])->group(function () {
     Route::get('/register/{invitation_id}', [AuthController::class, 'showRegisterForm'])
@@ -30,4 +32,4 @@ Route::middleware(['auth'])->group(function(){
 Route::middleware(['role:admin|secretary'])->group(function() {
     Route::post('/create-invitation',[ InvitationController::class,'store'])->name('invitation.store');
     Route::get('/invitation', [ InvitationController::class,'create'])->name('invitation');
-});
+}); 
