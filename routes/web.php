@@ -33,3 +33,10 @@ Route::middleware(['role:admin|secretary'])->group(function() {
     Route::post('/create-invitation',[ InvitationController::class,'store'])->name('invitation.store');
     Route::get('/invitation', [ InvitationController::class,'create'])->name('invitation');
 }); 
+Route::middleware(['auth'])->group(function() {
+    Route::get('/dashboard', function () {
+        return view('Dashboard.dashboard'); // Asigură-te că ai fișierul Dashboard/dashboard.blade.php
+    })->name('dashboard');
+
+    Route::get('logout', [AuthController::class, 'logout'])->name('logout');
+});
