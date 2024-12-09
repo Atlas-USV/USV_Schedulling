@@ -32,6 +32,9 @@ Route::middleware(['guest'])->group(function () {
 Route::middleware(['auth'])->group(function(){
     Route::get('logout', [AuthController::class, 'logout'])->name('logout');
     Route::get('calendar', [CalendarController::class,'load'])->name('calendar');
+    Route::post('exam-propose', [CalendarController::class,'propose'])
+        ->name('propose');
+        // ->middleware('can:propose_exam');
 });
 
 Route::middleware(['role:admin|secretary'])->group(function() {

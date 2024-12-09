@@ -3,7 +3,6 @@
 @section('title', 'Calendar')
 @section('content')
 <head>
-
 </head>
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/fullcalendar/3.4.0/fullcalendar.css" />
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/twitter-bootstrap/4.0.0-alpha.6/css/bootstrap.css" />
@@ -20,6 +19,7 @@
 <div class="p-4">
     
     @include('calendar.forms.event-info')
+    @include('calendar.forms.exam-proposal', ['groups' => $groups, 'faculties' => $faculties, 'specialities' => $specialities, 'teachers' => $teachers, 'subjects' => $subjects, 'rooms' => $rooms])
 
     <div id="accordion-color" data-accordion="collapse">
         <h2 id="accordion-color-heading-1" class="mb-0">
@@ -31,61 +31,82 @@
             </button>
         </h2>
         <div id="accordion-color-body-1" class="hidden" aria-labelledby="accordion-color-heading-1">
-        <form id="filter-form" class="h-auto flex flex-col overflow-auto border border-t-0  border-gray-200 dark:bg-gray-800 mb-6 p-4"> <!-- Added mb-4 for spacing -->
-        <div class="grid gap-4 grid-cols-1 sm:grid-cols-2 md:grid-cols-4">
-            <div class="sm:col-span-1rounded bg-gray-50 dark:bg-gray-800 hidden">
-                <button id="modal-toggle" data-modal-target="crud-modal" data-modal-toggle="crud-modal" class="block text-white bg-blue-700 hover:bg-blue-800 focus:ring-4 focus:outline-none focus:ring-blue-300 font-medium rounded-lg text-sm px-5 py-2.5 text-center dark:bg-blue-600 dark:hover:bg-blue-700 dark:focus:ring-blue-800" type="button">
-                Adauga
-                </button>
-            </div>
-            <div class="sm:col-span-1">
-                <label for="filter_group_id" class="block mb-2 text-sm font-medium text-gray-900 dark:text-white">Grupe</label>
-                <select name="filter_group_dropdown" id="filter_group_dropdown" class="bg-gray-50 border border-gray-300 text-gray-900 text-sm rounded-lg focus:ring-primary-600 focus:border-primary-600 block w-full p-2.5 dark:bg-gray-600 dark:border-gray-500 dark:placeholder-gray-400 dark:text-white dark:focus:ring-primary-500 dark:focus:border-primary-500">
-                    <!-- <option value="" selected>Alege o grupa</option>
-                    @foreach($groups as $group)
-                        <option value="{{ $group->id }}">{{ $group->name }} • {{ $group->speciality->short_name ?? 'N/A' }} • an {{ $group->study_year }}</option>
-                    @endforeach -->
-                </select>
+        <div class="border border-t-0  border-gray-200 dark:bg-gray-800">
 
-            </div> 
-            <div class="sm:col-span-1">
-                <label for="filter_speciality_id" class="block mb-2 text-sm font-medium text-gray-900 dark:text-white">Specialitati</label>
-                <select name="filter_speciality_dropdown" id="filter_speciality_dropdown" class="bg-gray-50 border border-gray-300 text-gray-900 text-sm rounded-lg focus:ring-primary-600 focus:border-primary-600 block w-full p-2.5 dark:bg-gray-600 dark:border-gray-500 dark:placeholder-gray-400 dark:text-white dark:focus:ring-primary-500 dark:focus:border-primary-500">
-                    <!-- <option value="" selected>Alege o specialitate</option>
-                    @foreach($specialities as $spec)
-                        <option value="{{ $spec->id }}">{{ $spec->name }}</option>
-                    @endforeach -->
-                </select>
-            </div> 
-            <div class=" sm:col-span-1">
-                <label for="filter_faculty_id" class="block mb-2 text-sm font-medium text-gray-900 dark:text-white">Facultati</label>
-                <select name="filter_faculty_dropdown" id="filter_faculty_dropdown" class="bg-gray-50 border border-gray-300 text-gray-900 text-sm rounded-lg focus:ring-primary-600 focus:border-primary-600 block w-full p-2.5 dark:bg-gray-600 dark:border-gray-500 dark:placeholder-gray-400 dark:text-white dark:focus:ring-primary-500 dark:focus:border-primary-500">
-                    <!-- <option value="" selected>Alege o facultate</option>
-                    @foreach($faculties as $faculty)
-                        <option value="{{ $faculty->id }}">{{ $faculty->name }}</option>
-                    @endforeach -->
-                </select>
-            </div> 
-            <div class=" sm:col-span-1">
-                <label for="filter_teacher_id" class="block mb-2 text-sm font-medium text-gray-900 dark:text-white">Cadri didactici</label>
-                <select name="filter_teacher_dropdown" id="filter_teacher_dropdown" class="bg-gray-50 border border-gray-300 text-gray-900 text-sm rounded-lg focus:ring-primary-600 focus:border-primary-600 block w-full p-2.5 dark:bg-gray-600 dark:border-gray-500 dark:placeholder-gray-400 dark:text-white dark:focus:ring-primary-500 dark:focus:border-primary-500">
-                    <!-- <option value="" selected>Alege un cadru didactic</option>
-                    @foreach($teachers as $teacher)
-                        <option value="{{ $teacher->id }}">{{ $teacher->name }}</option>
-                    @endforeach -->
-                </select>
-            </div> 
-            <div class=" sm:col-span-1">
-                <label for="filter_room_id" class="block mb-2 text-sm font-medium text-gray-900 dark:text-white">Sali</label>
-                <select name="filter_room_dropdown" id="filter_room_dropdown" class="bg-gray-50 border border-gray-300 text-gray-900 text-sm rounded-lg focus:ring-primary-600 focus:border-primary-600 block w-full p-2.5 dark:bg-gray-600 dark:border-gray-500 dark:placeholder-gray-400 dark:text-white dark:focus:ring-primary-500 dark:focus:border-primary-500">
-                    <!-- <option value="" selected>Alege o sala</option>
-                    @foreach($rooms as $room)
-                        <option value="{{ $room->id }}">{{ $room->short_name }} • corp {{ $room->block }}</option>
-                    @endforeach -->
-                </select>
-            </div> 
+        <div class="p-4">
+        
+        <form id="filter-form" class="h-auto flex flex-col overflow-auto"> <!-- Added mb-4 for spacing -->
+            <div class="grid gap-4 grid-cols-1 sm:grid-cols-2 md:grid-cols-5">
+                <div class="sm:col-span-1 rounded bg-gray-50 dark:bg-gray-800 hidden">
+                    <button id="modal-toggle" data-modal-target="crud-modal" data-modal-toggle="crud-modal" class="block text-white bg-blue-700 hover:bg-blue-800 focus:ring-4 focus:outline-none focus:ring-blue-300 font-medium rounded-lg text-sm px-5 py-2.5 text-center dark:bg-blue-600 dark:hover:bg-blue-700 dark:focus:ring-blue-800" type="button">
+                    Adauga
+                    </button>
+                </div>
+                <div class="sm:col-span-1">
+                    <label for="filter_group_id" class="block mb-2 text-sm font-medium text-gray-900 dark:text-white">Grupe</label>
+                    <select name="filter_group_dropdown" id="filter_group_dropdown" class="bg-gray-50 border border-gray-300 text-gray-900 text-sm rounded-lg focus:ring-primary-600 focus:border-primary-600 block w-full p-2.5 dark:bg-gray-600 dark:border-gray-500 dark:placeholder-gray-400 dark:text-white dark:focus:ring-primary-500 dark:focus:border-primary-500">
+                        <!-- <option value="" selected>Alege o grupa</option>
+                        @foreach($groups as $group)
+                            <option value="{{ $group->id }}">{{ $group->name }} • {{ $group->speciality->short_name ?? 'N/A' }} • an {{ $group->study_year }}</option>
+                        @endforeach -->
+                    </select>
+
+                </div> 
+                <div class="sm:col-span-1">
+                    <label for="filter_speciality_id" class="block mb-2 text-sm font-medium text-gray-900 dark:text-white">Specialitati</label>
+                    <select name="filter_speciality_dropdown" id="filter_speciality_dropdown" class="bg-gray-50 border border-gray-300 text-gray-900 text-sm rounded-lg focus:ring-primary-600 focus:border-primary-600 block w-full p-2.5 dark:bg-gray-600 dark:border-gray-500 dark:placeholder-gray-400 dark:text-white dark:focus:ring-primary-500 dark:focus:border-primary-500">
+                        <!-- <option value="" selected>Alege o specialitate</option>
+                        @foreach($specialities as $spec)
+                            <option value="{{ $spec->id }}">{{ $spec->name }}</option>
+                        @endforeach -->
+                    </select>
+                </div> 
+                <div class=" sm:col-span-1">
+                    <label for="filter_faculty_id" class="block mb-2 text-sm font-medium text-gray-900 dark:text-white">Facultati</label>
+                    <select name="filter_faculty_dropdown" id="filter_faculty_dropdown" class="bg-gray-50 border border-gray-300 text-gray-900 text-sm rounded-lg focus:ring-primary-600 focus:border-primary-600 block w-full p-2.5 dark:bg-gray-600 dark:border-gray-500 dark:placeholder-gray-400 dark:text-white dark:focus:ring-primary-500 dark:focus:border-primary-500">
+                        <!-- <option value="" selected>Alege o facultate</option>
+                        @foreach($faculties as $faculty)
+                            <option value="{{ $faculty->id }}">{{ $faculty->name }}</option>
+                        @endforeach -->
+                    </select>
+                </div> 
+                <div class=" sm:col-span-1">
+                    <label for="filter_teacher_id" class="block mb-2 text-sm font-medium text-gray-900 dark:text-white">Cadri didactici</label>
+                    <select name="filter_teacher_dropdown" id="filter_teacher_dropdown" class="bg-gray-50 border border-gray-300 text-gray-900 text-sm rounded-lg focus:ring-primary-600 focus:border-primary-600 block w-full p-2.5 dark:bg-gray-600 dark:border-gray-500 dark:placeholder-gray-400 dark:text-white dark:focus:ring-primary-500 dark:focus:border-primary-500">
+                        <!-- <option value="" selected>Alege un cadru didactic</option>
+                        @foreach($teachers as $teacher)
+                            <option value="{{ $teacher->id }}">{{ $teacher->name }}</option>
+                        @endforeach -->
+                    </select>
+                </div> 
+                <div class=" sm:col-span-1">
+                    <label for="filter_room_id" class="block mb-2 text-sm font-medium text-gray-900 dark:text-white">Sali</label>
+                    <select name="filter_room_dropdown" id="filter_room_dropdown" class="bg-gray-50 border border-gray-300 text-gray-900 text-sm rounded-lg focus:ring-primary-600 focus:border-primary-600 block w-full p-2.5 dark:bg-gray-600 dark:border-gray-500 dark:placeholder-gray-400 dark:text-white dark:focus:ring-primary-500 dark:focus:border-primary-500">
+                        <!-- <option value="" selected>Alege o sala</option>
+                        @foreach($rooms as $room)
+                            <option value="{{ $room->id }}">{{ $room->short_name }} • corp {{ $room->block }}</option>
+                        @endforeach -->
+                    </select>
+                </div> 
+                
+            </div>
+         </form>
+        
         </div>
-    </form>
+        <div class="py-2 px-2 mt-1 mx-2 border border-l-0 border-r-0 border-b-0 items-center flex  justify-end">
+           
+            <div class="">
+            <button type="button" id="filter-reset-button" class="items-center flex py-2 px-3 me-2 text-sm font-medium rounded-lg text-gray-900 focus:outline-none  hover:bg-gray-100 hover:text-gray-900 focus:z-10 focus:ring-4 focus:ring-gray-100 dark:focus:ring-gray-700 dark:bg-gray-800 dark:text-gray-400 dark:border-gray-600 dark:hover:text-white dark:hover:bg-gray-700">
+            <svg class="w-[17px] h-[17px] text-gray-800 dark:text-white" aria-hidden="true" xmlns="http://www.w3.org/2000/svg" width="28" height="28" fill="none" viewBox="0 0 24 24">
+                <path stroke="currentColor" stroke-linecap="round" stroke-linejoin="round" stroke-width="2.6" d="M6 18 17.94 6M18 18 6.06 6"/>
+            </svg>
+
+            Reset
+            </button>
+            </div>
+         </div>
+        </div>
+
         </div>
     </div>
     <!-- Form Section -->
@@ -120,6 +141,7 @@
          
 
             <div class="text-sm font-medium text-center text-gray-500 border-b border-gray-200 dark:text-gray-400 dark:border-gray-700">
+                
             <ul class="flex flex-wrap -mb-px text-sm font-medium text-center" id="default-tab" data-tabs-toggle="#default-tab-content" role="tablist">
                <li class="flex-1 me-2" role="presentation">
                   <button class="inline-block p-4 border-b-2 rounded-t-lg focus:outline-none" id="profile-tab" data-tabs-target="#exam" type="button" role="tab" aria-controls="exam" aria-selected="false">Examen</button>
@@ -161,6 +183,14 @@
         </div>
     </div>
 </div> 
+
+
+@auth
+    <script>
+        var userRoles = "{{ auth()->user()->getRoleNames() }}"; // Assuming you use Spatie/laravel-permission
+        var user = "{{ auth()->user() }}";
+    </script>
+@endauth
 
 <script>
    
@@ -255,7 +285,10 @@
     $(document).ready(function() {
         initialPopulation()
         
-        
+        $('#filter-reset-button').click(function(){
+            initialPopulation()
+            window.filterEvents()
+        })
 
         $('#filter_faculty_dropdown').change(function(){
             var selectedOption = $(this).find('option:selected').val();
@@ -375,15 +408,16 @@
     }
   
     function populateEventInfo(event){
+        $('#event-group-info').text('');
         console.log(event)
         const localizedExamName = JSON.parse(@json($evaluationTypes));
         $('#event-title-info').text("Info " + localizedExamName[event.type].toLowerCase());
         $('#event-subject-info').text(event.subject.name);  // Subject
-        $('#event-room-info').text(event.room.name);  // Room
+        event.room !== null ? $('#event-room-info').text(event.room.name) : '' // Room
         $('#event-teacher-info').text(event.teacher.name);  // Teacher
         $('#event-date-info').text(event.start.local().format('DD-MM-YYYY') + '\n' + event.start.local().format('H(:mm)'));  // Start time (formatted)
         $('#event-duration-info').text((event.end-event.start)/(1000* 60) + " min");  // Duration
-        !event.group ?? $('#event-group-info').text("Grupa " + event.group.name)
+        event.group !==null ? $('#event-group-info').text("Grupa " + event.group.name) : $('#event-group-li-info').hide()
         $('#description').html(event.description)
     }
 
@@ -395,7 +429,7 @@
      timezone: 'local',
      timeFormat: 'H(:mm)',
      header:{
-      left:'prev,next,myCustomButton today',
+      left:'prev,next,@if(auth()->user()->can('propose_exam')) proposeExamButton @elseif(auth()->user()->can('create_exams')) addExamButton @endif today',
       center:'title',
       right:'month,agendaWeek,agendaDay,list'
      },
@@ -432,13 +466,19 @@
      }
     },
     customButtons: {
-        myCustomButton: {
-        text: 'Adauga', // Button text
-        className: 'bg-blue-700 text-white px-5 py-2 rounded hover:bg-blue-800', // Tailwind classes
-        click: function() {
-            $('#modal-toggle').click()
+        addExamButton: {
+            text: 'Adauga', // Button text
+            className: 'bg-blue-700 text-white px-5 py-2 rounded hover:bg-blue-800', // Tailwind classes
+            click: function() {
+                $('#modal-toggle').click()
+            }
+        },
+        proposeExamButton: {
+            text: 'Propune',
+            click: function(){
+                $('#exam-proposal-modal-toggle').click()
+            }
         }
-      }
   },
      select: function(start)
      {
