@@ -7,12 +7,14 @@ use App\Models\User;
 use Illuminate\Database\Seeder;
 use Database\Seeders\RoomSeeder;
 use Database\Seeders\UserSeeder;
+use Database\Seeders\GroupSeeder;
 use Database\Seeders\FacultySeeder;
 use Database\Seeders\SubjectSeeder;
-use Database\Seeders\GroupSeeder;
+use Database\Seeders\RolePermissions;
+use Database\Seeders\UserGroupSeeder;
 use Database\Seeders\EvaluationSeeder;
 use Database\Seeders\SpecialitySeeder;
-use Database\Seeders\UserGroupSeeder;
+use Database\Seeders\PermissionsSeeder;
 
 class DatabaseSeeder extends Seeder
 {
@@ -31,6 +33,8 @@ class DatabaseSeeder extends Seeder
             RoomSeeder::class,
             EvaluationSeeder::class,
             UserGroupSeeder::class,
+            PermissionsSeeder::class,
+            RolePermissions::class
         ]);
     }
 }

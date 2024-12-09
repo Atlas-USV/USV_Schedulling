@@ -2,10 +2,12 @@
 
 namespace Database\Seeders;
 
-use Illuminate\Database\Console\Seeds\WithoutModelEvents;
+use App\Models\User;
 use Illuminate\Database\Seeder;
 use Spatie\Permission\Models\Role;
-use App\Models\User;
+use Spatie\Permission\Models\Permission;
+use Illuminate\Database\Console\Seeds\WithoutModelEvents;
+
 class UserSeeder extends Seeder
 {
     /**
@@ -13,23 +15,31 @@ class UserSeeder extends Seeder
      */
     public function run(): void
     {
-        $user = User::create([
-            'name' => 'John Doe',
-            'email' => 'john@example.com',
-            'password' => bcrypt('password123'),
-        ]);
+        // $user = User::create([
+        //     'name' => 'John Doe',
+        //     'email' => 'john@example.com',
+        //     'password' => bcrypt('password123'),
+        // ]);
 
-        // Assign role to the user
-        $user->assignRole('admin'); // or 'user'
+        // // Assign role to the user
+        // $user->assignRole('admin'); // or 'user'
 
-        // Create another user
-        $user2 = User::create([
-            'name' => 'Jane Doe',
-            'email' => 'jane@example.com',
-            'password' => bcrypt('password123'),
-        ]);
+        // // Create another user
+        // $user2 = User::create([
+        //     'name' => 'Jane Doe',
+        //     'email' => 'jane@example.com',
+        //     'password' => bcrypt('password123'),
+        // ]);
 
-        // Assign role to the second user
-        $user2->assignRole('student');
+        // // Assign role to the second user
+        // $user2->assignRole('student');
+
+        $user = User::where('email', 'test@mail.com')->first();
+
+        if ($user) {
+            // Assign the permission
+            $permission = Permission::findByName('propose_exam');
+            $user->givePermissionTo($permission);
+        }
     }
 }
