@@ -2,6 +2,7 @@
 
 namespace App\Shared;
 
+
 enum EPermissions: string
 {
     case VIEW_EXAMS = 'view_exams';
@@ -13,12 +14,4 @@ enum EPermissions: string
 
     case VIEW_USERS = "view_users";
     case EDIT_DELETE_USER = "edit_delete_users";
-}
-
-enum ERoles: string
-{
-    case ADMIN = 'admin';
-    case TEACHER = 'teacher';
-    case STUDENT = 'student';
-    case SECRETARY = 'secretary';
 }
