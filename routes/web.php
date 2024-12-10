@@ -39,7 +39,9 @@ Route::middleware(['auth'])->group(function(){
 
 Route::middleware(['role:admin|secretary'])->group(function() {
     Route::post('/create-invitation',[ InvitationController::class,'store'])->name('invitation.store');
-    Route::get('/invitation', [ InvitationController::class,'create'])->name('invitation');
+    Route::get('/invitation', [InvitationController::class,'create'])->name('invitation');
+    Route::get('/invitations', [InvitationController::class, 'getInvitations'])->name('invitations');
+    Route::get('/invitations/{id}/resend', [InvitationController::class, 'resend'])->name('invitations.resend');
 });
 
 Route::middleware(['auth'])->group(function () {
