@@ -1,6 +1,6 @@
 @extends('layouts.app')
 
-@section('title', 'Create nvitation')
+@section('title', 'Create invitation')
 @section('content')
     <form id="invitation-form" action="{{ route('invitation.store') }}" method="POST">
         @csrf <!-- CSRF token for security -->

@@ -14,7 +14,13 @@ export default {
     },
   },
   plugins: [
-      require('flowbite/plugin'),
+      require('flowbite/plugin')({
+        datatables: true
+        
+      }),
+      require('flowbite-typography')({
+        wysiwyg: true,
+      })
       // require('@tailwindcss/forms'),
   ],
 }

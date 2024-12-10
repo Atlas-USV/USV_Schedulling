@@ -5,6 +5,7 @@ use App\Models\User;
 use App\Models\Group;
 use App\Models\Invitation;
 use Illuminate\Http\Request;
+use Spatie\Permission\Models\Role;
 use App\Http\Controllers\Controller;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\Hash;
@@ -102,7 +103,15 @@ class AuthController extends Controller
                 $user->teacher_faculty_id = $invitation->teacher_faculty_id;
             }
         }
-        
+        if ($invitation->role_id) {
+            $role = Role::find($invitation->role_id);  // Find the role by ID
+            if ($role) {
+                $user->assignRole($role);  // Assign the role to the user
+            }
+        }
+        if ($invitation->teacher_faculty_id) {
+            $user->teacher_faculty_id = $invitation->teacher_faculty_id;  // Assign faculty_id
+        }
         $user->save();
        
         Invitation::where('email', $invitation->email)->delete();

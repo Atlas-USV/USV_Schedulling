@@ -3,8 +3,9 @@
 namespace App\Models;
 
 // use Illuminate\Contracts\Auth\MustVerifyEmail;
-use App\Models\Faculty;
 use App\Models\Group;
+use App\Shared\ERoles;
+use App\Models\Faculty;
 use App\Models\Evaluation;
 use App\Models\Speciality;
 use Spatie\Permission\Traits\HasRoles;
@@ -58,13 +59,18 @@ class User extends Authenticatable implements MustVerifyEmail
         ];
     }
 
-    public function specialty(): BelongsTo
+    public function speciality(): BelongsTo
     {
-        return $this->belongsTo(Speciality::class);
+        return $this->belongsTo(Speciality::class, 'speciality_id');
     }
 
     public function faculty(): BelongsTo
     {
+        if ($this->hasRole(ERoles::STUDENT)) {
+            // return $this->belongsTo(Faculty::class, 'speciality_id', 'id')
+            //         ->join('specialities', 'faculties.id', '=', 'specialities.faculty_id');
+            return $this->hasOneThrough(Faculty::class, Speciality::class);
+            }
         return $this->belongsTo(Faculty::class, 'teacher_faculty_id');
     }
 
