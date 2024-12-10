@@ -9,7 +9,7 @@
                 <option value="{{ $group->id }}">{{ $group->name }} • {{ $group->speciality->short_name ?? 'N/A' }} • an {{ $group->study_year }}</option>
             @endforeach
         </select>
-    </div> 
+    </div>
 
     <!-- Subject Dropdown -->
     <div class="col-span-2 sm:col-span-1">
@@ -58,9 +58,9 @@
     <div class="col-span-2 sm:col-span-1">
     <label for="colloquium-number-input" class="block mb-2 text-sm font-medium text-gray-900 dark:text-white">Deurata (min)</label>
     <input type="number" id="colloquium-number-input" aria-describedby="helper-text-explanation" class="bg-gray-50 border border-gray-300 text-gray-900 text-sm rounded-lg focus:ring-blue-500 focus:border-blue-500 block w-full p-2.5 dark:bg-gray-700 dark:border-gray-600 dark:placeholder-gray-400 dark:text-white dark:focus:ring-blue-500 dark:focus:border-blue-500" placeholder="120" required />
-        <p id='colloquium-durata-error-message'class="mt-2 text-sm text-red-600 dark:text-red-500 hidden">Durata trebuie sa fie cuprinsa intre 10 si 360 min</p>    
+        <p id='colloquium-durata-error-message'class="mt-2 text-sm text-red-600 dark:text-red-500 hidden">Durata trebuie sa fie cuprinsa intre 10 si 360 min</p>
     </div>
-    
+
         <div class="col-span-2">
             <label for="colloquium_description" class="block mb-2 text-sm font-medium text-gray-900 dark:text-white">Informatii aditionale</label>
             @include('calendar.forms.rich-text-editor', ['idSuffix' => 'colloquium'])
@@ -125,7 +125,7 @@
               }
             const start_time = moment($('#colloquium_start_time').val());
             const end_time = moment(start_time).add(inputValue, 'minutes'); // Add duration in minutes
-             
+
             const start_time_iso = start_time.toISOString();
             const end_time_iso = end_time.toISOString();
             const colloquium_subject_id = $('#colloquium_subject_id').val();
@@ -158,7 +158,7 @@
                     window.filterEvents()
                     toastr.success('Colocviu salvat cu succes');
                 },
-               
+
             });
         });
 </script>

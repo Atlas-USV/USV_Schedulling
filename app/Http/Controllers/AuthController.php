@@ -90,14 +90,14 @@ class AuthController extends Controller
 
         if ($invitation->group_id) {
             $group = Group::find($invitation->group_id); // Find the group by ID
-        
+
             if ($group) {
                 // Assign group speciality_id to the user
                 $user->speciality_id = $group->speciality_id;
                 $user->groups()->attach($group->id);
             }
-            
-        
+
+
             // If a teacher_faculty_id is present, assign it
             if ($invitation->teacher_faculty_id) {
                 $user->teacher_faculty_id = $invitation->teacher_faculty_id;
@@ -113,7 +113,6 @@ class AuthController extends Controller
             $user->teacher_faculty_id = $invitation->teacher_faculty_id;  // Assign faculty_id
         }
         $user->save();
-       
         Invitation::where('email', $invitation->email)->delete();
         Auth::login($user);
 

@@ -6,6 +6,10 @@ use App\Http\Controllers\InvitationController;
 use App\Http\Controllers\DashboardController;
 use App\Http\Controllers\TaskController;
 use App\Http\Controllers\AdminEvaluationController;
+use App\Http\Controllers\ChangePasswordController;
+use App\Http\Controllers\ForgotPasswordController;
+use App\Http\Controllers\ResetPasswordController;
+
 
 Route::get('/', function () {
     return view('welcome');
@@ -26,7 +30,6 @@ Route::middleware(['guest'])->group(function () {
 
     Route::get('login', [AuthController::class, 'showLoginForm'])->name('login');
     Route::post('login', [AuthController::class, 'login']);
-    
 });
 
 Route::middleware(['auth'])->group(function(){
@@ -65,3 +68,16 @@ Route::middleware(['auth'])->group(function () {
     Route::get('/evaluations', [CalendarController::class, 'getAllEvents']);
     Route::post('/evaluation', [CalendarController::class, 'create']);
 });
+
+Route::middleware(['auth'])->group(function () {
+    Route::get('password/change', [ChangePasswordController::class, 'showChangePasswordForm'])->name('password.change');
+    Route::post('password/change', [ChangePasswordController::class, 'changePassword'])->name('password.update.change');
+});
+Route::middleware(['guest'])->group(function () {
+    Route::get('password/reset', [ForgotPasswordController::class, 'showLinkRequestForm'])->name('password.request');
+    Route::post('password/email', [ForgotPasswordController::class, 'sendResetLinkEmail'])->name('password.email');
+    Route::get('password/reset/{token}', [ResetPasswordController::class, 'showResetForm'])->name('password.reset');
+    Route::post('password/reset', [ResetPasswordController::class, 'reset'])->name('password.update');
+});
+
+

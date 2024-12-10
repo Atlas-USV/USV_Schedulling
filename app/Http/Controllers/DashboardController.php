@@ -19,7 +19,6 @@ class DashboardController extends Controller
         $subjects = Subject::all();
         $teachers = User::role('admin')->get();
         $rooms = Room::all();
-    
         // Obține task-urile utilizatorului curent (limitate la 4)
         $tasks = Task::where('user_id', auth()->id())->take(4)->get();
 
@@ -31,7 +30,6 @@ class DashboardController extends Controller
         ->get();
 
         $userName = auth()->user()->name;
-    
         return view('dashboard', compact('groups', 'faculties', 'subjects', 'teachers', 'rooms', 'tasks',  'userName', 'upcomingExams'));
     }
 
@@ -45,7 +43,7 @@ class DashboardController extends Controller
         'deadline' => 'required|date|after:now',
     ]);
 
-    
+
 
     Task::create([
         'user_id' => auth()->id(),
@@ -56,7 +54,7 @@ class DashboardController extends Controller
         'is_completed' => false,
     ]);
 
-   
+
 
     return redirect()->route('dashboard')->with('success', 'Task added successfully!');
 }
