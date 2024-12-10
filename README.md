@@ -53,12 +53,7 @@ Brief description of your project.
    php artisan migrate
    ```
 
-7. Create queue tables
-   ```bash
-   php artisan queue:table
-   php artisan queue:failed-table
-   php artisan migrate
-   ```
+
 
 ## Running the Application
 
