@@ -16,7 +16,6 @@ use App\Http\Controllers\Controller;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\Mail;
 use App\Rules\FacultySpecialityGroupRule;
-use Illuminate\Database\Eloquent\ModelNotFoundException;
 
 class InvitationController extends Controller
 {
@@ -65,7 +64,7 @@ class InvitationController extends Controller
             
             $signedUrl = URL::signedRoute('register', ['invitation_id' => $invitation->id]);
             
-            Mail::to($invitation->email)->send(new InvitationMail($invitation, $signedUrl));
+            Mail::to($invitation->email)->queue(new InvitationMail($invitation, $signedUrl));
             session()->flash('toast_success', 'Invitatie trimisa cu succes!');
             return back();
 
@@ -99,7 +98,7 @@ class InvitationController extends Controller
             
             $signedUrl = URL::signedRoute('register', ['invitation_id' => $invitation->id]);
             
-            Mail::to($invitation->email)->send(new InvitationMail($invitation, $signedUrl));
+            Mail::to($invitation->email)->queue(new InvitationMail($invitation, $signedUrl));
             
             return response()->json([
                 'success' => true,

@@ -7,9 +7,12 @@ use Illuminate\Contracts\Queue\ShouldQueue;
 use Illuminate\Notifications\Messages\MailMessage;
 use Illuminate\Notifications\Notification;
 
-class CustomEmailVerificationNotification extends Notification
+class CustomEmailVerificationNotification extends Notification implements ShouldQueue
 {
     use Queueable;
+
+    public $tries = 3; // Number of times to attempt sending
+    public $timeout = 60; // Timeout in seconds
 
     /**
      * Create a new notification instance.
