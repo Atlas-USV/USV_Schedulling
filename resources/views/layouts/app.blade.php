@@ -160,6 +160,14 @@
                 Administrare examene
             </a>
         </li>
+        <li>
+          <a href="{{ route('invitations') }}" class="flex items-center p-2 pl-11 w-full text-base font-normal text-gray-900 rounded-lg transition duration-75 group hover:bg-gray-100 dark:text-white dark:hover:bg-gray-700">
+              <svg class="w-5 h-5 text-gray-800 dark:text-white mr-3" aria-hidden="true" xmlns="http://www.w3.org/2000/svg" fill="currentColor" viewBox="0 0 24 24">
+                  <path d="M4 4h16v2H4zM10 9h4v2h-4zM10 13h4v6h-4zM8 9h2v10H8zM14 9h2v10h-2z"></path>
+              </svg>
+                Invitatii
+            </a>
+        </li>
     </ul>
 </li>
 @endif

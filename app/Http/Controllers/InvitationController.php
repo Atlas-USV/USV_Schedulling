@@ -8,13 +8,15 @@ use App\Models\Invitation;
 use App\Models\Speciality;
 use App\Mail\InvitationMail;
 use Illuminate\Http\Request;
+use Illuminate\Support\Facades\DB;
 use Spatie\Permission\Models\Role;
+use Illuminate\Support\Facades\Log;
 use Illuminate\Support\Facades\URL;
 use App\Http\Controllers\Controller;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\Mail;
 use App\Rules\FacultySpecialityGroupRule;
-use Illuminate\Support\Facades\Log;
+
 class InvitationController extends Controller
 {
 
@@ -72,5 +74,15 @@ class InvitationController extends Controller
         }
       
 
+    }
+    function getInvitations(Request $request){
+        // $invitations = Invitation::with([
+        //     'group',
+        //     'speciality:short_name',
+        //     'faculty:short_name',
+        //     'role'
+        // ])->toSql();
+        $invitations = Invitation::with(['faculty','group','role','speciality'])->get();
+        return view('invitation.invitations', compact('invitations'));
     }
 }
