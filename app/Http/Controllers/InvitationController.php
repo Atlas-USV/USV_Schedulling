@@ -16,6 +16,7 @@ use App\Http\Controllers\Controller;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\Mail;
 use App\Rules\FacultySpecialityGroupRule;
+use Illuminate\Database\Eloquent\ModelNotFoundException;
 
 class InvitationController extends Controller
 {
@@ -84,5 +85,41 @@ class InvitationController extends Controller
         // ])->toSql();
         $invitations = Invitation::with(['faculty','group','role','speciality'])->get();
         return view('invitation.invitations', compact('invitations'));
+    }
+
+    public function resend($id)
+    {
+        try {
+            $invitation = Invitation::findOrFail($id);
+            
+            // Update expiration date
+            $invitation->update([
+                'expires_at' => now()->addDays(90)
+            ]);
+            
+            $signedUrl = URL::signedRoute('register', ['invitation_id' => $invitation->id]);
+            
+            Mail::to($invitation->email)->send(new InvitationMail($invitation, $signedUrl));
+            
+            return response()->json([
+                'success' => true,
+                'message' => 'Invitatie retrimisa cu succes!',
+                'data' => $invitation
+            ], 200);
+            
+        } catch (ModelNotFoundException $e) {
+            return response()->json([
+                'success' => false,
+                'message' => 'Invitatia nu a fost gasita.',
+                'errors' => [$e->getMessage()]
+            ], 404);
+        } catch (Exception $e) {
+            Log::error($e->getMessage());
+            return response()->json([
+                'success' => false,
+                'message' => 'A aparut o eroare la retrimiterea invitatiei!',
+                'errors' => [$e->getMessage()]
+            ], 500);
+        }
     }
 }

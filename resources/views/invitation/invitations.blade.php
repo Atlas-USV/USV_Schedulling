@@ -20,6 +20,15 @@
 </table>
 
 <script>
+    function resendInvitation(id) {
+        $.ajax({
+            url: `/invitations/${id}/resend`,
+            type: 'GET',
+            success: function (response) {
+                toastr.success('Invitație retrimisă cu succes');
+            }
+        });
+    }
 if (document.getElementById("filter-table") && typeof simpleDatatables.DataTable !== 'undefined') {
     console.log(@json($invitations))
     const tableData = (@json($invitations)).map((i)=>[
@@ -28,11 +37,15 @@ if (document.getElementById("filter-table") && typeof simpleDatatables.DataTable
         i.group?.name ?? "",
         i.faculty?.short_name ?? "",
         i.speciality?.short_name ?? "",
-        i.expires_at
+        i.expires_at,
+        // i.id,
+         `<button onclick="resendInvitation('${i.id}')" class="text-white bg-blue-700 hover:bg-blue-800 focus:ring-4 focus:outline-none focus:ring-blue-300 font-medium rounded-lg text-sm px-3 py-1.5 text-center dark:bg-blue-600 dark:hover:bg-blue-700 dark:focus:ring-blue-800">Retrimite</button>`
     ])
+
+    
     const dataTable = new simpleDatatables.DataTable("#filter-table", {
         data: {
-            headings: ["Email", "Rol", "Grupa","Facultate", "Specialitate", "Expira la"],
+            headings: ["Email", "Rol", "Grupa","Facultate", "Specialitate", "Expira la", "Action"],
             data: tableData
          },
         tableRender: (_data, table, type) => {
@@ -47,7 +60,7 @@ if (document.getElementById("filter-table") && typeof simpleDatatables.DataTable
                 },
                 childNodes: tHead.childNodes[0].childNodes.map(
                     (_th, index) => ({nodeName: "TH",
-                        childNodes: [
+                        childNodes: index < 6 ? [ // Only add search input for first 6 columns
                             {
                                 nodeName: "INPUT",
                                 attributes: {
@@ -56,7 +69,8 @@ if (document.getElementById("filter-table") && typeof simpleDatatables.DataTable
                                     "data-columns": "[" + index + "]"
                                 }
                             }
-                        ]})
+                        ] : [] // Empty array for last column
+                    })
                 )
             }
 
