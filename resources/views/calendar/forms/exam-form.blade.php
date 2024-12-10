@@ -166,6 +166,23 @@
                     window.events.push(response.data)
                     window.filterEvents()
                     toastr.success('Examen salvat cu succes');
+                    
+                    // Clear all form inputs
+                    $('#group_id').val('');
+                    $('#subject_id').val('');
+                    $('#teacher_id').val('');
+                    $('#room_id').val('');
+                    $('#start_time').val('');
+                    $('#number-input').val('');
+                    
+                    // Clear rich text editor
+                    const editor = document.querySelector('#text-' + response.data.type).editor;
+                    if (editor) {
+                        editor.commands.setContent('');
+                    }
+                    
+                    // Reset error message if visible
+                    $('#durata-error-message').addClass('hidden');
                 },
                
             });
