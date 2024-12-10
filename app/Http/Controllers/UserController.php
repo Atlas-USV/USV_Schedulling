@@ -8,28 +8,45 @@ use Illuminate\Support\Facades\Storage;
 use App\Models\Faculty; // Importă modelul Faculty
 use App\Models\Speciality; // Importă modelul Speciality
 use App\Models\Group; // Importă modelul Group
-use App\Models\User; // import corect pentru modelul User
-
+use App\Models\Evaluation; // Importă modelul Evaluation
+use App\Models\User; // Importă modelul User
 
 class UserController extends Controller
 {
     public function myAccount()
     {
         $user = Auth::user(); // Obține utilizatorul autentificat
-        
-        // Încarcă relațiile (specialty, faculty, groups)
-        //$user = $user->load('specialities', 'groups');
-        
-       
-        // dd($user->speciality);
-        // Obține informațiile facultății, specializării și grupului
-        //$faculty = $user->faculty ? $user->faculty->name : 'N/A';
+
+
+        // Obține specializarea utilizatorului
         $speciality = $user->speciality ? $user->speciality->name : 'N/A';
-        $group = $user->groups->pluck('name')->join(', ') ?: 'N/A'; // Dacă utilizatorul are mai multe grupuri
+        
+        // Obține grupurile utilizatorului (dacă are mai multe)
+        $group = $user->groups->pluck('name')->join(', ') ?: 'N/A';
+
+        
+
+        $faculty = $user->faculty ? $user->faculty->name : 'N/A';
+
+        // Obține rolul utilizatorului (ex. profesor, student)
         $role = $user->getRoleNames()->first();
 
-        // Transmite datele către View
-        return view('my-account', compact('user', 'speciality', 'group','role'));
+        // dd($user->evaluations);
+
+        $evaluation=null;
+
+        // if ($user->hasRole('student')) {
+        // $evaluation = $user->evaluationsAsStudent()->get();
+        // } elseif ($user->hasRole('teacher')) {
+        // $evaluation = $user->evaluationsAsTeacher()->get();
+        // }
+
+        $evaluation = $user->evaluations()->with(['group', 'subject'])->latest('exam_date')->first();
+
+        
+        
+        // Transmite datele către view
+        return view('my-account', compact('user', 'speciality', 'group', 'role', 'evaluation', 'faculty'));
     }
 
     public function updateAccount(Request $request)
@@ -48,12 +65,11 @@ class UserController extends Controller
             if ($user->avatar && Storage::exists('public/' . $user->avatar)) {
                 Storage::delete('public/' . $user->avatar);
             }
-    
+
             // Încarcă fișierul și salvează calea
             $avatarPath = $request->file('avatar')->store('avatars', 'public');
             $user->avatar = $avatarPath;
         }
-        
 
         // Salvează utilizatorul
         $user->save();
@@ -62,7 +78,3 @@ class UserController extends Controller
         return redirect()->route('user.my-account')->with('success', 'Account updated successfully!');
     }
 }
-
-
-
-

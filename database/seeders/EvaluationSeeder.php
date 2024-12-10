@@ -15,13 +15,13 @@ class EvaluationSeeder extends Seeder
      */
     public function run()
     {
-        // $subject = Subject::first();
-        // $teacher = User::first();
+        $subject = Subject::first();
+        $teacher = User::first();
 
-        // Evaluation::create([
-        //     'subject_id' => $subject->id,
-        //     'teacher_id' => $teacher->id,
-        //     'type' => 'exam',
-        // ]);
+         Evaluation::create([
+             'subject_id' => $subject->id,
+             'teacher_id' => $teacher->id,
+             'type' => 'exam',
+         ]);
     }
 }

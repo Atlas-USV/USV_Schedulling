@@ -27,14 +27,14 @@ class Evaluation extends Model
         'group_id',
         'room_id',
         'speciality_id',
-        'attempt',
+        //'attempt',
         'exam_date',
         'start_time',
         'end_time',
         'type',
         'other_examinators',
         'description',
-        'year_of_study',
+        'year_of_study', 
     ];
 
     // Cast the other_examinators field to an array (because it's stored as JSON)
@@ -62,7 +62,7 @@ class Evaluation extends Model
     // Group the evaluation is assigned to
     public function group()
     {
-        return $this->belongsTo(Group::class);
+        return $this->belongsTo(Group::class,'group_id');
     }
 
     // Room for the evaluation

@@ -45,52 +45,60 @@
         <!-- Titlul "Personal Information" -->
         <h2 class="text-2xl font-semibold mb-6 text-left">Personal Information</h2>
 
-        <!-- Informații utilizator -->
+        <!-- Informații utilizator - generale -->
         <div class="space-y-4 text-lg">
             <p><strong>Name:</strong> {{ $user->name }}</p>
             <p><strong>Email:</strong> {{ $user->email }}</p>
+            <p><strong>Role:</strong> {{ $role ?? 'N/A' }}</p>
+        
+        <!-- Informații utilizator - student -->
+            @if(Auth::user()->hasRole('student'))
             <p><strong>Speciality:</strong> {{ $speciality }}</p>
             <p><strong>Group:</strong> {{ $group }}</p>
-            <p><strong>Role:</strong> {{ $role ?? 'N/A' }}</p>
+            @endif
+            
+        <!-- Informații utilizator - Teacher -->
+            @if(Auth::user()->hasRole('teacher'))
+            <p><strong>Faculty:</strong> {{ $faculty }}</p>
+            @endif 
+            
         </div>
     </div>
-
+    <!-- Verificare dacă utilizatorul are rolul de admin sau secretar -->
+    @if(!Auth::user()->hasRole('admin') && !Auth::user()->hasRole('secretary'))
     <!-- Card pentru informațiile despre examen -->
     <div class="bg-blue-100 p-10 rounded-lg shadow-lg max-w-xl w-full">
         <!-- Titlul "Exam Information" -->
         <h2 class="text-2xl font-semibold mb-6 text-left">Exams Information</h2>
-    
-<button id="dropdownDelayButton" data-dropdown-toggle="dropdownDelay" data-dropdown-delay="500" data-dropdown-trigger="hover" class="text-white bg-blue-700 hover:bg-blue-800 focus:ring-4 focus:outline-none focus:ring-blue-300 font-medium rounded-lg text-sm px-5 py-2.5 text-center inline-flex items-center dark:bg-blue-600 dark:hover:bg-blue-700 dark:focus:ring-blue-800" type="button">Dropdown hover <svg class="w-2.5 h-2.5 ms-3" aria-hidden="true" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 10 6">
-<path stroke="currentColor" stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="m1 1 4 4 4-4"/>
-</svg>
-</button>
-
-<!-- Dropdown menu -->
-<div id="dropdownDelay" class="z-10 hidden bg-white divide-y divide-gray-100 rounded-lg shadow w-44 dark:bg-gray-700">
-    <ul class="py-2 text-sm text-gray-700 dark:text-gray-200" aria-labelledby="dropdownDelayButton">
-      <li>
-        <a href="#" class="block px-4 py-2 hover:bg-gray-100 dark:hover:bg-gray-600 dark:hover:text-white">Dashboard</a>
-      </li>
-      <li>
-        <a href="#" class="block px-4 py-2 hover:bg-gray-100 dark:hover:bg-gray-600 dark:hover:text-white">Settings</a>
-      </li>
-      <li>
-        <a href="#" class="block px-4 py-2 hover:bg-gray-100 dark:hover:bg-gray-600 dark:hover:text-white">Earnings</a>
-      </li>
-      <li>
-        <a href="#" class="block px-4 py-2 hover:bg-gray-100 dark:hover:bg-gray-600 dark:hover:text-white">Sign out</a>
-      </li>
-    </ul>
-</div>
 
         <!-- Informații examen -->
-        <div class="space-y-4 text-lg">
-            <p><strong>Exam:</strong> {{ $exam_name ?? 'N/A' }}</p>
-            <p><strong>Date:</strong> {{ $exam_date ?? 'N/A' }}</p>
-            <p><strong>Time:</strong> {{ $exam_time ?? 'N/A' }}</p>
-            <p><strong>Grade:</strong> {{ $exam_grade ?? 'N/A' }}</p>
-        </div>
-    </div>
+        <div class="space-y-6 text-lg">
+
+            <p><strong>Subject:</strong> {{ $evaluation->subject->name ?? 'N/A' }}</p>
+            <p><strong>Type:</strong> {{ $evaluation->type ?? 'N/A' }}</p>
+            <p><strong>Start Time:</strong> {{ $evaluation->start_time ?? 'N/A' }}</p>
+            <p><strong>End Time:</strong> {{ $evaluation->end_time ?? 'N/A' }}</p>
+            <p><strong>Room:</strong> {{ $evaluation->room->name ?? 'N/A' }}</p>
+            @if(Auth::user()->hasRole('student'))
+            <p><strong>Teacher:</strong> {{ $evaluation->teacher->name ?? 'N/A' }}</p>
+            @endif
+            @if(Auth::user()->hasRole('teacher'))
+            <p><strong>Group:</strong> {{ $evaluation->group->name }}</p>
+            <p><strong>Other examinators:</p>
+            @endif
+
+    
+    
+    @else
+            <!-- Card sau conținut pentru admin sau secretar -->
+            <div class="bg-green-100 p-10 rounded-lg shadow-lg max-w-xl w-full">
+                <h2 class="text-2xl font-semibold mb-6 text-left">Admin or Secretary Dashboard</h2>
+                <p>This section is for admins or secretaries. You can manage users and other system settings here.</p>
+                <!-- Adaugă orice alt conținut relevant pentru admin sau secretar -->
+            </div>
+    @endif
 </div>
 
+
 @endsection
+

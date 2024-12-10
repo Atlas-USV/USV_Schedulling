@@ -65,9 +65,35 @@ class User extends Authenticatable implements MustVerifyEmail
         ];
     }
 
+    public function evaluationsAsStudent()
+{
+    return $this->hasManyThrough(
+        Evaluation::class,
+        UserGroup::class,
+        'user_id',     // Foreign key on UserGroup table
+        'group_id',    // Foreign key on Evaluation table
+        'id',          // Local key on User table
+        'group_id'     // Local key on UserGroup table
+    );
+}
+
+    public function evaluationsAsTeacher()
+{
+    return $this->hasMany(Evaluation::class, 'teacher_id', 'id');
+}
+public function evaluations()
+{
+    if ($this->hasRole('student')) {
+        return $this->evaluationsAsStudent();
+    } elseif ($this->hasRole('teacher')) {
+        return $this->evaluationsAsTeacher();
+    }
+    return null; // Or handle admin/other roles as needed
+}
+
     public function speciality(): BelongsTo
     {
-        return $this->belongsTo(Speciality::class,'speciality_id');
+        return $this->belongsTo(Speciality::class, 'speciality_id');
     }
 
     public function faculty(): BelongsTo
@@ -77,13 +103,8 @@ class User extends Authenticatable implements MustVerifyEmail
 
     public function groups(): BelongsToMany
     {
-        return $this->belongsToMany(Group::class, 'user_group', 'user_id', 'group_id')
-                    ->withTimestamps();
-    }
-
-    public function evaluations(): HasMany
-    {
-        return $this->hasMany(Evaluation::class, 'teacher_id');
+        return $this->belongsToMany(Group::class, 'user_group', 'user_id', 'group_id');
+                    
     }
 
     public function sendEmailVerificationNotification()
