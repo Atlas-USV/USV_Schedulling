@@ -6,10 +6,13 @@ use App\Http\Controllers\InvitationController;
 Route::get('/', function () {
     return view('Home.home');
 })->name('home');
-// Auth::routes(['verify' => true]);
 Route::get('/features', function () {
-    return view('Home.features'); // Căutăm în resources/views/Home/features.blade.php
+    return view('Home.features'); 
 })->name('features');
+
+Route::get('/users', function () {
+    return view('Users.users'); 
+})->name('users');
 
 Route::middleware(['guest'])->group(function () {
     Route::get('/register/{invitation_id}', [AuthController::class, 'showRegisterForm'])
@@ -35,7 +38,7 @@ Route::middleware(['role:admin|secretary'])->group(function() {
 }); 
 Route::middleware(['auth'])->group(function() {
     Route::get('/dashboard', function () {
-        return view('Dashboard.dashboard'); // Asigură-te că ai fișierul Dashboard/dashboard.blade.php
+        return view('Dashboard.dashboard');
     })->name('dashboard');
 
     Route::get('logout', [AuthController::class, 'logout'])->name('logout');
