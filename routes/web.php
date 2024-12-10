@@ -6,6 +6,7 @@ use App\Http\Controllers\InvitationController;
 use App\Http\Controllers\DashboardController;
 use App\Http\Controllers\TaskController;
 use App\Http\Controllers\AdminEvaluationController;
+use App\Http\Controllers\InboxController;
 
 Route::get('/', function () {
     return view('welcome');
@@ -55,7 +56,9 @@ Route::middleware(['auth', 'role:admin|secretary'])->group(function () {
     Route::get('/evaluations/pending', [AdminEvaluationController::class, 'index'])->name('evaluations.pending');
     Route::post('/evaluations/{evaluation}/accept', [AdminEvaluationController::class, 'accept'])->name('evaluations.accept');
     Route::delete('/evaluations/{id}', [AdminEvaluationController::class, 'delete'])->name('evaluations.delete');
-    Route::post('/evaluations/{evaluation}/decline', [AdminEvaluationController::class, 'decline'])->name('evaluations.decline');
+    Route::post('/evaluations/{id}/decline', [AdminEvaluationController::class, 'decline'])->name('evaluations.decline');
+    Route::post('/evaluations/update', [AdminEvaluationController::class, 'update'])->name('evaluations.update');
+
 
 });
 
@@ -64,4 +67,9 @@ Route::middleware(['auth', 'role:admin|secretary'])->group(function () {
 Route::middleware(['auth'])->group(function () {
     Route::get('/evaluations', [CalendarController::class, 'getAllEvents']);
     Route::post('/evaluation', [CalendarController::class, 'create']);
+});
+
+Route::middleware(['auth'])->group(function () {
+    Route::get('/inbox', [InboxController::class, 'index'])->name('inbox.index');
+    Route::post('/inbox/{id}/read', [InboxController::class, 'markAsRead'])->name('inbox.read');
 });
