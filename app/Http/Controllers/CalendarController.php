@@ -27,30 +27,9 @@ class CalendarController extends Controller
     
     public function load(Request $request){
         
-        $user = Auth::user()->load(['speciality']);
         $faculties = Faculty::all();
         $specialities = Speciality::all();
-        // if ($user->hasRole('secretary')) {
-        //     // Filter users by faculty_id and role 'teacher'
-        //     $teachers = User::role('teacher') // Filters users with the 'teacher' role
-        //         ->where('teacher_faculty_id', $user->teacher_faculty_id)
-        //         ->get();
-        //         $groups = Group::with('speciality') // Eager load the speciality relationship
-        //         ->whereHas('speciality.faculty', function ($query) use ($user) {
-        //             $query->where('id', $user->teacher_faculty_id); // Filter by faculty ID
-        //         })->orderBy('speciality_id') // Sort by speciality_id
-        //         ->orderBy('study_year')   // Then by study_year
-        //         ->get();
-                
-        // } else {
-        //     // Fetch all users or apply other logic for different roles
-        //     $teachers = User::role('teacher')->get();
-        //     $groups = Group::with('speciality')
-        //     ->orderBy('speciality_id') // Sort by speciality_id
-        //     ->orderBy('study_year')   // Then by study_year
-        //     ->get();
-            
-        // }
+       
         $teachers = User::role('teacher')->get();
         $groups = Group::with('speciality')->get()->map(function ($group) {
             $group->speciality_short_name = $group->speciality ? $group->speciality->short_name : null;
@@ -63,8 +42,17 @@ class CalendarController extends Controller
         $subjects = Subject::all();
         $rooms = Room::all();
 
-        $canProposeExam = auth()->user()->hasRole(ERoles::STUDENT->value) && auth()->user()->can(EPermissions::PROPOSE_EXAM->value);
-        return view('calendar.index', compact('groups', 'faculties', 'specialities', 'teachers', 'subjects', 'rooms', 'evaluationTypes','canProposeExam', 'user'));
+        $user = null;
+        $canProposeExam = false;
+        
+        if (Auth::check()) {
+            $user = Auth::user()->load(['speciality']);
+            $canProposeExam = auth()->user()->hasRole(ERoles::STUDENT->value) && 
+                             auth()->user()->can(EPermissions::PROPOSE_EXAM->value);
+        }
+
+        return view('calendar.index', compact('groups', 'faculties', 'specialities', 'teachers', 
+                   'subjects', 'rooms', 'evaluationTypes','canProposeExam', 'user'));
     }
 
     public function getAllEvents(Request $request)

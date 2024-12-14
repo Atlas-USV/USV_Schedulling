@@ -4,7 +4,7 @@ namespace Database\Seeders;
 
 use App\Models\Room;
 use Illuminate\Database\Seeder;
-use Illuminate\Database\Console\Seeds\WithoutModelEvents;
+use Illuminate\Support\Facades\Http;
 
 class RoomSeeder extends Seeder
 {
@@ -13,7 +13,35 @@ class RoomSeeder extends Seeder
      */
     public function run()
     {
-        Room::create(['name' => 'Room 101', 'block' => 'A', 'short_name' => 'R101']);
-        Room::create(['name' => 'Room 202', 'block' => 'B', 'short_name' => 'R202']);
+        try {
+            // Replace this URL with your actual API endpoint
+            $response = Http::get('https://orar.usv.ro/orar/vizualizare/data/sali.php?json');
+            
+            if ($response->successful()) {
+                $rooms = $response->json();
+                // \Log::info('Parsed rooms:', $rooms);
+                foreach ($rooms as $roomData) {
+                    if (!is_null($roomData['name']) && !is_null($roomData['buildingName']) && !is_null($roomData['shortName'])) {
+                        Room::create([
+                            'name' => $roomData['name'],
+                            'block' => $roomData['buildingName'],
+                            'short_name' => $roomData['shortName'],
+                        ]);
+                    }
+                }
+            }
+        } catch (\Exception $e) {
+            // Fallback data in case API is not available
+            // $defaultRooms = [
+            //     ['name' => 'C001', 'block' => 'C', 'short_name' => 'C001'],
+            //     ['name' => 'C002', 'block' => 'C', 'short_name' => 'C002'],
+            //     ['name' => 'A101', 'block' => 'A', 'short_name' => 'A101'],
+            //     ['name' => 'B201', 'block' => 'B', 'short_name' => 'B201'],
+            // ];
+
+            // foreach ($defaultRooms as $room) {
+            //     Room::create($room);
+            // }
+        }
     }
 }

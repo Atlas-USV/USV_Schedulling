@@ -37,7 +37,7 @@
 
 
 <body class="bg-gray-50 dark:bg-gray-800">
-<div class="flex pt-16  bg-gray-50 dark:bg-gray-900">
+<div class="flex pt-8  bg-gray-50 dark:bg-gray-900">
 <button data-drawer-target="default-sidebar" data-drawer-toggle="default-sidebar" aria-controls="default-sidebar" type="button" class="inline-flex items-center p-2 mt-2 ml-3 text-sm text-gray-500 rounded-lg sm:hidden hover:bg-gray-100 focus:outline-none focus:ring-2 focus:ring-gray-200 dark:text-gray-400 dark:hover:bg-gray-700 dark:focus:ring-gray-600">
    <span class="sr-only">Open sidebar</span>
    <svg class="w-6 h-6" aria-hidden="true" fill="currentColor" viewBox="0 0 20 20" xmlns="http://www.w3.org/2000/svg">
@@ -276,7 +276,7 @@
   </div>
 </aside>
 <div id="main-content" class="sm:ml-64 relative w-full h-full overflow-y-auto bg-gray-50 lg:ml-64 dark:bg-gray-900">
-    <div class="px-4 pt-6">
+    <div class="px-4 pt-1">
         @yield('content')
     </div>
 </div>
