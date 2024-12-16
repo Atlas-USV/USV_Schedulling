@@ -7,6 +7,7 @@ use App\Http\Controllers\DashboardController;
 use App\Http\Controllers\TaskController;
 use App\Http\Controllers\AdminEvaluationController;
 use App\Http\Controllers\InboxController;
+use App\Http\Controllers\UserController;
 
 Route::get('/', function () {
     return view('welcome');
@@ -72,4 +73,12 @@ Route::middleware(['auth'])->group(function () {
 Route::middleware(['auth'])->group(function () {
     Route::get('/inbox', [InboxController::class, 'index'])->name('inbox.index');
     Route::post('/inbox/{id}/read', [InboxController::class, 'markAsRead'])->name('inbox.read');
+});
+
+Route::middleware(['auth', 'role:admin|secretary'])->group(function () {
+Route::get('/users', [UserController::class, 'index'])->name('users.index');
+Route::get('/users/{id}/edit', [UserController::class, 'edit'])->name('users.edit');
+Route::put('/users/{id}', [UserController::class, 'update'])->name('users.update');
+Route::get('/groups/by-faculty/{faculty_id}', [UserController::class, 'getGroupsByFaculty'])->name('groups.by-faculty');
+
 });

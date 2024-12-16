@@ -168,6 +168,14 @@
                 Administrare examene
             </a>
         </li>
+        <li>
+            <a href="{{ route('users.index') }}" class="flex items-center p-2 pl-11 w-full text-base font-normal text-gray-900 rounded-lg transition duration-75 group hover:bg-gray-100 dark:text-white dark:hover:bg-gray-700">
+                <svg class="w-5 h-5 text-gray-800 dark:text-white mr-3" aria-hidden="true" xmlns="http://www.w3.org/2000/svg" fill="currentColor" viewBox="0 0 24 24">
+                    <path d="M4 4h16v2H4zM10 9h4v2h-4zM10 13h4v6h-4zM8 9h2v10H8zM14 9h2v10h-2z"></path>
+                </svg>
+                Administrare utilizatori
+            </a>
+        </li>
     </ul>
 </li>
 @endif
@@ -281,10 +289,36 @@
     </div>
 </div>
 </div>
+<!-- Toasts -->
+@if(session('success'))
+    <div id="toast-success" class="fixed bottom-4 right-4 z-50 flex items-center w-full max-w-xs p-4 text-gray-500 bg-white rounded-lg shadow dark:text-gray-400 dark:bg-gray-800" role="alert">
+        <div class="inline-flex items-center justify-center flex-shrink-0 w-8 h-8 text-green-500 bg-green-100 rounded-lg dark:bg-green-800 dark:text-green-200">
+            ✓
+        </div>
+        <div class="ml-3 text-sm font-normal">{{ session('success') }}</div>
+    </div>
+@endif
+
+@if(session('error'))
+    <div id="toast-error" class="fixed bottom-4 right-4 z-50 flex items-center w-full max-w-xs p-4 text-gray-500 bg-white rounded-lg shadow dark:text-gray-400 dark:bg-gray-800" role="alert">
+        <div class="inline-flex items-center justify-center flex-shrink-0 w-8 h-8 text-red-500 bg-red-100 rounded-lg dark:bg-red-800 dark:text-red-200">
+            ✕
+        </div>
+        <div class="ml-3 text-sm font-normal">{{ session('error') }}</div>
+    </div>
+@endif
+
 @stack('scripts')
 </body>
 </html>
 
+<!-- Script pentru ascunderea toast-urilor după 3 secunde -->
+<script>
+        setTimeout(() => {
+            document.getElementById('toast-success')?.classList.add('hidden');
+            document.getElementById('toast-error')?.classList.add('hidden');
+        }, 3000);
+    </script>
 <!-- for notification -->
 <script>
    $.ajaxSetup({
