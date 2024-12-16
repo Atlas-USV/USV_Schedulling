@@ -14,26 +14,32 @@ class GroupSeeder extends Seeder
         $endpoint = 'https://orar.usv.ro/orar/vizualizare/data/subgrupe.php?json';
         $response = Http::get($endpoint);
 
+        
+        $nextNumber = 1;
+
         if ($response->successful()) {
             $data = $response->json();
 
             foreach ($data as $item) {
-                // Verificăm dacă specialitatea există
+                
                 $speciality = Speciality::where('short_name', $item['specializationShortName'])->first();
 
-                if ($speciality && is_numeric($item['groupName'])) { // Verificăm dacă groupName este numeric
+                if ($speciality) {
+
+                    $number = is_numeric($item['groupName']) ? intval($item['groupName']) : $nextNumber++;
+
                     Group::updateOrCreate(
                         [
-                            'name' => $item['groupName'],
+                            'name' => $item['groupName'], 
                             'speciality_id' => $speciality->id,
                         ],
                         [
-                            'number' => intval($item['groupName']), // Salvăm doar numere întregi
+                            'number' => $number, 
                             'study_year' => $item['studyYear'],
                         ]
                     );
                 } else {
-                    $this->command->warn("Invalid group data or missing speciality for: " . $item['groupName']);
+                    $this->command->warn("Missing speciality for: " . $item['groupName']);
                 }
             }
 
