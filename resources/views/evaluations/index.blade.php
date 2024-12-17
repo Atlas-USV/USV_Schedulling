@@ -49,10 +49,7 @@
     Decline
 </button>
 </form>
-    <!-- Show More Info Button -->
-    <button type="button" class="bg-blue-500 text-white px-4 py-2 rounded-lg hover:bg-blue-600 focus:ring-2 focus:ring-blue-300 focus:outline-none" onclick="alert('More info about the evaluation');">
-        More Info
-    </button>
+    
 </td>
                 </tr>
             @empty
@@ -68,7 +65,7 @@
 </div>
 
 
-<!-- Modal -->
+<!-- Modal Accept Evaluation -->
 <div id="acceptModal" class="fixed inset-0 z-50 hidden flex items-center justify-center bg-gray-900 bg-opacity-50">
     <div class="bg-white rounded-lg p-6 w-full max-w-md">
         <h2 class="text-lg font-semibold mb-4">Accept Evaluation</h2>
@@ -81,43 +78,35 @@
 
             <!-- Start Time -->
             <div class="mb-4">
-                <label for="start_time" class="block mb-2 text-sm font-medium text-gray-900 dark:text-white">Select Start Time:</label>
-                <div class="relative">
-                    <div class="absolute inset-y-0 end-0 top-0 flex items-center pe-3.5 pointer-events-none">
-                        <svg class="w-4 h-4 text-gray-500 dark:text-gray-400" aria-hidden="true" xmlns="http://www.w3.org/2000/svg" fill="currentColor" viewBox="0 0 24 24">
-                            <path fill-rule="evenodd" d="M2 12C2 6.477 6.477 2 12 2s10 4.477 10 10-4.477 10-10 10S2 17.523 2 12Zm11-4a1 1 0 1 0-2 0v4a1 1 0 0 0 .293.707l3 3a1 1 0 0 0 1.414-1.414L13 11.586V8Z" clip-rule="evenodd" />
-                        </svg>
-                    </div>
-                    <input type="time" id="start_time" name="start_time" class="bg-gray-50 border leading-none border-gray-300 text-gray-900 text-sm rounded-lg focus:ring-blue-500 focus:border-blue-500 block w-full p-2.5 dark:bg-gray-700 dark:border-gray-600 dark:placeholder-gray-400 dark:text-white dark:focus:ring-blue-500 dark:focus:border-blue-500" min="09:00" max="18:00" required />
-                </div>
+                <label for="start_time" class="block mb-2 text-sm font-medium text-gray-900">Start Time:</label>
+                <input type="time" id="start_time" name="start_time" class="w-full border rounded px-3 py-2" required>
             </div>
 
             <!-- End Time -->
             <div class="mb-4">
-                <label for="end_time" class="block mb-2 text-sm font-medium text-gray-900 dark:text-white">Select End Time:</label>
-                <div class="relative">
-                    <div class="absolute inset-y-0 end-0 top-0 flex items-center pe-3.5 pointer-events-none">
-                        <svg class="w-4 h-4 text-gray-500 dark:text-gray-400" aria-hidden="true" xmlns="http://www.w3.org/2000/svg" fill="currentColor" viewBox="0 0 24 24">
-                            <path fill-rule="evenodd" d="M2 12C2 6.477 6.477 2 12 2s10 4.477 10 10-4.477 10-10 10S2 17.523 2 12Zm11-4a1 1 0 1 0-2 0v4a1 1 0 0 0 .293.707l3 3a1 1 0 0 0 1.414-1.414L13 11.586V8Z" clip-rule="evenodd" />
-                        </svg>
-                    </div>
-                    <input type="time" id="end_time" name="end_time" class="bg-gray-50 border leading-none border-gray-300 text-gray-900 text-sm rounded-lg focus:ring-blue-500 focus:border-blue-500 block w-full p-2.5 dark:bg-gray-700 dark:border-gray-600 dark:placeholder-gray-400 dark:text-white dark:focus:ring-blue-500 dark:focus:border-blue-500" min="09:00" max="18:00" required />
-                </div>
+                <label for="end_time" class="block mb-2 text-sm font-medium text-gray-900">End Time:</label>
+                <input type="time" id="end_time" name="end_time" class="w-full border rounded px-3 py-2" required>
             </div>
 
             <!-- Room -->
             <div class="mb-4">
-                <label for="room_id" class="block text-sm font-medium text-gray-700">Select Room:</label>
-                <select name="room_id" id="room_id" class="block w-full border-gray-300 rounded-md shadow-sm focus:ring-indigo-500 focus:border-indigo-500">
+                <label for="room_id" class="block mb-2 text-sm font-medium text-gray-900">Select Room:</label>
+                <select name="room_id" id="room_id" class="w-full border rounded px-3 py-2" required>
                     @foreach ($rooms as $room)
                         <option value="{{ $room->id }}">{{ $room->name }}</option>
                     @endforeach
                 </select>
             </div>
 
+            <!-- Check Availability Button -->
+            <div class="flex justify-end gap-2 mb-4">
+                <button type="button" id="checkAvailabilityBtn" class="px-4 py-2 bg-yellow-500 text-white rounded hover:bg-yellow-600">Check Availability</button>
+            </div>
+
+            <!-- Submit and Cancel -->
             <div class="flex justify-end gap-2">
-                <button type="button" onclick="closeModal()" class="px-4 py-2 bg-gray-200 text-gray-700 rounded-lg">Cancel</button>
-                <button type="submit" class="px-4 py-2 bg-green-600 text-white rounded-lg">Accept</button>
+                <button type="button" onclick="closeModal()" class="px-4 py-2 bg-gray-200 text-gray-700 rounded">Cancel</button>
+                <button type="submit" id="acceptSubmitBtn" class="px-4 py-2 bg-green-600 text-white rounded hover:bg-green-700" disabled>Accept</button>
             </div>
         </form>
     </div>
@@ -180,26 +169,71 @@ function closeDeclineModal() {
     document.getElementById('declineModal').classList.add('hidden');
 }
 
-    // Asigură-te că restul codului este în funcția DOMContentLoaded
-    document.addEventListener('DOMContentLoaded', function () {
-    const form = document.getElementById('acceptForm');
-    if (form) {
-        form.addEventListener('submit', function (e) {
-            const startTime = document.getElementById('start_time').value;
-            const endTime = document.getElementById('end_time').value;
-            const errorMessage = document.getElementById('errorMessage');
+document.addEventListener('DOMContentLoaded', () => {
+    const checkAvailabilityBtn = document.getElementById('checkAvailabilityBtn');
+    const errorMessage = document.getElementById('errorMessage');
+    const acceptSubmitBtn = document.getElementById('acceptSubmitBtn');
 
-            // Reset mesajul de eroare
-            errorMessage.textContent = '';
-            errorMessage.classList.add('hidden');
+    checkAvailabilityBtn.addEventListener('click', () => {
+        const evaluationId = document.getElementById('evaluationId').value;
+        const startTime = document.getElementById('start_time').value;
+        const endTime = document.getElementById('end_time').value;
+        const roomId = document.getElementById('room_id').value;
 
-            // Verifică validitatea timpului
-            if (endTime <= startTime) {
-                e.preventDefault();
-                errorMessage.textContent = 'End time must be after start time!';
-                errorMessage.classList.remove('hidden');
+        errorMessage.textContent = '';
+        errorMessage.classList.add('hidden');
+        acceptSubmitBtn.disabled = true;
+
+        if (!startTime || !endTime || !roomId) {
+            errorMessage.textContent = 'Selectează orele și sala pentru verificare!';
+            errorMessage.classList.remove('hidden');
+            return;
+        }
+
+        fetch("{{ route('evaluations.checkAvailability') }}", {
+            method: "POST", // Metoda POST
+            headers: {
+                "Content-Type": "application/json",
+                "X-CSRF-TOKEN": "{{ csrf_token() }}"
+            },
+            body: JSON.stringify({
+                evaluation_id: evaluationId,
+                start_time: startTime,
+                end_time: endTime,
+                room_id: roomId
+            })
+        })
+        .then(response => {
+            if (!response.ok) {
+                throw new Error("Server error: " + response.status);
             }
+            return response.json();
+        })
+        .then(data => {
+            let message = '';
+            if (data.teacher_conflict) {
+                message += 'Profesorul are deja un examen în acest interval orar.\n';
+            }
+            if (data.room_conflict) {
+                message += 'Sala este deja ocupată în acest interval orar.\n';
+            }
+
+            if (!message) {
+                message = 'Profesorul și sala sunt disponibile!';
+                acceptSubmitBtn.disabled = false; // Activează butonul Submit
+            } else {
+                acceptSubmitBtn.disabled = true; // Dezactivează butonul Submit
+            }
+
+            errorMessage.textContent = message;
+            errorMessage.classList.remove('hidden');
+        })
+        .catch(error => {
+            console.error('Eroare:', error);
+            errorMessage.textContent = 'A apărut o eroare la verificare.';
+            errorMessage.classList.remove('hidden');
         });
-    }
+    });
 });
+
 </script>

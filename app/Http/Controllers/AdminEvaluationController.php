@@ -116,5 +116,54 @@ public function update(Request $request)
     return redirect()->route('evaluations.pending')->with('success', 'Evaluation accepted successfully!');
 }
 
+
+public function checkAvailability(Request $request)
+{
+    \Log::info('Check Availability Request:', $request->all());
+
+    try {
+        $request->validate([
+            'evaluation_id' => 'required|exists:evaluations,id',
+            'start_time' => 'required|date_format:H:i',
+            'end_time' => 'required|date_format:H:i|after:start_time',
+            'room_id' => 'required|exists:rooms,id',
+        ]);
+
+        \Log::info('Validation passed');
+
+        $evaluation = Evaluation::findOrFail($request->evaluation_id);
+
+        // Verificare conflicte
+        $teacherConflict = Evaluation::where('teacher_id', $evaluation->teacher_id)
+            ->where('exam_date', $evaluation->exam_date)
+            ->where(function ($query) use ($request) {
+                $query->whereBetween('start_time', [$request->start_time, $request->end_time])
+                      ->orWhereBetween('end_time', [$request->start_time, $request->end_time]);
+            })
+            ->exists();
+
+        $roomConflict = Evaluation::where('room_id', $request->room_id)
+            ->where('exam_date', $evaluation->exam_date)
+            ->where(function ($query) use ($request) {
+                $query->whereBetween('start_time', [$request->start_time, $request->end_time])
+                      ->orWhereBetween('end_time', [$request->start_time, $request->end_time]);
+            })
+            ->exists();
+
+        \Log::info('Conflicts:', [
+            'teacher_conflict' => $teacherConflict,
+            'room_conflict' => $roomConflict
+        ]);
+
+        return response()->json([
+            'teacher_conflict' => $teacherConflict,
+            'room_conflict' => $roomConflict,
+        ]);
+    } catch (\Exception $e) {
+        \Log::error('Error in checkAvailability:', ['error' => $e->getMessage()]);
+        return response()->json(['error' => 'Server error'], 500);
+    }
+}
+
 }
 

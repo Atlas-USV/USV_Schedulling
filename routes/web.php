@@ -59,6 +59,8 @@ Route::middleware(['auth', 'role:admin|secretary'])->group(function () {
     Route::delete('/evaluations/{id}', [AdminEvaluationController::class, 'delete'])->name('evaluations.delete');
     Route::post('/evaluations/{id}/decline', [AdminEvaluationController::class, 'decline'])->name('evaluations.decline');
     Route::post('/evaluations/update', [AdminEvaluationController::class, 'update'])->name('evaluations.update');
+    Route::post('/evaluations/check-availability', [AdminEvaluationController::class, 'checkAvailability'])
+    ->name('evaluations.checkAvailability');
 
 
 });
