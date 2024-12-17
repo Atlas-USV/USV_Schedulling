@@ -10,12 +10,14 @@ use Illuminate\Queue\SerializesModels;
 use Illuminate\Mail\Mailables\Envelope;
 use Illuminate\Contracts\Queue\ShouldQueue;
 
-class InvitationMail extends Mailable
+class InvitationMail extends Mailable implements ShouldQueue
 {
     use Queueable, SerializesModels;
 
     public $invitation;
     public $signedUrl;
+    public $tries = 3;
+    public $timeout = 60;
 
     /**
      * Create a new message instance.
