@@ -449,7 +449,7 @@
             const selectedGroup = $('#filter_group_dropdown').val();
             const selectedTeacher = $('#filter_teacher_dropdown').val();
             const selectedRoom = $('#filter_room_dropdown').val();
-
+            console.log(selectedFaculty)
 
             // Filter events based on selected values
             filteredEvents = allEvents.filter(event => {
@@ -460,7 +460,7 @@
                     .faculty_id == selectedFaculty);
                 const teacherMatches = !selectedTeacher || event.teacher_id == selectedTeacher;
                 const roomMatches = !selectedRoom || event.room?.id == selectedRoom;
-
+                console.log(facultyMatches)
 
                 return groupMatches && specialityMatches && facultyMatches && teacherMatches && roomMatches;
             });
@@ -770,6 +770,7 @@
                 },
                 eventClick: function(event) {
                     populateEventInfo(event)
+                    console.log(event)
                     $('#event-details-modal-toggle').click()
                 },
                 

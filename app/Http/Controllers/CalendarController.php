@@ -58,17 +58,26 @@ class CalendarController extends Controller
     public function getAllEvents(Request $request)
     {
         try {
+            // Enable query logging
+            \DB::enableQueryLog();
+
             // Fetch evaluations from the database
             $evaluations = \App\Models\Evaluation::with([
                 'subject',
                 'group:id,name,speciality_id',
-                'speciality:id,name',
-                'teacher',
+                'speciality:id,name', 
+                'teacher:id,name,teacher_faculty_id',
                 'room:id,name',
+                'teacher.faculty:id,name' // Add eager loading for faculty relationship
             ])
             ->where('status', 'accepted')
             ->get();
-            // Transform evaluations into event format
+
+            // Log the executed query
+            $queries = \DB::getQueryLog();
+            \Log::info('Executed queries:', $queries);
+
+            // Transform evaluations into event format 
             $events = $evaluations->map(function ($evaluation) {
                 $eventColor = EvaluationTypes::from($evaluation->type)->getColor();
                 return [
@@ -85,7 +94,8 @@ class CalendarController extends Controller
                     'description' => $evaluation->description,
                     'teacher_id' => $evaluation->teacher_id,
                     'subject' => $evaluation->subject,
-                    'color' => $eventColor, // Add color to the event
+                    'color' => $eventColor,
+                    'faculty' => $evaluation->teacher->faculty // Now efficiently loaded
                 ];
             });
 
@@ -163,6 +173,26 @@ class CalendarController extends Controller
 
         // Add 'exam_date' to the validated data
         $validatedData['exam_date'] = Carbon::parse($validatedData['start_time'])->format('Y-m-d');
+
+        // Check if teacher and group are from same faculty
+        $teacher = \App\Models\User::find($validatedData['teacher_id']);
+        $group = \App\Models\Group::find($validatedData['group_id']);
+        
+        if ($group && $teacher) {
+            $groupFacultyId = $group->speciality->faculty_id;
+            $teacherFacultyId = $teacher->teacher_faculty_id;
+            
+            if ($groupFacultyId !== $teacherFacultyId) {
+                return response()->json([
+                    'success' => false,
+                    'message' => 'Validation error',
+                    'errors' => [
+                        'teacher_id' => ['Cadrul didactic trebuie să fie din aceeași facultate cu grupa']
+                    ]
+                ], 422);
+            }
+        }
+
         $overlapCheck = $this->checkForOverlaps($validatedData);
         if ($overlapCheck['hasOverlap']) {
             return response()->json([

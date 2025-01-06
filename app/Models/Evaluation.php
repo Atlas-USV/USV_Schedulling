@@ -95,6 +95,18 @@ class Evaluation extends Model
     {
         return $this->belongsTo(Speciality::class);
     }
+    // Faculty relationship through teacher
+    public function faculty()
+    {
+        return $this->hasOneThrough(
+            Faculty::class,
+            User::class,
+            'id', // Foreign key on users table
+            'id', // Foreign key on faculties table
+            'teacher_id', // Local key on evaluations table
+            'teacher_faculty_id' // Local key on users table
+        );
+    }
 
     // Method to check if this is a re-examination
     public function isReexamination()
