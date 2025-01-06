@@ -35,7 +35,7 @@ class ProfessorSeeder extends Seeder
                 }
 
                 // Creăm sau actualizăm profesorul în tabelul users
-                User::updateOrCreate(
+                $user = User::updateOrCreate( // Atribuim rezultatul metodei unei variabile
                     [
                         'email' => $professor['emailAddress'],
                     ],
@@ -45,6 +45,11 @@ class ProfessorSeeder extends Seeder
                         'teacher_faculty_id' => $faculty->id, // Atribuim facultatea
                     ]
                 );
+
+                // Atribuim rolul de 'teacher'
+                if ($user && !$user->hasRole('teacher')) {
+                    $user->assignRole('teacher');
+                }
             }
         } else {
             // Dacă cererea eșuează, afișăm un mesaj de eroare
