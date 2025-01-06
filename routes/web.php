@@ -84,3 +84,5 @@ Route::put('/users/{id}', [UserController::class, 'update'])->name('users.update
 Route::get('/groups/by-faculty/{faculty_id}', [UserController::class, 'getGroupsByFaculty'])->name('groups.by-faculty');
 
 });
+
+
