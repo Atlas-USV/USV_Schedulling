@@ -136,82 +136,105 @@ document.addEventListener("DOMContentLoaded", () => {
             });
         });
     }
+    //Real Time Hour
+    
+    const timeDisplay = document.getElementById("time-display");
+
+    if (timeDisplay) {
+        const updateTime = () => {
+            const now = new Date();
+            const hours = now.getHours().toString().padStart(2, "0");
+            const minutes = now.getMinutes().toString().padStart(2, "0");
+            const seconds = now.getSeconds().toString().padStart(2, "0");
+            timeDisplay.textContent = `${hours}:${minutes}:${seconds}`;
+        };
+
+        // Actualizează ora la fiecare secundă
+        updateTime();
+        setInterval(updateTime, 1000);
+    }
+    
 
     //Timer
 
       // Selectează elementele din DOM
       const timerDisplay = document.getElementById("timer-display");
-      const startButton = document.getElementById("start-timer");
-      const pauseButton = document.getElementById("pause-timer");
-      const resetButton = document.getElementById("reset-timer");
-  
-      // Variabile globale pentru timer
-      let timerInterval = null;
-      let remainingTime = 25 * 60; // 25 minute în secunde
-  
-      // Funcție pentru a formata timpul
-      const formatTime = (seconds) => {
-          const minutes = Math.floor(seconds / 60);
-          const secs = seconds % 60;
-          return `${minutes.toString().padStart(2, "0")}:${secs.toString().padStart(2, "0")}`;
-      };
-  
-      // Actualizează afișajul timer-ului
-      const updateDisplay = () => {
-          timerDisplay.textContent = formatTime(remainingTime);
-      };
-  
-      // Funcție pentru a începe timer-ul
-      const startTimer = () => {
-          if (timerInterval) return; // Evită multiple intervale
-  
-          timerInterval = setInterval(() => {
-              if (remainingTime > 0) {
-                  remainingTime--;
-                  updateDisplay();
-              } else {
-                  clearInterval(timerInterval);
-                  timerInterval = null;
-                  alert("Time's up!");
-              }
-          }, 1000);
-  
-          // Actualizează butoanele
-          startButton.classList.add("hidden");
-          pauseButton.classList.remove("hidden");
-          resetButton.classList.remove("hidden");
-      };
-  
-      // Funcție pentru a pune pauză la timer
-      const pauseTimer = () => {
-          clearInterval(timerInterval);
-          timerInterval = null;
-  
-          // Actualizează butoanele
-          startButton.textContent = "Resume";
-          startButton.classList.remove("hidden");
-          pauseButton.classList.add("hidden");
-      };
-  
-      // Funcție pentru a reseta timer-ul
-      const resetTimer = () => {
-          clearInterval(timerInterval);
-          timerInterval = null;
-          remainingTime = 25 * 60; // Resetează la 25 minute
-          updateDisplay();
-  
-          // Actualizează butoanele
-          startButton.textContent = "Start";
-          startButton.classList.remove("hidden");
-          pauseButton.classList.add("hidden");
-          resetButton.classList.add("hidden");
-      };
-  
-      // Evenimente pentru butoane
-      startButton.addEventListener("click", startTimer);
-      pauseButton.addEventListener("click", pauseTimer);
-      resetButton.addEventListener("click", resetTimer);
-  
-      // Inițializează afișajul timer-ului
-      updateDisplay();
+const startButton = document.getElementById("start-timer");
+const pauseButton = document.getElementById("pause-timer");
+const resetButton = document.getElementById("reset-timer");
+
+// Verifică dacă toate elementele timer-ului există
+if (timerDisplay && startButton && pauseButton && resetButton) {
+    // Variabile globale pentru timer
+    let timerInterval = null;
+    let remainingTime = 25 * 60; // 25 minute în secunde
+
+    // Funcție pentru a formata timpul
+    const formatTime = (seconds) => {
+        const minutes = Math.floor(seconds / 60);
+        const secs = seconds % 60;
+        return `${minutes.toString().padStart(2, "0")}:${secs.toString().padStart(2, "0")}`;
+    };
+
+    // Actualizează afișajul timer-ului
+    const updateDisplay = () => {
+        timerDisplay.textContent = formatTime(remainingTime);
+    };
+
+    // Funcție pentru a începe timer-ul
+    const startTimer = () => {
+        if (timerInterval) return; // Evită multiple intervale
+
+        timerInterval = setInterval(() => {
+            if (remainingTime > 0) {
+                remainingTime--;
+                updateDisplay();
+            } else {
+                clearInterval(timerInterval);
+                timerInterval = null;
+                alert("Time's up!");
+            }
+        }, 1000);
+
+        // Actualizează butoanele
+        startButton.classList.add("hidden");
+        pauseButton.classList.remove("hidden");
+        resetButton.classList.remove("hidden");
+    };
+
+    // Funcție pentru a pune pauză la timer
+    const pauseTimer = () => {
+        clearInterval(timerInterval);
+        timerInterval = null;
+
+        // Actualizează butoanele
+        startButton.textContent = "Resume";
+        startButton.classList.remove("hidden");
+        pauseButton.classList.add("hidden");
+    };
+
+    // Funcție pentru a reseta timer-ul
+    const resetTimer = () => {
+        clearInterval(timerInterval);
+        timerInterval = null;
+        remainingTime = 25 * 60; // Resetează la 25 minute
+        updateDisplay();
+
+        // Actualizează butoanele
+        startButton.textContent = "Start";
+        startButton.classList.remove("hidden");
+        pauseButton.classList.add("hidden");
+        resetButton.classList.add("hidden");
+    };
+
+    // Evenimente pentru butoane
+    startButton.addEventListener("click", startTimer);
+    pauseButton.addEventListener("click", pauseTimer);
+    resetButton.addEventListener("click", resetTimer);
+
+    // Inițializează afișajul timer-ului
+    updateDisplay();
+} else {
+    console.warn("Focus Timer elements are not available for this user role.");
+}
 });
