@@ -108,13 +108,21 @@
           </li>
           @endif
           <li>
-              <a href="#" class="flex items-center p-2 text-base font-normal text-gray-900 rounded-lg dark:text-white hover:bg-gray-100 dark:hover:bg-gray-700 group">
-                  <svg aria-hidden="true" class="flex-shrink-0 w-6 h-6 text-gray-400 transition duration-75 dark:text-gray-400 group-hover:text-gray-900 dark:group-hover:text-white" fill="currentColor" viewBox="0 0 20 20" xmlns="http://www.w3.org/2000/svg"><path d="M8.707 7.293a1 1 0 00-1.414 1.414l2 2a1 1 0 001.414 0l2-2a1 1 0 00-1.414-1.414L11 7.586V3a1 1 0 10-2 0v4.586l-.293-.293z"></path><path d="M3 5a2 2 0 012-2h1a1 1 0 010 2H5v7h2l1 2h4l1-2h2V5h-1a1 1 0 110-2h1a2 2 0 012 2v10a2 2 0 01-2 2H5a2 2 0 01-2-2V5z"></path></svg>
-                  <span class="flex-1 ml-3 whitespace-nowrap">Mesaje</span>
-                  <span class="inline-flex justify-center items-center w-5 h-5 text-xs font-semibold rounded-full text-primary-800 bg-primary-100 dark:bg-primary-200 dark:text-primary-800">
-                      6   
-                  </span>
-              </a>
+          <a href="{{ route('inbox.index') }}" class="flex items-center p-2 text-base font-normal text-gray-900 rounded-lg dark:text-white hover:bg-gray-100 dark:hover:bg-gray-700 group">
+    <svg aria-hidden="true" class="flex-shrink-0 w-6 h-6 text-gray-400 transition duration-75 dark:text-gray-400 group-hover:text-gray-900 dark:group-hover:text-white" fill="currentColor" viewBox="0 0 20 20" xmlns="http://www.w3.org/2000/svg">
+        <path d="M8.707 7.293a1 1 0 00-1.414 1.414l2 2a1 1 0 001.414 0l2-2a1 1 0 00-1.414-1.414L11 7.586V3a1 1 0 10-2 0v4.586l-.293-.293z"></path>
+        <path d="M3 5a2 2 0 012-2h1a1 1 0 010 2H5v7h2l1 2h4l1-2h2V5h-1a1 1 0 110-2h1a2 2 0 012 2v10a2 2 0 01-2 2H5a2 2 0 01-2-2V5z"></path>
+    </svg>
+    <span class="flex-1 ml-3 whitespace-nowrap">Mesaje</span>
+    @php
+        $unreadCount = App\Models\Message::where('user_id', Auth::id())->where('is_read', false)->count();
+    @endphp
+    @if($unreadCount > 0)
+        <span class="inline-flex justify-center items-center w-5 h-5 text-xs font-semibold rounded-full text-white bg-red-500">
+            {{ $unreadCount }}
+        </span>
+    @endif
+</a>
           </li>
           <li>
               <button type="button" class="flex items-center p-2 w-full text-base font-normal text-gray-900 rounded-lg transition duration-75 group hover:bg-gray-100 dark:text-white dark:hover:bg-gray-700" aria-controls="dropdown-authentication" data-collapse-toggle="dropdown-authentication">
@@ -166,6 +174,14 @@
                   <path d="M4 4h16v2H4zM10 9h4v2h-4zM10 13h4v6h-4zM8 9h2v10H8zM14 9h2v10h-2z"></path>
               </svg>
                 Invitatii
+            </a>
+        </li>
+        <li>
+            <a href="{{ route('users.index') }}" class="flex items-center p-2 pl-11 w-full text-base font-normal text-gray-900 rounded-lg transition duration-75 group hover:bg-gray-100 dark:text-white dark:hover:bg-gray-700">
+                <svg class="w-5 h-5 text-gray-800 dark:text-white mr-3" aria-hidden="true" xmlns="http://www.w3.org/2000/svg" fill="currentColor" viewBox="0 0 24 24">
+                    <path d="M4 4h16v2H4zM10 9h4v2h-4zM10 13h4v6h-4zM8 9h2v10H8zM14 9h2v10h-2z"></path>
+                </svg>
+                Administrare utilizatori
             </a>
         </li>
     </ul>
@@ -281,10 +297,36 @@
     </div>
 </div>
 </div>
+<!-- Toasts -->
+@if(session('success'))
+    <div id="toast-success" class="fixed bottom-4 right-4 z-50 flex items-center w-full max-w-xs p-4 text-gray-500 bg-white rounded-lg shadow dark:text-gray-400 dark:bg-gray-800" role="alert">
+        <div class="inline-flex items-center justify-center flex-shrink-0 w-8 h-8 text-green-500 bg-green-100 rounded-lg dark:bg-green-800 dark:text-green-200">
+            ✓
+        </div>
+        <div class="ml-3 text-sm font-normal">{{ session('success') }}</div>
+    </div>
+@endif
+
+@if(session('error'))
+    <div id="toast-error" class="fixed bottom-4 right-4 z-50 flex items-center w-full max-w-xs p-4 text-gray-500 bg-white rounded-lg shadow dark:text-gray-400 dark:bg-gray-800" role="alert">
+        <div class="inline-flex items-center justify-center flex-shrink-0 w-8 h-8 text-red-500 bg-red-100 rounded-lg dark:bg-red-800 dark:text-red-200">
+            ✕
+        </div>
+        <div class="ml-3 text-sm font-normal">{{ session('error') }}</div>
+    </div>
+@endif
+
 @stack('scripts')
 </body>
 </html>
 
+<!-- Script pentru ascunderea toast-urilor după 3 secunde -->
+<script>
+        setTimeout(() => {
+            document.getElementById('toast-success')?.classList.add('hidden');
+            document.getElementById('toast-error')?.classList.add('hidden');
+        }, 3000);
+    </script>
 <!-- for notification -->
 <script>
    $.ajaxSetup({

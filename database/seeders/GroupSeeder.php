@@ -2,21 +2,50 @@
 
 namespace Database\Seeders;
 
+use Illuminate\Database\Seeder;
+use Illuminate\Support\Facades\Http;
 use App\Models\Group;
 use App\Models\Speciality;
-use Illuminate\Database\Seeder;
-use Illuminate\Database\Console\Seeds\WithoutModelEvents;
 
 class GroupSeeder extends Seeder
 {
-    /**
-     * Run the database seeds.
-     */
     public function run()
     {
-        $speciality = Speciality::first();
+        $endpoint = 'https://orar.usv.ro/orar/vizualizare/data/subgrupe.php?json';
+        $response = Http::get($endpoint);
 
-        Group::create(['name' => '3111', 'speciality_id' => $speciality->id, 'study_year' => 1,  'number' => 1]);
-        Group::create(['name' => '3121', 'speciality_id' => $speciality->id, 'study_year' => 2,  'number' => 2]);
+        
+        $nextNumber = 1;
+
+        if ($response->successful()) {
+            $data = $response->json();
+
+            foreach ($data as $item) {
+                
+                $speciality = Speciality::where('short_name', $item['specializationShortName'])->first();
+
+                if ($speciality) {
+
+                    $number = is_numeric($item['groupName']) ? intval($item['groupName']) : $nextNumber++;
+
+                    Group::updateOrCreate(
+                        [
+                            'name' => $item['groupName'], 
+                            'speciality_id' => $speciality->id,
+                        ],
+                        [
+                            'number' => $number, 
+                            'study_year' => $item['studyYear'],
+                        ]
+                    );
+                } else {
+                    $this->command->warn("Missing speciality for: " . $item['groupName']);
+                }
+            }
+
+            $this->command->info('Groups have been seeded successfully.');
+        } else {
+            $this->command->error('Failed to fetch data from the endpoint.');
+        }
     }
 }
