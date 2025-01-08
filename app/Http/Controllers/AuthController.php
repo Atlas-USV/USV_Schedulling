@@ -75,7 +75,7 @@ class AuthController extends Controller
         ]);
         // Retrieve the invitation by ID
         $invitation = Invitation::findOrFail($invitation_id);
-
+        
         // Check if the invitation is valid (optional: ensure the invitation is not expired)
         if ($invitation->expires_at != null && $invitation->expires_at < now()) {
             abort(419);
@@ -87,6 +87,7 @@ class AuthController extends Controller
             'email' => $invitation->email,
             'password' => Hash::make($request->password),
         ]);
+       
 
         if ($invitation->group_id) {
             $group = Group::find($invitation->group_id); // Find the group by ID

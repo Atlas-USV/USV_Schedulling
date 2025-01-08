@@ -30,7 +30,24 @@ class DashboardController extends Controller
         ->get();
 
         $userName = auth()->user()->name;
-        return view('dashboard', compact('groups', 'faculties', 'subjects', 'teachers', 'rooms', 'tasks',  'userName', 'upcomingExams'));
+
+        $userRole = auth()->user()->role;
+
+        // Ultimii 5 utilizatori adăugați
+    $recentUsers = User::orderBy('created_at', 'desc')->take(5)->get();
+
+    // Primele 5 examene în așteptare
+    $pendingExams = \App\Models\Evaluation::where('status', 'pending')
+        ->orderBy('exam_date', 'asc')
+        ->take(5)
+        ->get();
+
+        \Log::info('User Role:', ['role' => $userRole]);
+        \Log::info('Authenticated User:', ['user' => auth()->user()]);
+
+
+    
+        return view('dashboard', compact('groups', 'faculties', 'subjects', 'teachers', 'rooms', 'tasks',  'userName', 'upcomingExams', 'userRole', 'recentUsers', 'pendingExams'));
     }
 
 
@@ -151,6 +168,8 @@ public function showExams(Request $request)
 
     return view('exams.index', compact('exams', 'subjects'));
 }
+
+
 
 
 }

@@ -1,14 +1,17 @@
 <?php
+use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\Route;
 use App\Http\Controllers\AuthController;
-use App\Http\Controllers\CalendarController;
-use App\Http\Controllers\InvitationController;
-use App\Http\Controllers\DashboardController;
 use App\Http\Controllers\TaskController;
-use App\Http\Controllers\AdminEvaluationController;
+use App\Http\Controllers\UserController;
+use App\Http\Controllers\InboxController;
+use App\Http\Controllers\CalendarController;
+use App\Http\Controllers\DashboardController;
+use App\Http\Controllers\InvitationController;
+use App\Http\Controllers\ResetPasswordController;
 use App\Http\Controllers\ChangePasswordController;
 use App\Http\Controllers\ForgotPasswordController;
-use App\Http\Controllers\ResetPasswordController;
+use App\Http\Controllers\AdminEvaluationController;
 
 
 Route::get('/', function () {
@@ -63,7 +66,11 @@ Route::middleware(['auth', 'role:admin|secretary'])->group(function () {
     Route::get('/evaluations/pending', [AdminEvaluationController::class, 'index'])->name('evaluations.pending');
     Route::post('/evaluations/{evaluation}/accept', [AdminEvaluationController::class, 'accept'])->name('evaluations.accept');
     Route::delete('/evaluations/{id}', [AdminEvaluationController::class, 'delete'])->name('evaluations.delete');
-    Route::post('/evaluations/{evaluation}/decline', [AdminEvaluationController::class, 'decline'])->name('evaluations.decline');
+    Route::post('/evaluations/{id}/decline', [AdminEvaluationController::class, 'decline'])->name('evaluations.decline');
+    Route::post('/evaluations/update', [AdminEvaluationController::class, 'update'])->name('evaluations.update');
+    Route::post('/evaluations/check-availability', [AdminEvaluationController::class, 'checkAvailability'])
+    ->name('evaluations.checkAvailability');
+
 
 });
 
@@ -73,6 +80,22 @@ Route::middleware(['auth'])->group(function () {
     Route::get('/evaluations', [CalendarController::class, 'getAllEvents']);
     Route::post('/evaluation', [CalendarController::class, 'create']);
 });
+
+Route::middleware(['auth'])->group(function () {
+    Route::get('/inbox', [InboxController::class, 'index'])->name('inbox.index');
+    Route::post('/inbox/{id}/read', [InboxController::class, 'markAsRead'])->name('inbox.read');
+});
+
+Route::middleware(['auth', 'role:admin|secretary'])->group(function () {
+Route::get('/users', [UserController::class, 'index'])->name('users.index');
+Route::get('/users/{id}/edit', [UserController::class, 'edit'])->name('users.edit');
+Route::put('/users/{id}', [UserController::class, 'update'])->name('users.update');
+Route::get('/groups/by-faculty/{faculty_id}', [UserController::class, 'getGroupsByFaculty'])->name('groups.by-faculty');
+
+});
+
+
+
 
 Route::middleware(['auth'])->group(function () {
     Route::get('password/change', [ChangePasswordController::class, 'showChangePasswordForm'])->name('password.change');

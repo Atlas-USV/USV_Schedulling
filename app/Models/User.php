@@ -8,6 +8,7 @@ use App\Shared\ERoles;
 use App\Models\Faculty;
 use App\Models\Evaluation;
 use App\Models\Speciality;
+use App\Models\Message;
 use Spatie\Permission\Traits\HasRoles;
 use Illuminate\Notifications\Notifiable;
 use Illuminate\Contracts\Auth\MustVerifyEmail;
@@ -88,5 +89,10 @@ class User extends Authenticatable implements MustVerifyEmail
     public function sendEmailVerificationNotification()
     {
         $this->notify(new CustomEmailVerificationNotification());
+    }
+
+    public function messages()
+    {
+        return $this->hasMany(Message::class);
     }
 }
