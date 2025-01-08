@@ -22,7 +22,6 @@ class InvitationController extends Controller
 
     public function __construct()
     {
-       
     }
 
     public function create()
@@ -37,20 +36,20 @@ class InvitationController extends Controller
 
     public function store(Request $request)
     {
-       
-       
+
+
         try{
             $validated = $request->validate([
                 'email' => 'required|email|unique:users,email',
                 'role_id' => 'nullable|exists:roles,id',
                 'group_id' => 'nullable|exists:groups,id',
-                
-                'speciality_id' => ['nullable','exists:specialities,id'], 
-                'teacher_faculty_id' => ['nullable','exists:faculties,id', 
+
+                'speciality_id' => ['nullable','exists:specialities,id'],
+                'teacher_faculty_id' => ['nullable','exists:faculties,id',
                     new FacultySpecialityGroupRule($request->teacher_faculty_id, $request->role_id, $request->group_id, $request->speciality_id )],
                     ]);
-           
-            
+
+
             // Create the invitation
             $invitation = Invitation::create([
                 'email' => $request->email,
@@ -61,18 +60,18 @@ class InvitationController extends Controller
                 'created_by' => auth()->id(),
                 'expires_at' => now()->addDays(90),
             ]);
-            
+
             $signedUrl = URL::signedRoute('register', ['invitation_id' => $invitation->id]);
-            
+
             Mail::to($invitation->email)->queue(new InvitationMail($invitation, $signedUrl));
             session()->flash('toast_success', 'Invitatie trimisa cu succes!');
             return back();
 
         }catch(Exception $e){
             Log::error($e->getMessage());
-            
+
         }
-      
+
 
     }
     function getInvitations(Request $request){
@@ -90,22 +89,22 @@ class InvitationController extends Controller
     {
         try {
             $invitation = Invitation::findOrFail($id);
-            
+
             // Update expiration date
             $invitation->update([
                 'expires_at' => now()->addDays(90)
             ]);
-            
+
             $signedUrl = URL::signedRoute('register', ['invitation_id' => $invitation->id]);
-            
+
             Mail::to($invitation->email)->queue(new InvitationMail($invitation, $signedUrl));
-            
+
             return response()->json([
                 'success' => true,
                 'message' => 'Invitatie retrimisa cu succes!',
                 'data' => $invitation
             ], 200);
-            
+
         } catch (ModelNotFoundException $e) {
             return response()->json([
                 'success' => false,
