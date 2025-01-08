@@ -15,6 +15,8 @@
         "vite": "^5.0"
     },
     "dependencies": {
-        "flowbite-typography": "^1.0.5"
+        "@preline/select": "^2.6.0",
+        "flowbite-typography": "^1.0.5",
+        "preline": "^2.6.0"
     }
 }
