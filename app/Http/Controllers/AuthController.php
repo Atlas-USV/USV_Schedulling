@@ -67,18 +67,26 @@ class AuthController extends Controller
     // Handle registration request
     public function register(Request $request, $invitation_id)
     {
-         // Validate the request data
+        // Validate the request data
         $request->validate([
             'name' => 'required|string|max:255',
             // 'email' => 'required|email|unique:users,email',
             'password' => 'required|string|min:8|confirmed',
         ]);
+
         // Retrieve the invitation by ID
         $invitation = Invitation::findOrFail($invitation_id);
-        
+        session()->flash('toast_success', 'Invitatie trimisa cu succes!');
+
         // Check if the invitation is valid (optional: ensure the invitation is not expired)
         if ($invitation->expires_at != null && $invitation->expires_at < now()) {
             abort(419);
+        }
+
+        // Handle validation errors
+        if ($errors = $request->errors()) {
+            session()->flash('toast_error', $errors->all());
+            return back()->withErrors($errors)->withInput();
         }
 
         // Create the user
