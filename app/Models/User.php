@@ -39,6 +39,7 @@ class User extends Authenticatable implements MustVerifyEmail
         'teacher_faculty_id',
         'background_color', 
         'avatar',     // Adaugă și avatar dacă vrei să îl salvezi
+        'year_of_start',
         
     ];
 
@@ -81,6 +82,7 @@ class User extends Authenticatable implements MustVerifyEmail
 {
     return $this->hasMany(Evaluation::class, 'teacher_id', 'id');
 }
+
 public function evaluations()
 {
     if ($this->hasRole('student')) {
@@ -101,7 +103,7 @@ public function evaluations()
         return $this->belongsTo(Faculty::class, 'teacher_faculty_id');
     }
 
-    public function groups(): BelongsToMany
+    public function groups(): BelongsToMany 
     {
         return $this->belongsToMany(Group::class, 'user_group', 'user_id', 'group_id');
                     
@@ -111,4 +113,22 @@ public function evaluations()
     {
         $this->notify(new CustomEmailVerificationNotification());
     }
+
+    public function getYearOfStudy()
+    {
+        $evaluation = $this->evaluationsAsStudent()->first(); // Obține prima evaluare a studentului
+        return $evaluation ? $evaluation->year_of_study : 'N/A'; // Returnează anul de studiu sau 'N/A'
+    }
+
+    public function getYearsOfWork()
+    {
+        if (!$this->year_of_start) 
+        {
+            return 'N/A';
+        }
+        return now()->year - $this->year_of_start;
+    }
+
+
+
 }

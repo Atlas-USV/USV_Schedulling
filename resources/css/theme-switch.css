@@ -1,0 +1,39 @@
+/* Stil pentru switch-ul de tema */
+.toggle-path {
+    position: relative;
+    transition: background-color 0.3s;
+}
+
+.toggle-circle {
+    position: absolute;
+    transition: transform 0.3s;
+    top: 0.25rem;
+    left: 0.25rem;
+}
+
+/* Culoare pentru Night Mode */
+input:checked ~ .toggle-path {
+    background-color: #4A5568;
+}
+
+input:checked ~ .toggle-circle {
+    transform: translateX(100%);
+}
+
+/* Stiluri pentru tema întunecată */
+body.dark {
+    background-color: #1A202C;
+    color: #CBD5E0;
+}
+
+body.dark .container {
+    background-color: #2D3748;
+    border-color: #4A5568;
+}
+
+body.dark h2, 
+body.dark p {
+    color: #E2E8F0;
+}
+
+

@@ -33,6 +33,14 @@ Route::middleware(['guest'])->group(function () {
     
 });
 
+
+
+Route::get('/change-language/{lang}', function ($lang) {
+    session(['locale' => $lang]); // Salvează limba în sesiune
+    return redirect()->back(); // Revino la pagina anterioară
+})->name('change-language');
+
+
 Route::middleware(['auth'])->group(function(){
     Route::get('logout', [AuthController::class, 'logout'])->name('logout');
     Route::get('calendar', [CalendarController::class,'load'])->name('calendar');

@@ -62,7 +62,7 @@ class Evaluation extends Model
     // Group the evaluation is assigned to
     public function group()
     {
-        return $this->belongsTo(Group::class,'group_id');
+        return $this->belongsTo(Group::class);
     }
 
     // Room for the evaluation
@@ -89,9 +89,10 @@ class Evaluation extends Model
         return $value ?? 'N/A'; // Default to 'N/A' if null
     }
 
-    // Get all the other examinators
-    public function getOtherExaminatorsAttribute($value)
+    public function otherExaminators()
     {
-        return json_decode($value);
+        return $this->belongsToMany(User::class, 'evaluation_examinator', 'evaluation_id', 'teacher_id');
     }
+    
+
 }

@@ -14,40 +14,48 @@ use App\Models\User; // Importă modelul User
 class UserController extends Controller
 {
     public function myAccount()
-    {
-        $user = Auth::user(); // Obține utilizatorul autentificat
+{
+    $user = Auth::user(); // Utilizatorul autentificat
+
+    // Obține examenele viitoare (Upcoming)
+    $upcomingExam = $user->evaluations()
+        ->with(['group', 'subject', 'speciality'])
+        ->where('exam_date', '>', now()) // Examene cu dată în viitor
+        ->orderBy('exam_date', 'asc')
+        ->first();
+
+    // Obține examenele anterioare (History)
+    $recentExam = $user->evaluations()
+        ->with(['group', 'subject', 'speciality'])
+        ->where('exam_date', '<=', now()) // Examene cu dată în trecut
+        ->orderBy('exam_date', 'desc')
+        ->first();
+
+    $otherExaminatorsUpcoming = $upcomingExam && is_array($upcomingExam->other_examinators) 
+    ? $upcomingExam->other_examinators 
+    : ($upcomingExam ? json_decode($upcomingExam->other_examinators) : null);
+    $otherExaminatorsRecent = $recentExam && is_array($recentExam->other_examinators) 
+    ? $recentExam->other_examinators 
+    : ($recentExam ? json_decode($recentExam->other_examinators) : null);
+
+    // Alte date despre utilizator
+    $speciality = $user->speciality ? $user->speciality->name : 'N/A';
+    $group = $user->groups->pluck('name')->join(', ') ?: 'N/A';
+    $faculty = $user->faculty ? $user->faculty->name : 'N/A';
+    $role = $user->getRoleNames()->first();
+    $yearOfStudy = $user->getYearOfStudy(); // Obține anul de studiu
+    $yearsOfWork = $user->getYearsOfWork();
+
+    // Datele necesare pentru profesori
+    $teacherGroups = $user->groups->pluck('name')->join(', ') ?: 'N/A';
+    $teacherSpeciality = $user->speciality ? $user->speciality->name : 'N/A';
+    
 
 
-        // Obține specializarea utilizatorului
-        $speciality = $user->speciality ? $user->speciality->name : 'N/A';
-        
-        // Obține grupurile utilizatorului (dacă are mai multe)
-        $group = $user->groups->pluck('name')->join(', ') ?: 'N/A';
+    return view('my-account', compact('user', 'speciality', 'group', 'role', 'faculty','yearOfStudy','yearsOfWork', 'teacherGroups', 'teacherSpeciality', 'upcomingExam', 'recentExam', 'otherExaminatorsRecent', 'otherExaminatorsUpcoming'));
+}
 
-        
 
-        $faculty = $user->faculty ? $user->faculty->name : 'N/A';
-
-        // Obține rolul utilizatorului (ex. profesor, student)
-        $role = $user->getRoleNames()->first();
-
-        // dd($user->evaluations);
-
-        $evaluation=null;
-
-        // if ($user->hasRole('student')) {
-        // $evaluation = $user->evaluationsAsStudent()->get();
-        // } elseif ($user->hasRole('teacher')) {
-        // $evaluation = $user->evaluationsAsTeacher()->get();
-        // }
-
-        $evaluation = $user->evaluations()->with(['group', 'subject'])->latest('exam_date')->first();
-
-        
-        
-        // Transmite datele către view
-        return view('my-account', compact('user', 'speciality', 'group', 'role', 'evaluation', 'faculty'));
-    }
 
     public function updateAccount(Request $request)
     {
@@ -77,4 +85,17 @@ class UserController extends Controller
         // Redirect cu mesaj de succes
         return redirect()->route('user.my-account')->with('success', 'Account updated successfully!');
     }
+
+        public function updateEvaluation(Request $request, $id)
+    {
+        $evaluation = Evaluation::find($id);
+
+        // Salvează alți examinatori
+        $evaluation->otherExaminators()->sync($request->input('other_examinators'));
+
+        $evaluation->save();
+
+        return redirect()->back()->with('success', 'Evaluation updated successfully.');
+    }
+
 }
