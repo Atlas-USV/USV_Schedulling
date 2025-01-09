@@ -41,6 +41,36 @@
 
         <!-- Content for Students -->
         @if(auth()->user()->hasRole('student'))
+
+
+        <!-- Upcoming Exams -->
+<div class="col-span-12 md:col-span-8 bg-white rounded-lg p-4 shadow-md">
+    <h3 class="text-lg font-bold mb-3">Upcoming Exams</h3>
+    <ul>
+        @forelse ($upcomingExams as $exam)
+            <li class="flex justify-between items-center bg-gray-50 p-2 rounded-lg mb-2">
+                <div>
+                    <p class="font-medium">{{ $exam->subject->name }}</p>
+                    <p class="text-sm text-gray-500">
+                        {{ $exam->exam_date->format('d M Y') }} | {{ $exam->start_time->format('H:i') }} - {{ $exam->end_time->format('H:i') }}
+                    </p>
+                    <p class="text-sm text-gray-400">Room: {{ $exam->room->name }} | Type: {{ $exam->type }}</p>
+                </div>
+            </li>
+        @empty
+            <p class="text-sm text-gray-500">No upcoming exams.</p>
+        @endforelse
+    </ul>
+    <a href="{{route('exams.index')}}" class="inline-flex items-center justify-center p-5 text-base font-medium text-gray-500 rounded-lg bg-gray-50 hover:text-gray-900 hover:bg-gray-100 dark:text-gray-400 dark:bg-gray-800 dark:hover:bg-gray-700 dark:hover:text-white">
+    <svg class="w-6 h-6 text-gray-800 dark:text-white" aria-hidden="true" xmlns="http://www.w3.org/2000/svg" width="24" height="24" fill="currentColor" viewBox="0 0 24 24">
+  <path fill-rule="evenodd" d="M8 3a1 1 0 0 1 1-1h6a1 1 0 0 1 1 1h2a2 2 0 0 1 2 2v15a2 2 0 0 1-2 2H6a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h2Zm6 1h-4v2H9a1 1 0 0 0 0 2h6a1 1 0 1 0 0-2h-1V4Zm-3 8a1 1 0 0 1 1-1h3a1 1 0 1 1 0 2h-3a1 1 0 0 1-1-1Zm-2-1a1 1 0 1 0 0 2h.01a1 1 0 1 0 0-2H9Zm2 5a1 1 0 0 1 1-1h3a1 1 0 1 1 0 2h-3a1 1 0 0 1-1-1Zm-2-1a1 1 0 1 0 0 2h.01a1 1 0 1 0 0-2H9Z" clip-rule="evenodd"/>
+</svg>
+    <span class="w-full">Check out all your upcoming exams.</span>
+    <svg class="w-4 h-4 ms-2 rtl:rotate-180" aria-hidden="true" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 14 10">
+        <path stroke="currentColor" stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M1 5h12m0 0L9 1m4 4L9 9"/>
+    </svg>
+</a> 
+</div>
             <!-- Quick Add Section -->
             <div class="col-span-12 bg-white rounded-lg p-4 shadow-md">
                 <h3 class="text-lg font-bold mb-3">Quick Add</h3>
