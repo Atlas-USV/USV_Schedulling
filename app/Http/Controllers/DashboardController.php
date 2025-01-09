@@ -19,10 +19,10 @@ class DashboardController extends Controller
         $subjects = Subject::all();
         $teachers = User::role('admin')->get();
         $rooms = Room::all();
-        // Obține task-urile utilizatorului curent (limitate la 4)
+        
         $tasks = Task::where('user_id', auth()->id())->take(4)->get();
 
-        $upcomingExams = \App\Models\Evaluation::where('group_id', 1) // Modifică dacă grupul e dinamic
+        $upcomingExams = \App\Models\Evaluation::where('group_id', 1) 
         ->where('status', 'accepted')
         ->where('exam_date', '>=', now())
         ->orderBy('exam_date', 'asc')
