@@ -12,9 +12,9 @@ class UserController extends Controller
     public function index()
     {
         
-        $users = User::with(['groups', 'faculty'])->paginate(10);
+        $users = User::with(['groups', 'faculty', 'roles'])->paginate(10);
 
-
+        dd($users);
         return view('users.index', compact('users'));
     }
 

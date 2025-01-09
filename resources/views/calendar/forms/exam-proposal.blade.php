@@ -16,7 +16,7 @@
             <!-- Modal header -->
             <div class="flex items-center justify-between p-4 md:p-5 border-b rounded-t dark:border-gray-600">
                 <h3 id="event-title-info" class="text-xl font-semibold text-gray-900 dark:text-white">
-                    Propunere examen @if (auth()->user()->groups)
+                    Propunere examen @if (auth()->user()->groups && auth()->user()->groups->isNotEmpty())
                         pentru grupa {{ auth()->user()->groups->first()->name }}
                     @endif
                 </h3>
