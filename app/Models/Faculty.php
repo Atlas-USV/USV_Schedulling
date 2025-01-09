@@ -24,7 +24,7 @@ class Faculty extends Model
     {
         return $this->hasMany(User::class, 'teacher_faculty_id');
     }
-    
+
     public function groups(): HasManyThrough
     {
         return $this->hasManyThrough(Group::class, Speciality::class);

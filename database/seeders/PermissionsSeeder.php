@@ -16,7 +16,6 @@ class PermissionsSeeder extends Seeder
         Permission::firstOrCreate(['name' => EPermissions::CREATE_EXAMS->value]);
         Permission::firstOrCreate(['name' => EPermissions::EDIT_EXAMS->value]);
         Permission::firstOrCreate(['name' => EPermissions::DELETE_EXAMS->value]);
-        
         Permission::firstOrCreate(['name' => EPermissions::MANAGE_USERS->value]);
         Permission::firstOrCreate(['name' => EPermissions::PROPOSE_EXAM->value]);
         Permission::firstOrCreate(['name' => EPermissions::VIEW_USERS->value]);

@@ -11,6 +11,7 @@
                 <th class="px-6 py-3">Email</th>
                 <th class="px-6 py-3">Grupă</th>
                 <th class="px-6 py-3">Facultate</th>
+                <th class="px-6 py-3">Roluri</th>
                 <th class="px-6 py-3">Opțiuni</th>
             </tr>
         </thead>
@@ -26,6 +27,11 @@
                     </td>
                     <td class="px-6 py-4">{{ $user->faculty ? $user->faculty->name : 'N/A' }}</td>
                     <td class="px-6 py-4">
+                        @foreach($user->roles as $role)
+                            {{ $role->name }}
+                        @endforeach
+                    </td>
+                    <td class="px-6 py-4">
                         <a href="{{ route('users.edit', $user->id) }}" class="text-blue-600 hover:underline">Edit</a>
                     </td>
                 </tr>
@@ -39,3 +45,10 @@
     {{ $users->links('vendor.pagination.flowbite') }}
 </div>
 @endsection
+<script>
+    document.addEventListener('DOMContentLoaded', function() {
+        @foreach($users as $user)
+            console.log('Roles for {{ $user->name }}: ', @json($user->roles->pluck('name')));
+        @endforeach
+    });
+</script>
