@@ -26,7 +26,11 @@ class DashboardController extends Controller
         ->take(4)  // Limit to 4 tasks
         ->get();
 
-        $upcomingExams = \App\Models\Evaluation::where('group_id', 1) 
+        // Obține ID-ul grupei utilizatorului autentificat
+    $groupId = auth()->user()->group_id; // Asumând că utilizatorul are `group_id` în modelul User
+
+    // Filtrează examenele pentru grupa utilizatorului
+    $upcomingExams = \App\Models\Evaluation::where('group_id', $groupId) 
         ->where('status', 'accepted')
         ->where('exam_date', '>=', now())
         ->orderBy('exam_date', 'asc')
@@ -46,12 +50,21 @@ class DashboardController extends Controller
         ->take(5)
         ->get();
 
+
+        $requests = [];
+        if (auth()->user()->hasRole('teacher')) {
+            $requests = \App\Models\Request::where('teacher_id', auth()->id())
+                ->orderBy('created_at', 'desc')
+                ->take(10) // Limitează numărul de cereri afișate
+                ->get();
+        }
+
         \Log::info('User Role:', ['role' => $userRole]);
         \Log::info('Authenticated User:', ['user' => auth()->user()]);
 
 
     
-        return view('dashboard', compact('groups', 'faculties', 'subjects', 'teachers', 'rooms', 'tasks',  'userName', 'upcomingExams', 'userRole', 'recentUsers', 'pendingExams'));
+        return view('dashboard', compact('groups', 'faculties', 'subjects', 'teachers', 'rooms', 'tasks',  'userName', 'upcomingExams', 'userRole', 'recentUsers', 'pendingExams', 'requests'));
     }
 
 
@@ -148,20 +161,26 @@ public function deleteTask($id)
 
 public function showExams(Request $request)
 {
-    // Obține `group_id` din relația user-group
-    $groupId = auth()->user()->groups()->pluck('groups.id')->first();
+    // Verifică rolul utilizatorului
+    if (auth()->user()->hasRole('teacher')) {
+        // Dacă este profesor, afișează examenele pe care le predă
+        $query = \App\Models\Evaluation::where('teacher_id', auth()->id())
+            ->where('status', 'accepted');
+    } else {
+        // Dacă este student, afișează examenele pentru grupa sa
+        $groupId = auth()->user()->group_id; // Asumând că utilizatorul are `group_id` în modelul User
 
-    // Verifică dacă utilizatorul are un grup asociat
-    if (!$groupId) {
-        return view('exams.index', [
-            'exams' => collect([]), // Returnează o colecție goală
-            'subjects' => \App\Models\Subject::all(),
-        ]);
+        // Verifică dacă utilizatorul are un grup asociat
+        if (!$groupId) {
+            return view('exams.index', [
+                'exams' => collect([]), // Returnează o colecție goală
+                'subjects' => \App\Models\Subject::all(),
+            ]);
+        }
+
+        $query = \App\Models\Evaluation::where('group_id', $groupId)
+            ->where('status', 'accepted');
     }
-
-    // Construiește query-ul
-    $query = \App\Models\Evaluation::where('group_id', $groupId)
-    ->where('status', 'accepted');
 
     // Aplica filtrul de timp (past/current)
     if ($request->filter === 'past') {
