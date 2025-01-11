@@ -61,6 +61,11 @@
                         <p><strong>Years of Work:</strong> {{ $yearsOfWork }} years</p>
                     @endif
 
+                    @if (Auth::user()->hasRole('secretary'))
+                        <p><strong>Faculty:</strong> {{ $faculty }}</p>
+                        <p><strong>Years of Work:</strong> {{ $yearsOfWork }} years</p>
+                    @endif
+
                     <!-- Meniu pentru schimbarea temei -->
                     <div class="flex justify mb-4">
                         <label for="theme-toggle" class="flex items-center cursor-pointer">

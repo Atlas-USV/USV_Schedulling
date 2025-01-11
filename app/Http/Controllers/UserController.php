@@ -17,19 +17,27 @@ class UserController extends Controller
 {
     $user = Auth::user(); // Utilizatorul autentificat
 
-    // Obține examenele viitoare (Upcoming)
-    $upcomingExam = $user->evaluations()
-        ->with(['group', 'subject', 'speciality'])
-        ->where('exam_date', '>', now()) // Examene cu dată în viitor
-        ->orderBy('exam_date', 'asc')
-        ->first();
+    if ($user->hasRole('student') || $user->hasRole('teacher')) {
+        $upcomingExam = $user->evaluations()
+            ->with(['group', 'subject', 'speciality'])
+            ->where('exam_date', '>', now())
+            ->orderBy('exam_date', 'asc')
+            ->first();
+    } else {
+        $upcomingExam = null; // Sau alte acțiuni specifice rolurilor admin/secretar
+    }
+    
 
-    // Obține examenele anterioare (History)
-    $recentExam = $user->evaluations()
-        ->with(['group', 'subject', 'speciality'])
-        ->where('exam_date', '<=', now()) // Examene cu dată în trecut
-        ->orderBy('exam_date', 'desc')
-        ->first();
+    if ($user->hasRole('student') || $user->hasRole('teacher')) {
+        $recentExam = $user->evaluations()
+            ->with(['group', 'subject', 'speciality'])
+            ->where('exam_date', '>', now())
+            ->orderBy('exam_date', 'asc')
+            ->first();
+    } else {
+        $recentExam = null; // Sau alte acțiuni specifice rolurilor admin/secretar
+    }
+  
 
     $otherExaminatorsUpcoming = $upcomingExam && is_array($upcomingExam->other_examinators) 
     ? $upcomingExam->other_examinators 
