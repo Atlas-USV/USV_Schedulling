@@ -72,17 +72,26 @@
 </a> 
 </div>
             <!-- Quick Add Section -->
-            <div class="col-span-12 bg-white rounded-lg p-4 shadow-md">
-                <h3 class="text-lg font-bold mb-3">Quick Add</h3>
-                <div class="flex gap-2">
-                    <input type="text" id="newTaskTitle" class="form-input rounded-lg flex-1 border-gray-300"
-                        placeholder="Add a task title..." required />
-                    <button type="button" data-modal-target="addTaskModal" data-modal-toggle="addTaskModal"
-                        class="bg-blue-600 text-white px-4 py-2 rounded-lg hover:bg-blue-700">
-                        Add Task
-                    </button>
-                </div>
-            </div>
+    <div class="col-span-12 bg-white rounded-lg p-4 shadow-md">
+        <h3 class="text-lg font-bold mb-3">Quick Add</h3>
+        <div class="flex gap-2">
+            <input
+                type="text"
+                id="newTaskTitle"
+                class="form-input rounded-lg flex-1 border-gray-300"
+                placeholder="Add a task title..."
+                required
+            />
+            <button
+                type="button"
+                data-modal-target="addTaskModal"
+                data-modal-toggle="addTaskModal"
+                class="bg-blue-600 text-white px-4 py-2 rounded-lg hover:bg-blue-700"
+            >
+                Add Task
+            </button>
+        </div>
+    </div>
 
             <!-- Upcoming Tasks -->
             <div class="col-span-12 md:col-span-8 bg-white rounded-lg p-4 shadow-md">
@@ -127,7 +136,87 @@
                         class="bg-white text-blue-600 px-4 py-2 rounded-lg hover:bg-gray-100 hidden">Reset</button>
                 </div>
             </div>
+
+            <!-- Add Task Modal -->
+<div id="addTaskModal" tabindex="-1" aria-hidden="true" 
+    class="hidden overflow-y-auto overflow-x-hidden fixed top-0 right-0 left-0 z-50 justify-center items-center w-full md:inset-0 h-modal md:h-full">
+    <div class="relative p-4 w-full max-w-md h-full md:h-auto">
+        <div class="relative p-4 text-center bg-white rounded-lg shadow dark:bg-gray-800 sm:p-5">
+            <button type="button"
+                class="text-gray-400 absolute top-2.5 right-2.5 bg-transparent hover:bg-gray-200 hover:text-gray-900 rounded-lg text-sm p-1.5 ml-auto inline-flex items-center dark:hover:bg-gray-600 dark:hover:text-white"
+                data-modal-toggle="addTaskModal">
+                <svg aria-hidden="true" class="w-5 h-5" fill="currentColor" viewBox="0 0 20 20"
+                    xmlns="http://www.w3.org/2000/svg">
+                    <path fill-rule="evenodd"
+                        d="M4.293 4.293a1 1 0 011.414 0L10 8.586l4.293-4.293a1 1 0 111.414 1.414L11.414 10l4.293 4.293a1 1 0 01-1.414 1.414L10 11.414l-4.293 4.293a1 1 0 01-1.414-1.414L8.586 10 4.293 5.707a1 1 0 010-1.414z"
+                        clip-rule="evenodd"></path>
+                </svg>
+                <span class="sr-only">Close modal</span>
+            </button>
+            <form action="{{ route('tasks.store') }}" method="POST">
+                @csrf
+                <input type="hidden" id="modalTaskTitle" name="title">
+                <div class="mb-4">
+                    <label for="description" class="block mb-2 text-sm font-medium text-gray-700 dark:text-white">
+                        Task Description
+                    </label>
+                    <textarea id="description" name="description" class="form-input rounded-lg w-full border-gray-300 focus:ring-primary-300 dark:border-gray-600 dark:bg-gray-700 dark:focus:ring-primary-800" placeholder="Add a task description..." required></textarea>
+                </div>
+                <div class="mb-4">
+                    <label for="subject" class="block text-sm font-medium text-gray-700">Subject</label>
+                    <select id="subject" name="subject" required class="form-select rounded-lg w-full border-gray-300 focus:ring-primary-300">
+                        <option value="" disabled {{ old('subject') ? '' : 'selected' }}>Select a subject</option>
+                        @foreach($subjects as $subject)
+                            <option value="{{ $subject->name }}">{{ $subject->name }}</option>
+                        @endforeach
+                    </select>
+                </div>
+                <div class="mb-4">
+                    <label for="deadline" class="block text-sm font-medium text-gray-700">Deadline</label>
+                    <input type="datetime-local" id="deadline" name="deadline" value="{{ old('deadline') ?? now()->format('Y-m-d\TH:i') }}" required class="form-input rounded-lg w-full border-gray-300 focus:ring-primary-300">
+                </div>
+                <button type="submit" class="py-2 px-3 text-sm font-medium text-center text-white bg-green-600 rounded-lg hover:bg-green-700 focus:ring-4 focus:outline-none focus:ring-green-300 dark:bg-green-500 dark:hover:bg-green-600 dark:focus:ring-green-900">
+                    Save Task
+                </button>
+            </form>
+        </div>
+    </div>
+    <div id="toast-container" class="fixed top-4 right-4 z-50 space-y-4"></div>
+
+</div>
+<!-- Delete Confirmation Modal -->
+<div id="deleteTaskModal" tabindex="-1"
+    class="hidden fixed top-0 left-0 right-0 z-50 p-4 overflow-x-hidden overflow-y-auto w-full md:inset-0 h-modal md:h-full">
+    <!-- Change this button to include proper data attributes -->
+    <button data-modal-target="deleteTaskModal" data-modal-toggle="deleteTaskModal"
+        class="text-white bg-red-700 hover:bg-red-800 rounded-lg px-5 py-2.5">
+        Delete
+    </button>
+    <div class="relative w-full max-w-md h-full md:h-auto">
+        <!-- Modal content -->
+        <div class="relative bg-white rounded-lg shadow dark:bg-gray-700">
+            <div class="p-6 text-center">
+                <h3 class="mb-5 text-lg font-normal text-gray-500 dark:text-gray-400">Are you sure you want to delete this task?</h3>
+                <form id="deleteTaskForm" method="POST">
+                    @csrf
+                    @method('DELETE')
+                    <button type="submit" class="text-white bg-red-600 hover:bg-red-800 px-5 py-2.5 rounded-lg">
+                        Yes, delete it
+                    </button>
+                    <button type="button" data-modal-toggle="deleteTaskModal"
+                        class="text-gray-500 bg-white hover:bg-gray-100 px-5 py-2.5 rounded-lg">
+                        No, cancel
+                    </button>
+                </form>
+            </div>
+        </div>
+    </div>
+</div>
+
         @endif
+
+
+        
 
         <!-- Content for Professors -->
         @if(auth()->user()->hasRole('teacher'))
@@ -204,5 +293,6 @@
 
 
 @push('scripts')
+<script src="https://cdnjs.cloudflare.com/ajax/libs/flowbite/2.2.1/flowbite.min.js"></script>
     @vite('resources/js/dashboardscripts.js')
 @endpush

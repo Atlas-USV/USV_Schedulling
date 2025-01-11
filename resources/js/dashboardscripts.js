@@ -6,75 +6,123 @@ document.addEventListener("DOMContentLoaded", () => {
     const deadlineInput = document.getElementById("deadline");
     const descriptionInput = document.getElementById("description");
     const modal = document.getElementById("addTaskModal");
+    const taskForm = document.querySelector('#addTaskModal form');
 
     if (addTaskButton && newTaskTitleInput && modalTaskTitleInput && subjectSelect && deadlineInput && descriptionInput && modal) {
-        // Validare înainte de a deschide modalul
+        // Modal opening logic
         addTaskButton.addEventListener("click", (event) => {
             const taskTitle = newTaskTitleInput.value.trim();
 
-            // Dacă titlul lipsește, afișează eroarea și blochează accesul
             if (!taskTitle) {
-                event.preventDefault(); // Previne comportamentul implicit de deschidere a modalului
-                newTaskTitleInput.classList.add("border-red-500"); // Adaugă clasa pentru border roșu
-                createToast("Please insert a title", "error"); // Afișează toastr-ul de eroare
-                return; // Oprește execuția ulterioară
+                event.preventDefault();
+                newTaskTitleInput.classList.add("border-red-500");
+                createToast("Please insert a title", "error");
+                return;
             }
 
-            // Elimină clasa de eroare dacă există titlu
             newTaskTitleInput.classList.remove("border-red-500");
-
-            // Setează titlul în input-ul modalului
             modalTaskTitleInput.value = taskTitle;
-
-            // Manual, afișează modalul
             modal.classList.remove("hidden");
             modal.classList.add("flex");
         });
 
-        // Validare în interiorul modalului
-        const saveTaskButton = document.querySelector("[type='submit']");
-        if (saveTaskButton) {
-            saveTaskButton.addEventListener("click", (event) => {
+        // Form submission handling
+        if (taskForm) {
+            taskForm.addEventListener('submit', async (e) => {
+                e.preventDefault();
+
                 const selectedSubject = subjectSelect.value;
                 const deadlineValue = deadlineInput.value;
                 const descriptionValue = descriptionInput.value.trim();
 
                 let isValid = true;
 
-                // Validare pentru descriere
+                  // Check if deadline is today
+            const selectedDate = new Date(deadlineValue);
+            const today = new Date();
+
+            // Reset both dates to midnight for date-only comparison
+            selectedDate.setHours(0, 0, 0, 0);
+            today.setHours(0, 0, 0, 0);
+
+            if (selectedDate.getTime() === today.getTime()) {
+                isValid = false;
+                deadlineInput.classList.add("border-red-500");
+                createToast("Tasks cannot be created for the current day", "error");
+            } else {
+                deadlineInput.classList.remove("border-red-500");
+            }
+
                 if (!descriptionValue) {
                     isValid = false;
                     descriptionInput.classList.add("border-red-500");
                     createToast("Please provide a description", "error");
-                } else {
-                    descriptionInput.classList.remove("border-red-500");
                 }
 
-                // Validare pentru subiect
                 if (!selectedSubject || selectedSubject === "") {
                     isValid = false;
                     createToast("Please select a subject", "error");
                 }
 
-                // Validare pentru deadline
                 if (!deadlineValue) {
                     isValid = false;
                     createToast("Please set a deadline", "error");
                 }
 
-                // Dacă validarea eșuează, blochează submit-ul
                 if (!isValid) {
-                    event.preventDefault();
+                    return;
+                }
+
+                try {
+                    const formData = new FormData(taskForm);
+                    
+                    const response = await fetch(taskForm.action, {
+                        method: 'POST',
+                        body: formData,
+                        headers: {
+                            'X-CSRF-TOKEN': document.querySelector('meta[name="csrf-token"]').content,
+                            'Accept': 'application/json'
+                        },
+                        credentials: 'same-origin'
+                    });
+
+                    if (response.ok) {
+                        // Reset form and inputs
+                        taskForm.reset();
+                        newTaskTitleInput.value = '';
+                        
+                        // Close modal
+                        modal.classList.add('hidden');
+                        modal.classList.remove('flex');
+                        
+                        createToast('Task added successfully!', 'success');
+                        
+                        // Reload the page after a short delay
+                        setTimeout(() => {
+                            window.location.reload();
+                        }, 500);
+                    } else {
+                        const errorData = await response.json();
+                        createToast(errorData.message || 'Failed to add task. Please try again.', 'error');
+                    }
+                } catch (error) {
+                    console.error('Error:', error);
+                    createToast('An error occurred. Please try again.', 'error');
                 }
             });
         }
 
-        // Închide modalul pe butonul de close
+        // Modal close button handling
         const closeModalButtons = document.querySelectorAll("[data-modal-toggle]");
         closeModalButtons.forEach((closeButton) => {
             closeButton.addEventListener("click", () => {
                 modal.classList.add("hidden");
                 modal.classList.remove("flex");
+                // Reset form on modal close
+                if (taskForm) {
+                    taskForm.reset();
+                    newTaskTitleInput.value = '';
+                }
             });
         });
     }
@@ -89,51 +137,76 @@ document.addEventListener("DOMContentLoaded", () => {
         }
 
         const toast = document.createElement("div");
-        toast.className = `flex items-center p-4 mb-4 w-full max-w-xs text-gray-500 bg-white rounded-lg shadow dark:text-gray-400 dark:bg-gray-800 ${
-            type === "error" ? "border-red-500" : "border-green-500"
+        toast.className = `flex items-center w-full max-w-xs p-4 mb-4 text-gray-500 bg-white rounded-lg shadow dark:text-gray-400 dark:bg-gray-800 ${
+            type === "error" ? "border-l-4 border-red-500" : "border-l-4 border-green-500"
         }`;
+
+        // Updated toast HTML structure with single close button
         toast.innerHTML = `
             <div class="inline-flex items-center justify-center flex-shrink-0 w-8 h-8 ${
-                type === "error" ? "text-red-500 bg-red-100 dark:bg-red-800 dark:text-red-200" : "text-green-500 bg-green-100 dark:bg-green-800 dark:text-green-200"
-            } rounded-lg">
-                <svg class="w-5 h-5" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2">
-                    <path stroke-linecap="round" stroke-linejoin="round" ${
-                        type === "error"
-                            ? 'd="M6 18L18 6M6 6l12 12"/>' // X icon for error
-                            : 'd="M5 13l4 4L19 7"/>' // Check icon pentru success
-                    }
-                </svg>
+                type === "error" 
+                ? "text-red-500 bg-red-100 rounded-lg dark:bg-red-800 dark:text-red-200" 
+                : "text-green-500 bg-green-100 rounded-lg dark:bg-green-800 dark:text-green-200"
+            }">
+                ${type === "error" 
+                    ? '<svg class="w-5 h-5" fill="currentColor" viewBox="0 0 20 20"><path fill-rule="evenodd" d="M4.293 4.293a1 1 0 011.414 0L10 8.586l4.293-4.293a1 1 0 111.414 1.414L11.414 10l4.293 4.293a1 1 0 01-1.414 1.414L10 11.414l-4.293 4.293a1 1 0 01-1.414-1.414L8.586 10 4.293 5.707a1 1 0 010-1.414z" clip-rule="evenodd"></path></svg>'
+                    : '<svg class="w-5 h-5" fill="currentColor" viewBox="0 0 20 20"><path fill-rule="evenodd" d="M16.707 5.293a1 1 0 010 1.414l-8 8a1 1 0 01-1.414 0l-4-4a1 1 0 011.414-1.414L8 12.586l7.293-7.293a1 1 0 011.414 0z" clip-rule="evenodd"></path></svg>'
+                }
             </div>
             <div class="ml-3 text-sm font-normal">${message}</div>
-            <button type="button" class="ml-auto bg-white text-gray-400 hover:text-gray-900 rounded-lg focus:ring-2 focus:ring-gray-300 p-1.5 inline-flex items-center justify-center h-8 w-8 dark:text-gray-500 dark:hover:text-white dark:bg-gray-800 dark:hover:bg-gray-700">
-                <span class="sr-only">Close</span>
-                <svg class="w-3 h-3" aria-hidden="true" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 14 14">
-                    <path stroke="currentColor" stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="m1 1 6 6m0 0 6 6M7 7l6-6M7 7l-6 6"/>
+            <button type="button" class="ml-auto -mx-1.5 -my-1.5 text-gray-400 hover:text-gray-900 rounded-lg p-1.5 inline-flex items-center justify-center h-8 w-8 dark:text-gray-500 dark:hover:text-white">
+                <svg class="w-3 h-3" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12"/>
                 </svg>
             </button>
         `;
 
+        // Add the toast to the container
         toastContainer.appendChild(toast);
 
+        // Auto-remove after 5 seconds
         setTimeout(() => {
             toast.remove();
         }, 5000);
 
+        // Add click handler for close button
         toast.querySelector("button").addEventListener("click", () => toast.remove());
     };
 
-    //Delete modal
-
+    // Gestionare modal Delete Task
     const deleteButtons = document.querySelectorAll("[data-modal-target='deleteTaskModal']");
-    const deleteTaskForm = document.getElementById("deleteTaskForm");
+    
+    deleteButtons.forEach((button) => {
+        button.addEventListener("click", (e) => {
+            e.preventDefault();
+            const taskId = button.getAttribute("data-task-id");
+            const deleteTaskForm = document.getElementById("deleteTaskForm");
+            if (deleteTaskForm) {
+                deleteTaskForm.setAttribute("action", `/tasks/${taskId}`);
+            }
+        });
+    });
 
-    if (deleteButtons && deleteTaskForm) {
-        deleteButtons.forEach(button => {
-            button.addEventListener("click", () => {
-                const taskId = button.getAttribute("data-task-id");
-                const deleteUrl = `/tasks/${taskId}`;
-                deleteTaskForm.setAttribute("action", deleteUrl);
-            });
+    // Initialize Flowbite modal
+    const $modalElement = document.querySelector('#deleteTaskModal');
+    
+    if ($modalElement) {
+        const modalOptions = {
+            placement: 'center-center',
+            backdrop: 'dynamic',
+            backdropClasses: 'bg-gray-900 bg-opacity-50 dark:bg-opacity-80 fixed inset-0 z-40',
+            closable: true,
+        }
+        
+        const modal = new Modal($modalElement, modalOptions);
+        
+        // Optional: Add event listeners for modal events
+        $modalElement.addEventListener('show.modal.flowbite', () => {
+            console.log('Modal is shown');
+        });
+
+        $modalElement.addEventListener('hide.modal.flowbite', () => {
+            console.log('Modal is hidden');
         });
     }
     //Real Time Hour

@@ -20,7 +20,11 @@ class DashboardController extends Controller
         $teachers = User::role('admin')->get();
         $rooms = Room::all();
         
-        $tasks = Task::where('user_id', auth()->id())->take(4)->get();
+        $tasks = Task::where('user_id', auth()->id())
+        ->orderBy('deadline', 'asc')  // Order by deadline
+        ->where('deadline', '>=', now())  // Only future tasks
+        ->take(4)  // Limit to 4 tasks
+        ->get();
 
         $upcomingExams = \App\Models\Evaluation::where('group_id', 1) 
         ->where('status', 'accepted')
@@ -52,29 +56,42 @@ class DashboardController extends Controller
 
 
     public function storeTask(Request $request)
-{
-    $request->validate([
-        'title' => 'required|string|max:255',
-        'description' => 'required|string',
-        'subject' => 'required|string|max:255',
-        'deadline' => 'required|date|after:now',
-    ]);
-
-
-
-    Task::create([
-        'user_id' => auth()->id(),
-        'title' => $request->title,
-        'description' => $request->description,
-        'subject' => $request->subject ?? 'General', // Setează "General" ca valoare implicită
-        'deadline' => $request->deadline,
-        'is_completed' => false,
-    ]);
-
-
-
-    return redirect()->route('dashboard')->with('success', 'Task added successfully!');
-}
+    {
+        try {
+            $validated = $request->validate([
+                'title' => 'required|string|max:255',
+                'description' => 'required|string',
+                'subject' => 'required|string|max:255',
+                'deadline' => 'required|date|after:now',
+            ]);
+    
+            \Log::info('Creating task with data:', $validated);
+    
+            $task = Task::create([
+                'user_id' => auth()->id(),
+                'title' => $validated['title'],
+                'description' => $validated['description'],
+                'subject' => $validated['subject'],
+                'deadline' => $validated['deadline'],
+                'is_completed' => false,
+            ]);
+    
+            \Log::info('Task created successfully:', ['task_id' => $task->id]);
+    
+            return redirect()->route('dashboard')
+                ->with('success', 'Task added successfully!')
+                ->with('task_created', true);  // Add this flag
+    
+        } catch (\Exception $e) {
+            \Log::error('Error creating task:', [
+                'error' => $e->getMessage(),
+                'request_data' => $request->all()
+            ]);
+    
+            return redirect()->route('dashboard')
+                ->with('error', 'Failed to create task. Please try again.');
+        }
+    }
 
 public function editTask($id)
 {
