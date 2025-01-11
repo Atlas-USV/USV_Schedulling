@@ -1,10 +1,10 @@
 @extends('layouts.app')
 
 @section('content')
-    <div class="relative container mx-auto mt-8">
+    <div class="relative w-full mx-auto mt-8 min-h-screen">
         <div class="flex items-center justify-center mb-4 space-x-4">
             <!-- Titlul "My Account" -->
-            <h2 class="text-2xl font-bold">My Account</h2>
+            <h2 class="text-2xl font-bold my-account-title">My Account</h2>
 
             <!-- Container Avatar cu Iconiță -->
             <div class="relative group">
@@ -54,28 +54,26 @@
                         <p><strong>Speciality:</strong> {{ $speciality }}</p>
                         <p><strong>Group:</strong> {{ $group }}</p>
                         <p><strong>Year of Study:</strong> {{ $yearOfStudy }}</p>
-                         
-
                     @endif
 
                     @if (Auth::user()->hasRole('teacher'))
                         <p><strong>Faculty:</strong> {{ $faculty }}</p>
                         <p><strong>Years of Work:</strong> {{ $yearsOfWork }} years</p>
                     @endif
-                </div>
-                <!-- Meniu pentru schimbarea temei -->
-                <div class="flex justify-end mb-4">
-                    <label for="theme-toggle" class="flex items-center cursor-pointer">
-                        <span class="mr-2">Light/Dark Mode</span>
-                        <input type="checkbox" id="theme-toggle" class="hidden">
-                        <div class="relative">
-                            <div class="w-10 h-6 bg-gray-300 rounded-full shadow-inner"></div>
-                            <div class="dot absolute w-6 h-6 bg-white rounded-full shadow inset-y-0 left-0 transition-transform duration-300 ease-in-out transform" style="transform: translateX(0);"></div>
-                        </div>
-                    </label>
-                </div>
-</div>
-            
+
+                    <!-- Meniu pentru schimbarea temei -->
+                    <div class="flex justify mb-4">
+                        <label for="theme-toggle" class="flex items-center cursor-pointer">
+                            <span class="mr-2"><strong>Light/Dark Mode</strong></span> 
+                            <input type="checkbox" id="theme-toggle" class="hidden">
+                            <div class="relative">
+                                <div class="switch-bg w-10 h-6 bg-gray-300 rounded-full shadow-inner transition-colors duration-300 ease-in-out"></div>
+                                <div class="dot absolute w-6 h-6 bg-white rounded-full shadow inset-y-0 left-0 transition-transform duration-300 ease-in-out transform"></div>
+                            </div>
+                        </label>
+                    </div>
+                </div>      
+            </div>
 
             @if (Auth::user()->hasRole('student') || Auth::user()->hasRole('teacher'))
                 <!-- Card pentru informațiile despre examen -->
@@ -93,8 +91,7 @@
                     </div>
 
                     <!-- Container pentru afișarea informațiilor examenelor -->
-                    
-                    <div id="exam-info" class="space-y-8 text-lg ">
+                    <div id="exam-info" class="space-y-8 text-lg">
                         @if (Auth::user()->hasRole('student'))
                             <p><strong>History </strong> - to see the latest exam taken </p>
                             <p><strong> Upcoming </strong> - to see the the first exam to be taken  </p>
@@ -106,17 +103,30 @@
                         @endif
                     </div> 
                 </div>
-                @else
-                    <!-- Alte secțiuni sau mesaje pentru admin sau secretary -->
-
-                    <div class="relative -right-10 bg-blue-100 p-10 rounded-lg shadow-lg max-w-xl w-full">
-                        <h2 class="text-3xl font-semibold mb-4 text-center">Administrator Section</h2>
-                        <p class="text-lg">Specific information or functionality for admins and secretaries will be displayed here.</p>
-                    </div>
-                @endif
-
+            @else
+                <!-- Alte secțiuni sau mesaje pentru admin sau secretary -->
+                <div class="relative -right-10 bg-blue-100 p-10 rounded-lg shadow-lg max-w-xl w-full">
+                    <h2 class="text-3xl font-semibold mb-4 text-center">Administrator Section</h2>
+                    <p class="text-lg">Specific information or functionality for admins and secretaries will be displayed here.</p>
+                </div>
+            @endif
         </div>
     </div>
+
+    <style>
+        /* Schimbă fundalul switch-ului și poziția bulinei când este activ */
+        #theme-toggle:checked + div .switch-bg {
+            background-color: #3b82f6; /* Culoarea albastră */
+        }
+        #theme-toggle:checked + div .dot {
+            transform: translateX(1.5rem); /* Mută bulina în partea dreaptă */
+        }
+
+        /* Stiluri pentru titlul My Account în modul întunecat */
+        body.dark .my-account-title {
+            color: #E2E8F0; /* O nuanță deschisă pentru a contrasta cu fundalul întunecat */
+        }
+    </style>
 
     <!-- Script pentru comutarea între History și Upcoming -->
     <script>
@@ -124,7 +134,7 @@
             const historyBtn = document.getElementById('btn-history');
             const upcomingBtn = document.getElementById('btn-upcoming');
             const examInfo = document.getElementById('exam-info');
-            const themeToggle = document.getElementById('theme-toggle'); // Corectăm selectorul
+            const themeToggle = document.getElementById('theme-toggle');
 
             // Verifică tema curentă și setează tema la încărcarea paginii
             const currentTheme = localStorage.getItem('theme');
@@ -143,7 +153,7 @@
                     localStorage.setItem('theme', 'light');
                 }
             });
-      
+
             historyBtn.addEventListener('click', function () {
                 examInfo.innerHTML = `
                     @if ($recentExam)
@@ -154,12 +164,10 @@
                             <p><strong>Teacher:</strong> {{ $recentExam->teacher->name ?? 'N/A' }}</p>
                         @endif
 
-                        
                         @if (Auth::user()->hasRole('teacher'))
                             <p><strong>Speciality:</strong> {{ $recentExam->speciality->name ?? 'N/A' }}</p>
                             <p><strong>Group:</strong> {{ $recentExam->group->name ?? 'N/A' }}</p>
                         @endif
-                        
 
                         <p><strong>Start Time:</strong> {{ $recentExam->start_time }}</p>
                         <p><strong>End Time:</strong> {{ $recentExam->end_time }}</p>
@@ -179,21 +187,17 @@
                             @else 
                                 <span class="text-red-500"> - Failed</span>
                             @endif
-
                             </p>                        
                         @endif
-
-                        
                     @else
                         <p>No past exams available.</p>
                     @endif
-                   `;
+                `;
             });
 
             upcomingBtn.addEventListener('click', function () {
                 examInfo.innerHTML = `
                     @if ($upcomingExam)
-
                         <p><strong>Subject:</strong> {{ $upcomingExam->subject->name }}</p>
                         <p><strong>Type:</strong> {{ $upcomingExam->type }}</p>
 
@@ -215,14 +219,11 @@
                         @else
                             <p><strong>Other Examinators:</strong> -</p>
                         @endif
-                        @else
+                    @else
                         <p>No upcoming exams available.</p>
                     @endif
-            `;
-        });
-
-        
-
+                `;
+            });
         });
     </script>
 @endsection

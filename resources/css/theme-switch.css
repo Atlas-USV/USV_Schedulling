@@ -1,3 +1,10 @@
+
+body {
+    margin: 0;
+    padding: 0;
+    box-sizing: border-box;
+}
+
 /* Stil pentru switch-ul de tema */
 .toggle-path {
     position: relative;
@@ -20,20 +27,22 @@ input:checked ~ .toggle-circle {
     transform: translateX(100%);
 }
 
-/* Stiluri pentru tema întunecată */
+/* Stiluri pentru titlul My Account în modul întunecat */
+body.dark .my-account-title {
+    color: #E2E8F0; /* O nuanță deschisă pentru a contrasta cu fundalul întunecat */
+}
+
+/* Stiluri pentru tema întunecată 
 body.dark {
     background-color: #1A202C;
     color: #CBD5E0;
 }
-
+*/
 body.dark .container {
     background-color: #2D3748;
     border-color: #4A5568;
 }
 
-body.dark h2, 
-body.dark p {
-    color: #E2E8F0;
-}
+
 
 
