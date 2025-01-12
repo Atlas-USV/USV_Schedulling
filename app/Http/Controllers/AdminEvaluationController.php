@@ -87,8 +87,8 @@ public function update(Request $request)
     ]);
 
     $evaluation = Evaluation::findOrFail($request->evaluation_id);
-    $evaluation->start_time = $request->start_time;
-    $evaluation->end_time = $request->end_time;
+    $evaluation->start_time = $evaluation->exam_date->format('Y-m-d') . ' ' . $request->start_time;
+    $evaluation->end_time = $evaluation->exam_date->format('Y-m-d') . ' ' . $request->end_time;
     $evaluation->room_id = $request->room_id;
     $evaluation->status = 'accepted';
     $evaluation->save();
@@ -108,7 +108,7 @@ public function update(Request $request)
             'body' => "Examenul la disciplina '{$evaluation->subject->name}' a fost acceptat. 
             Profesor: {$evaluation->teacher->name}, 
             Dată: {$evaluation->exam_date->format('d M Y')}, 
-            Oră: {$evaluation->start_time} - {$evaluation->end_time}. 
+            Oră: {$evaluation->start_time->format('H:i')} - {$evaluation->end_time->format('H:i')}.  
             Sala: {$evaluation->room->name}.",
         ]);
     }

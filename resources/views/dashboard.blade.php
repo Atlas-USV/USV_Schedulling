@@ -247,31 +247,52 @@
         </a>
     </div>
 
-    <!-- Requests from Students -->
-    <div class="col-span-12 md:col-span-8 bg-white rounded-lg p-4 shadow-md">
-        <h3 class="text-lg font-bold mb-3">Requests from Students</h3>
-        <ul>
-            @forelse ($requests as $request)
-                <li class="flex justify-between items-center bg-gray-50 p-2 rounded-lg mb-2">
-                    <div>
-                        <p class="font-medium">From: {{ $request->student->name }}</p>
-                        <p class="text-sm text-gray-500">{{ $request->content }}</p>
-                        <p class="text-sm text-gray-400">Status: {{ ucfirst($request->status) }}</p>
-                    </div>
+    <!-- Requests -->
+<div class="col-span-12 md:col-span-8 bg-white rounded-lg p-4 shadow-md">
+    <h3 class="text-lg font-bold mb-3">Requests</h3>
+    <ul>
+        @forelse ($requests as $request)
+            <li class="flex justify-between items-center bg-gray-50 p-2 rounded-lg mb-2">
+                <div>
+                    @if(Auth::id() === $request->sender_id)
+                        <p class="font-medium">
+                            Sent to: {{ $request->teacher->name ?? $request->student->name ?? 'Unknown' }}
+                        </p>
+                    @else
+                        <p class="font-medium">
+                            From: {{ $request->sender->name ?? 'Unknown' }}
+                        </p>
+                    @endif
+                    <p class="text-sm text-gray-500">{{ $request->content }}</p>
+                    <p class="text-sm text-gray-400">Status: {{ ucfirst($request->status) }}</p>
+                </div>
+                <!-- Doar destinatarii pot vedea butoanele -->
+                @if(Auth::id() !== $request->sender_id)
                     <div class="flex gap-2">
-                        <button class="text-white bg-green-600 px-4 py-2 rounded-lg hover:bg-green-700">
-                            Approve
-                        </button>
-                        <button class="text-white bg-red-600 px-4 py-2 rounded-lg hover:bg-red-700">
-                            Deny
-                        </button>
+                        <form action="{{ route('requests.update', $request->id) }}" method="POST">
+                            @csrf
+                            @method('PUT')
+                            <input type="hidden" name="status" value="approved">
+                            <button type="submit" class="text-white bg-green-600 px-4 py-2 rounded-lg hover:bg-green-700">
+                                Approve
+                            </button>
+                        </form>
+                        <form action="{{ route('requests.update', $request->id) }}" method="POST">
+                            @csrf
+                            @method('PUT')
+                            <input type="hidden" name="status" value="denied">
+                            <button type="submit" class="text-white bg-red-600 px-4 py-2 rounded-lg hover:bg-red-700">
+                                Deny
+                            </button>
+                        </form>
                     </div>
-                </li>
-            @empty
-                <p class="text-sm text-gray-500">No requests from students.</p>
-            @endforelse
-        </ul>
-    </div>
+                @endif
+            </li>
+        @empty
+            <p class="text-sm text-gray-500">No requests found.</p>
+        @endforelse
+    </ul>
+</div>
 @endif
 
     <!-- Content for Admin and Secretary -->

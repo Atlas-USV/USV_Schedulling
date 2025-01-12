@@ -95,11 +95,13 @@ Route::get('/groups/by-faculty/{faculty_id}', [UserController::class, 'getGroups
 
 });
 
-Route::middleware(['auth'])->group(function () {
+Route::middleware(['auth', ])->group(function () {
     Route::get('/requests', [RequestController::class, 'index'])->name('requests.index');
     Route::get('/requests/create', [RequestController::class, 'create'])->name('requests.create');
     Route::post('/requests', [RequestController::class, 'store'])->name('requests.store');
     Route::put('/requests/{id}', [RequestController::class, 'updateStatus'])->name('requests.update');
+    Route::get('/requests/mark-status-updates-as-read', [RequestController::class, 'markStatusUpdatesAsRead'])->name('requests.markStatusUpdatesAsRead');
+
 });
 
 

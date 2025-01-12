@@ -119,9 +119,23 @@
         </svg>
         <span class="flex-1 ml-3 text-left whitespace-nowrap">Notifications</span>
         @php
+            // Notificări pentru mesaje necitite
             $unreadMessages = App\Models\Message::where('user_id', Auth::id())->where('is_read', false)->count();
-            $pendingRequests = App\Models\Request::where('teacher_id', Auth::id())->where('status', 'pending')->count();
-            $totalNotifications = $unreadMessages + $pendingRequests;
+            // Cereri în pending pentru utilizatorul logat ca destinatar
+            $pendingRequests = App\Models\Request::where(function ($query) {
+    $query->where('teacher_id', Auth::id())
+          ->orWhere('student_id', Auth::id());
+})
+->where('status', 'pending')
+->where('sender_id', '!=', Auth::id()) // Exclude cererile trimise de utilizatorul logat
+->count();
+
+$statusChangedRequests = App\Models\Request::where('sender_id', Auth::id())
+    ->whereIn('status', ['approved', 'denied'])
+    ->where('status_read', false) // Afișează doar notificările necitite
+    ->count();
+            // Total notificări
+            $totalNotifications = $unreadMessages + $pendingRequests + $statusChangedRequests;
         @endphp
         @if($totalNotifications > 0)
             <span class="inline-flex justify-center items-center w-5 h-5 text-xs font-semibold rounded-full text-white bg-red-500">
@@ -145,7 +159,7 @@
         </li>
         <li>
             <a href="{{ route('requests.index') }}" class="flex items-center p-2 pl-11 w-full text-base font-normal text-gray-900 rounded-lg transition duration-75 group hover:bg-gray-100 dark:text-white dark:hover:bg-gray-700">
-                Requests
+                Pending Requests
                 @if($pendingRequests > 0)
                     <span class="inline-flex justify-center items-center w-5 h-5 text-xs font-semibold rounded-full text-white bg-red-500 ml-auto">
                         {{ $pendingRequests }}
@@ -153,6 +167,16 @@
                 @endif
             </a>
         </li>
+        <li>
+    <a href="{{ route('requests.markStatusUpdatesAsRead') }}" class="flex items-center p-2 pl-11 w-full text-base font-normal text-gray-900 rounded-lg transition duration-75 group hover:bg-gray-100 dark:text-white dark:hover:bg-gray-700">
+        Status Updates
+        @if($statusChangedRequests > 0)
+            <span class="inline-flex justify-center items-center w-5 h-5 text-xs font-semibold rounded-full text-white bg-red-500 ml-auto">
+                {{ $statusChangedRequests }}
+            </span>
+        @endif
+    </a>
+</li>
     </ul>
 </li>
 
