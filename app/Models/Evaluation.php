@@ -8,6 +8,7 @@ use App\Models\User;
 use App\Models\Group;
 use App\Models\Subject;
 use App\Models\Speciality;
+use Illuminate\Support\Facades\Auth;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\HasMany;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
@@ -27,7 +28,7 @@ class Evaluation extends Model
         'group_id',
         'room_id',
         'speciality_id',
-        'attempt',
+        //'attempt',
         'exam_date',
         'start_time',
         'end_time',
@@ -35,6 +36,7 @@ class Evaluation extends Model
         'other_examinators',
         'description',
         'year_of_study',
+        'status',
     ];
 
     // Cast the other_examinators field to an array (because it's stored as JSON)
@@ -44,6 +46,23 @@ class Evaluation extends Model
         'start_time' => 'datetime',
         'end_time' => 'datetime',
     ];
+
+    protected static function boot()
+    {
+        parent::boot();
+
+        static::creating(function ($model) {
+            if (Auth::check()) {
+                $model->created_by = Auth::id();
+            }
+        });
+
+        static::updating(function ($model) {
+            if (Auth::check()) {
+                $model->updated_by = Auth::id();
+            }
+        });
+    }
 
     // Relationships with other models
 
@@ -76,6 +95,18 @@ class Evaluation extends Model
     {
         return $this->belongsTo(Speciality::class);
     }
+    // Faculty relationship through teacher
+    public function faculty()
+    {
+        return $this->hasOneThrough(
+            Faculty::class,
+            User::class,
+            'id', // Foreign key on users table
+            'id', // Foreign key on faculties table
+            'teacher_id', // Local key on evaluations table
+            'teacher_faculty_id' // Local key on users table
+        );
+    }
 
     // Method to check if this is a re-examination
     public function isReexamination()
@@ -94,4 +125,16 @@ class Evaluation extends Model
     {
         return json_decode($value);
     }
+
+    public function creator()
+    {
+        return $this->belongsTo(User::class, 'created_by');
+    }
+
+    public function updater()
+    {
+        return $this->belongsTo(User::class, 'updated_by');
+    }
+
+    
 }

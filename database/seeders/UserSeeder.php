@@ -2,10 +2,12 @@
 
 namespace Database\Seeders;
 
-use Illuminate\Database\Console\Seeds\WithoutModelEvents;
+use App\Models\User;
 use Illuminate\Database\Seeder;
 use Spatie\Permission\Models\Role;
-use App\Models\User;
+use Spatie\Permission\Models\Permission;
+use Illuminate\Database\Console\Seeds\WithoutModelEvents;
+
 class UserSeeder extends Seeder
 {
     /**
@@ -29,44 +31,25 @@ class UserSeeder extends Seeder
             'password' => bcrypt('password123'),
         ]);
 
-        //Assign role to the second user
-        $user2->assignRole('student');
-        
-        //Create another user
+         // Assign role to the second user
+         $user2->assignRole('student');
+
+         // Create another user
         $user3 = User::create([
-            'name' => 'John Dane',
-            'email' => 'dane@example.com',
+            'name' => 'Jane Doe',
+            'email' => 'cocris.iulian3@gmail.com',
             'password' => bcrypt('password123'),
         ]);
 
-        //Assign role to the second user
-        $user3->assignRole('teacher');
+         // Assign role to the second user
+         $user3->assignRole('student');
 
-        $user4 = User::create([
-            'name' => 'Alice Smith',
-            'email' => 'alice.smith@example.com',
-            'password' => bcrypt('password123'),
-        ]);
-        
-        // Assign role to the user
-        $user4->assignRole('teacher');
-        
-        $user5 = User::create([
-            'name' => 'Bob Johnson',
-            'email' => 'bob.johnson@example.com',
-            'password' => bcrypt('password123'),
-        ]);
-        
-        // Assign role to the user
-        $user5->assignRole('teacher');
-        
+        // $user = User::where('email', 'test@mail.com')->first();
 
-        //$user = User::where('email', 'test@mail.com')->first();
-
-        /*if ($user) {
-            // Assign the permission
-            $permission = Permission::findByName('propose_exam');
-            $user->givePermissionTo($permission);
-        }*/
+        // if ($user) {
+        //     // Assign the permission
+        //     $permission = Permission::findByName('propose_exam');
+        //     $user->givePermissionTo($permission);
+        // }
     }
 }

@@ -5,6 +5,7 @@ use App\Models\User;
 use App\Models\Group;
 use App\Models\Invitation;
 use Illuminate\Http\Request;
+use Spatie\Permission\Models\Role;
 use App\Http\Controllers\Controller;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\Hash;
@@ -66,18 +67,26 @@ class AuthController extends Controller
     // Handle registration request
     public function register(Request $request, $invitation_id)
     {
-         // Validate the request data
+        // Validate the request data
         $request->validate([
             'name' => 'required|string|max:255',
             // 'email' => 'required|email|unique:users,email',
             'password' => 'required|string|min:8|confirmed',
         ]);
+
         // Retrieve the invitation by ID
         $invitation = Invitation::findOrFail($invitation_id);
+        session()->flash('toast_success', 'Invitatie trimisa cu succes!');
 
         // Check if the invitation is valid (optional: ensure the invitation is not expired)
         if ($invitation->expires_at != null && $invitation->expires_at < now()) {
             abort(419);
+        }
+
+        // Handle validation errors
+        if ($errors = $request->errors()) {
+            session()->flash('toast_error', $errors->all());
+            return back()->withErrors($errors)->withInput();
         }
 
         // Create the user
@@ -86,25 +95,33 @@ class AuthController extends Controller
             'email' => $invitation->email,
             'password' => Hash::make($request->password),
         ]);
+       
 
         if ($invitation->group_id) {
             $group = Group::find($invitation->group_id); // Find the group by ID
-        
+
             if ($group) {
                 // Assign group speciality_id to the user
                 $user->speciality_id = $group->speciality_id;
                 $user->groups()->attach($group->id);
             }
-            
-        
+
+
             // If a teacher_faculty_id is present, assign it
             if ($invitation->teacher_faculty_id) {
                 $user->teacher_faculty_id = $invitation->teacher_faculty_id;
             }
         }
-        
+        if ($invitation->role_id) {
+            $role = Role::find($invitation->role_id);  // Find the role by ID
+            if ($role) {
+                $user->assignRole($role);  // Assign the role to the user
+            }
+        }
+        if ($invitation->teacher_faculty_id) {
+            $user->teacher_faculty_id = $invitation->teacher_faculty_id;  // Assign faculty_id
+        }
         $user->save();
-       
         Invitation::where('email', $invitation->email)->delete();
         Auth::login($user);
 

@@ -19,11 +19,18 @@ class DashboardController extends Controller
         $subjects = Subject::all();
         $teachers = User::role('admin')->get();
         $rooms = Room::all();
-    
-        // Obține task-urile utilizatorului curent (limitate la 4)
-        $tasks = Task::where('user_id', auth()->id())->take(4)->get();
+        
+        $tasks = Task::where('user_id', auth()->id())
+        ->orderBy('deadline', 'asc')  // Order by deadline
+        ->where('deadline', '>=', now())  // Only future tasks
+        ->take(4)  // Limit to 4 tasks
+        ->get();
 
-        $upcomingExams = \App\Models\Evaluation::where('group_id', 1) // Modifică dacă grupul e dinamic
+        // Obține ID-ul grupei utilizatorului autentificat
+    $groupId = auth()->user()->group_id; // Asumând că utilizatorul are `group_id` în modelul User
+
+    // Filtrează examenele pentru grupa utilizatorului
+    $upcomingExams = \App\Models\Evaluation::where('group_id', $groupId) 
         ->where('status', 'accepted')
         ->where('exam_date', '>=', now())
         ->orderBy('exam_date', 'asc')
@@ -43,39 +50,61 @@ class DashboardController extends Controller
         ->take(5)
         ->get();
 
+
+        $requests = [];
+        if (auth()->user()->hasRole('teacher')) {
+            $requests = \App\Models\Request::where('teacher_id', auth()->id())
+                ->orderBy('created_at', 'desc')
+                ->take(10) // Limitează numărul de cereri afișate
+                ->get();
+        }
+
         \Log::info('User Role:', ['role' => $userRole]);
         \Log::info('Authenticated User:', ['user' => auth()->user()]);
 
 
     
-        return view('dashboard', compact('groups', 'faculties', 'subjects', 'teachers', 'rooms', 'tasks',  'userName', 'upcomingExams', 'userRole', 'recentUsers', 'pendingExams'));
+        return view('dashboard', compact('groups', 'faculties', 'subjects', 'teachers', 'rooms', 'tasks',  'userName', 'upcomingExams', 'userRole', 'recentUsers', 'pendingExams', 'requests'));
     }
 
 
     public function storeTask(Request $request)
-{
-    $request->validate([
-        'title' => 'required|string|max:255',
-        'description' => 'required|string',
-        'subject' => 'required|string|max:255',
-        'deadline' => 'required|date|after:now',
-    ]);
-
+    {
+        try {
+            $validated = $request->validate([
+                'title' => 'required|string|max:255',
+                'description' => 'required|string',
+                'subject' => 'required|string|max:255',
+                'deadline' => 'required|date|after:now',
+            ]);
     
-
-    Task::create([
-        'user_id' => auth()->id(),
-        'title' => $request->title,
-        'description' => $request->description,
-        'subject' => $request->subject ?? 'General', // Setează "General" ca valoare implicită
-        'deadline' => $request->deadline,
-        'is_completed' => false,
-    ]);
-
-   
-
-    return redirect()->route('dashboard')->with('success', 'Task added successfully!');
-}
+            \Log::info('Creating task with data:', $validated);
+    
+            $task = Task::create([
+                'user_id' => auth()->id(),
+                'title' => $validated['title'],
+                'description' => $validated['description'],
+                'subject' => $validated['subject'],
+                'deadline' => $validated['deadline'],
+                'is_completed' => false,
+            ]);
+    
+            \Log::info('Task created successfully:', ['task_id' => $task->id]);
+    
+            return redirect()->route('dashboard')
+                ->with('success', 'Task added successfully!')
+                ->with('task_created', true);  // Add this flag
+    
+        } catch (\Exception $e) {
+            \Log::error('Error creating task:', [
+                'error' => $e->getMessage(),
+                'request_data' => $request->all()
+            ]);
+    
+            return redirect()->route('dashboard')
+                ->with('error', 'Failed to create task. Please try again.');
+        }
+    }
 
 public function editTask($id)
 {
@@ -115,11 +144,6 @@ public function updateTask(Request $request, $id)
     return redirect()->route('dashboard')->with('success', 'Task updated successfully!');
 }
 
-public function teachers()
-{
-    $subjects = Subject::all(); // Obține toate materiile din baza de date
-    return view('teachers', compact('subjects')); // Transmite $subjects către view
-}
 
 
 
@@ -137,20 +161,26 @@ public function deleteTask($id)
 
 public function showExams(Request $request)
 {
-    // Obține `group_id` din relația user-group
-    $groupId = auth()->user()->groups()->pluck('groups.id')->first();
+    // Verifică rolul utilizatorului
+    if (auth()->user()->hasRole('teacher')) {
+        // Dacă este profesor, afișează examenele pe care le predă
+        $query = \App\Models\Evaluation::where('teacher_id', auth()->id())
+            ->where('status', 'accepted');
+    } else {
+        // Dacă este student, afișează examenele pentru grupa sa
+        $groupId = auth()->user()->group_id; // Asumând că utilizatorul are `group_id` în modelul User
 
-    // Verifică dacă utilizatorul are un grup asociat
-    if (!$groupId) {
-        return view('exams.index', [
-            'exams' => collect([]), // Returnează o colecție goală
-            'subjects' => \App\Models\Subject::all(),
-        ]);
+        // Verifică dacă utilizatorul are un grup asociat
+        if (!$groupId) {
+            return view('exams.index', [
+                'exams' => collect([]), // Returnează o colecție goală
+                'subjects' => \App\Models\Subject::all(),
+            ]);
+        }
+
+        $query = \App\Models\Evaluation::where('group_id', $groupId)
+            ->where('status', 'accepted');
     }
-
-    // Construiește query-ul
-    $query = \App\Models\Evaluation::where('group_id', $groupId)
-    ->where('status', 'accepted');
 
     // Aplica filtrul de timp (past/current)
     if ($request->filter === 'past') {

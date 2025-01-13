@@ -2,8 +2,9 @@
 
 namespace App\Models;
 
-use App\Models\Faculty;
+use App\Models\User;
 use App\Models\Group;
+use App\Models\Faculty;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\HasMany;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
@@ -16,7 +17,7 @@ class Speciality extends Model
 
     protected $fillable = ['name', 'short_name', 'faculty_id'];
 
-    public function faculty(): BelongsTo
+    public function teacher_faculty(): BelongsTo
     {
         return $this->belongsTo(Faculty::class);
     }
@@ -29,5 +30,9 @@ class Speciality extends Model
     public function users(): HasMany
     {
         return $this->hasMany(User::class, 'specialty_id');
+    }
+    public function faculty(): BelongsTo
+    {
+        return $this->belongsTo(Faculty::class, 'faculty_id');
     }
 }

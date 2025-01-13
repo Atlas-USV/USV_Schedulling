@@ -2,6 +2,8 @@
 
 namespace App\Models;
 
+use App\Models\User;
+use App\Models\Group;
 use App\Models\Speciality;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\HasMany;
@@ -21,5 +23,10 @@ class Faculty extends Model
     public function teachers(): HasMany
     {
         return $this->hasMany(User::class, 'teacher_faculty_id');
+    }
+
+    public function groups(): HasManyThrough
+    {
+        return $this->hasManyThrough(Group::class, Speciality::class);
     }
 }
