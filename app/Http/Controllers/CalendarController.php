@@ -128,10 +128,22 @@ class CalendarController extends Controller
         ];
         $validatedData = $request->validate($baseRules);
         $validatedData['exam_date'] = Carbon::parse($validatedData['start_time'])->format('Y-m-d');
-        // Prepare the data for checking overlap
-        // Check for overlap with the group's exam date
+        
+        // Check if user has a group
         $groupId = Auth::user()->groups ? Auth::user()->groups->first()->id : null;
+        if (is_null($groupId)) {
+            return response()->json([
+                'success' => false,
+                'message' => 'Eroare de validare',
+                'errors' => [
+                    'group_id' => ['Studentul nu este intr-o grupa']
+                ]
+            ], 422);
+        }
+        
         $validatedData['group_id'] = $groupId;
+        
+        // Check for overlap with the group's exam date
         $overlapCheck = $this->checkForOverlaps($validatedData);
         if ($overlapCheck['hasOverlap']) {
             return response()->json([
@@ -141,6 +153,7 @@ class CalendarController extends Controller
                 ]
             ], 400);
         }
+        
         $evaluation = \App\Models\Evaluation::create($validatedData);
         return response()->json([
             'success' => true,

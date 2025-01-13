@@ -3,18 +3,21 @@
 namespace App\Http\Controllers;
 
 use App\Models\User;
-use Illuminate\Http\Request;
 use App\Models\Group;
 use App\Models\Faculty;
+use App\Models\Speciality;
+use Illuminate\Http\Request;
+use Spatie\Permission\Models\Role;
 
 class UserController extends Controller
 {
     public function index()
     {
-        
-        $users = User::with(['groups', 'faculty', 'roles'])->paginate(10);
 
-        return view('users.index', compact('users'));
+        $users = User::with(['groups', 'faculty', 'roles', 'speciality'])->paginate(10);
+        $roles = Role::all();
+
+        return view('users.index', compact('users', 'roles'));
     }
 
     public function edit($id)
@@ -22,8 +25,9 @@ class UserController extends Controller
         $user = User::with('groups', 'faculty')->findOrFail($id);
         $groups = Group::all();
         $faculties = Faculty::all();
-
-        return view('users.edit', compact('user', 'groups', 'faculties'));
+        $roles = Role::all()->pluck('id','name')->toArray();
+        $specialities = Speciality::all();
+        return view('users.edit', compact('user', 'groups', 'faculties', 'roles', 'specialities'));
     }
 
     public function update(Request $request, $id)
@@ -31,20 +35,40 @@ class UserController extends Controller
         $request->validate([
             'name' => 'required|string|max:255',
             'email' => 'required|email|unique:users,email,' . $id,
-            'faculty_id' => 'nullable|exists:faculties,id',
+            //'faculty_id' => 'nullable|exists:faculties,id',
             'group_id' => 'nullable|exists:groups,id',
+            'speciality_id' => 'nullable|exists:specialities,id',
+            'roles' => 'nullable|array',
+            'roles.*' => 'exists:roles,name',
         ]);
-
         $user = User::findOrFail($id);
-
+        // Validate if group matches with selected speciality
+        if ($request->group_id && $request->speciality_id) {
+            $group = Group::find($request->group_id);
+            if ($group->speciality_id != $request->speciality_id) {
+                return back()->with('error', 'The selected group does not match the selected speciality.');
+            }
+        }
+        // Check if user already has a group and speciality is changed
+        if ($user->groups->isNotEmpty() && $request->speciality_id && $user->speciality_id != $request->speciality_id) {
+            $group = $user->groups->first();
+            if ($group->speciality_id != $request->speciality_id) {
+                return back()->with('error', 'The user\'s current group does not match the new selected speciality.');
+            }
+        }
         // Actualizare câmpuri
         $user->name = $request->name;
         $user->email = $request->email;
         $user->teacher_faculty_id = $request->faculty_id;
+        $user->speciality_id = $request->speciality_id;
 
         // Actualizare grup (pivot table)
         if ($request->group_id) {
             $user->groups()->sync([$request->group_id]);
+        }
+        // Actualizare rol
+        if ($request->roles) {
+            $user->syncRoles($request->roles);
         }
 
         if ($user->save()) {
