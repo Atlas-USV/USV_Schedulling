@@ -11,13 +11,8 @@ use Database\Seeders\FacultySeeder;
 use Database\Seeders\SubjectSeeder;
 use Database\Seeders\GroupSeeder;
 use Database\Seeders\EvaluationSeeder;
-<<<<<<< Updated upstream
-use Database\Seeders\SpecialitySeeder;
-use Database\Seeders\UserGroupSeeder;
-=======
 use Database\Seeders\SpecialtiesSeeder;
 use Database\Seeders\PermissionsSeeder;
->>>>>>> Stashed changes
 
 class DatabaseSeeder extends Seeder
 {

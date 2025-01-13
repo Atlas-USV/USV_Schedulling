@@ -15,15 +15,6 @@ class EvaluationSeeder extends Seeder
      */
     public function run()
     {
-<<<<<<< Updated upstream
-        // $subject = Subject::first();
-        // $teacher = User::first();
-
-        // Evaluation::create([
-        //     'subject_id' => $subject->id,
-        //     'teacher_id' => $teacher->id,
-        //     'type' => 'exam',
-=======
         // // Creează examene
         // Evaluation::insert([
         //     [
@@ -112,7 +103,6 @@ class EvaluationSeeder extends Seeder
         //         'type' => 'project',
         //         'year_of_study' => 3
         //     ],
->>>>>>> Stashed changes
         // ]);
     }
 }
