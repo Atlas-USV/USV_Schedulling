@@ -19,27 +19,16 @@ class UserSeeder extends Seeder
             'password' => bcrypt('password123'),
         ]);
 
-<<<<<<< Updated upstream
-        // Assign role to the user
-        $user->assignRole('admin'); // or 'user'
-
-        // Create another user
-=======
         //Assign role to the user
         $user->assignRole('admin'); // or 'user'
 
         //Create another user
->>>>>>> Stashed changes
         $user2 = User::create([
             'name' => 'Jane Doe',
             'email' => 'jane@example.com',
             'password' => bcrypt('password123'),
         ]);
 
-<<<<<<< Updated upstream
-        // Assign role to the second user
-        $user2->assignRole('student');
-=======
         //Assign role to the second user
         $user2->assignRole('student');
         
@@ -79,6 +68,5 @@ class UserSeeder extends Seeder
             $permission = Permission::findByName('propose_exam');
             $user->givePermissionTo($permission);
         }*/
->>>>>>> Stashed changes
     }
 }

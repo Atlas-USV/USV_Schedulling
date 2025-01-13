@@ -2,8 +2,6 @@
 use Illuminate\Support\Facades\Route;
 use App\Http\Controllers\AuthController;
 use App\Http\Controllers\InvitationController;
-<<<<<<< Updated upstream
-=======
 use App\Http\Controllers\DashboardController;
 use App\Http\Controllers\TaskController;
 use App\Http\Controllers\AdminEvaluationController;
@@ -12,7 +10,6 @@ use App\Http\Controllers\UserController;
 use App\Http\Controllers\ContactController;
 use App\Http\Controllers\ContactUsController;
 use App\Http\Controllers\TeacherController;
->>>>>>> Stashed changes
 
 Route::get('/', function () {
     return view('Home.home');
@@ -20,12 +17,6 @@ Route::get('/', function () {
 Route::get('/features', function () {
     return view('Home.features'); 
 })->name('features');
-<<<<<<< Updated upstream
-
-Route::get('/users', function () {
-    return view('Users.users'); 
-})->name('users');
-=======
 Route::get('/contact', function () {
     return view('Home.contact'); 
 })->name('contact');
@@ -38,7 +29,6 @@ Route::get('/contactus', function () {
 Route::get('/modal', function(){
     return view('components.create-event-modal');
 });
->>>>>>> Stashed changes
 
 Route::middleware(['auth', 'role:student'])->group(function () {
     Route::get('/Teachers', [TeacherController::class, 'index'])->name('Teachers.index');
@@ -67,14 +57,6 @@ Route::middleware(['auth'])->group(function(){
 
 Route::middleware(['role:admin|secretary'])->group(function() {
     Route::post('/create-invitation',[ InvitationController::class,'store'])->name('invitation.store');
-<<<<<<< Updated upstream
-    Route::get('/invitation', [ InvitationController::class,'create'])->name('invitation');
-}); 
-Route::middleware(['auth'])->group(function() {
-    Route::get('/dashboard', function () {
-        return view('Dashboard.dashboard');
-    })->name('dashboard');
-=======
     Route::get('/invitation', [InvitationController::class,'create'])->name('invitation');
     Route::get('/invitations', [InvitationController::class, 'getInvitations'])->name('invitations');
     Route::get('/invitations/{id}/resend', [InvitationController::class, 'resend'])->name('invitations.resend');
@@ -122,7 +104,5 @@ Route::put('/users/{id}', [UserController::class, 'update'])->name('users.update
 Route::get('/groups/by-faculty/{faculty_id}', [UserController::class, 'getGroupsByFaculty'])->name('groups.by-faculty');
 });
 
->>>>>>> Stashed changes
 
-    Route::get('logout', [AuthController::class, 'logout'])->name('logout');
-});
+    
