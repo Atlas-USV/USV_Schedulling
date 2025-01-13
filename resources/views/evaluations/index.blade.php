@@ -28,8 +28,8 @@
                 <tr class="bg-white border-b dark:bg-gray-800 dark:border-gray-700 hover:bg-gray-50 dark:hover:bg-gray-600">
                     <td class="px-6 py-4">{{ $evaluation->subject->name }}</td>
                     <td class="px-6 py-4">{{ $evaluation->teacher->name }}</td>
-                    <td class="px-6 py-4">{{ $evaluation->group->name }}</td>
-                    <td class="px-6 py-4">{{ $evaluation->room->name }}</td>
+                    <td class="px-6 py-4">{{ $evaluation->group ? $evaluation->group->name : 'N/A' }}</td>
+                    <td class="px-6 py-4">{{ $evaluation->room ? $evaluation->room->name : 'N/A' }}</td>
                     <td class="px-6 py-4">{{ \Carbon\Carbon::parse($evaluation->exam_date)->translatedFormat('l, d M Y') }}</td>
                     <td class="px-6 py-4">{{ $evaluation->start_time }}</td>
                     <td class="px-6 py-4">{{ $evaluation->end_time }}</td>
