@@ -8,18 +8,13 @@ use App\Http\Controllers\InboxController;
 use App\Http\Controllers\CalendarController;
 use App\Http\Controllers\DashboardController;
 use App\Http\Controllers\InvitationController;
-use App\Http\Controllers\DashboardController;
-use App\Http\Controllers\TaskController;
 use App\Http\Controllers\AdminEvaluationController;
-use App\Http\Controllers\InboxController;
-use App\Http\Controllers\UserController;
 use App\Http\Controllers\ContactController;
 use App\Http\Controllers\ContactUsController;
 use App\Http\Controllers\TeacherController;
 use App\Http\Controllers\ResetPasswordController;
 use App\Http\Controllers\ChangePasswordController;
 use App\Http\Controllers\ForgotPasswordController;
-use App\Http\Controllers\AdminEvaluationController;
 use App\Http\Controllers\RequestController;
 
 
@@ -149,7 +144,6 @@ Route::middleware(['guest'])->group(function () {
     Route::get('/invitation', [InvitationController::class,'create'])->name('invitation');
     Route::get('/invitations', [InvitationController::class, 'getInvitations'])->name('invitations');
     Route::get('/invitations/{id}/resend', [InvitationController::class, 'resend'])->name('invitations.resend');
-});
 
 Route::middleware(['auth'])->group(function () {
     Route::get('/dashboard', [DashboardController::class, 'index'])->name('dashboard');

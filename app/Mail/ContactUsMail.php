@@ -34,8 +34,7 @@ class ContactUsMail extends Mailable
      */
     public function build()
     {
-        return $this->from($this->contactData['email'])  // Adresa de expeditor - adresa completată de utilizator
-                ->to('claudiu.mindrescu@student.usv.ro')  // Adresa destinatarului - adresa ta de Gmail
+        return $this
                 ->subject($this->contactData['subject'])  // Subiectul
                 ->view('emails.emailus')  // Vederea care va fi folosită pentru email
                 ->with('contactData', $this->contactData);  // Datele trimise de utilizator în formular

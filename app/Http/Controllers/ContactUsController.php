@@ -34,10 +34,9 @@ class ContactUsController extends Controller
         ]);
 
         // Trimite emailul către admin
-        Mail::to('claudiu.mindrescu@student.usv.ro')->send(new ContactUsMail($validatedData));
+        Mail::to(env('MAIL_FROM_ADDRESS','Hello@example.com'))->send(new ContactUsMail($validatedData));
 
         // Returnează succesul pe pagina
         return back()->with('success', 'Thanks for your message');
     }
-
 }
