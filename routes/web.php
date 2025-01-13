@@ -37,6 +37,8 @@ Route::get('/modal', function(){
     return view('components.create-event-modal');
 });
 
+Route::post('/teachers/{teacherId}/schedule', [TeacherController::class, 'storeSchedule'])->name('teachers.storeSchedule');
+
 Route::middleware(['auth', 'role:student'])->group(function () {
     Route::get('/Teachers', [TeacherController::class, 'index'])->name('Teachers.index');
     });
