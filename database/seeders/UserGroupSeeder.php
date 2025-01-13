@@ -17,6 +17,6 @@ class UserGroupSeeder extends Seeder
         $user = User::first();
         $group = Group::first();
 
-        $user->groups()->attach($group->id);
+        //$user->groups()->attach($group->id);
     }
 }

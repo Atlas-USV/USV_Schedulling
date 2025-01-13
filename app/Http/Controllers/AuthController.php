@@ -123,6 +123,9 @@ class AuthController extends Controller
         $request->session()->invalidate();
         $request->session()->regenerateToken();
 
-        return redirect('/login');
+        
+        Cookie::queue(Cookie::forget('laravel_session'));
+        Cookie::queue(Cookie::forget('XSRF-TOKEN'));
+        return redirect('home');
     }
 }
