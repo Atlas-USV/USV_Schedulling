@@ -21,10 +21,10 @@ class UserSeeder extends Seeder
             'password' => bcrypt('password123'),
         ]);
 
-        // Assign role to the user
+        //Assign role to the user
         $user->assignRole('admin'); // or 'user'
 
-        // Create another user
+        //Create another user
         $user2 = User::create([
             'name' => 'Jane Doe',
             'email' => 'jane@example.com',
