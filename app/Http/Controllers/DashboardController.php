@@ -68,43 +68,43 @@ class DashboardController extends Controller
     }
 
 
-    public function storeTask(Request $request)
-    {
-        try {
-            $validated = $request->validate([
-                'title' => 'required|string|max:255',
-                'description' => 'required|string',
-                'subject' => 'required|string|max:255',
-                'deadline' => 'required|date|after:now',
-            ]);
+    // public function storeTask(Request $request)
+    // {
+    //     try {
+    //         $validated = $request->validate([
+    //             'title' => 'required|string|max:255',
+    //             'description' => 'required|string',
+    //             'subject' => 'required|string|max:255',
+    //             'deadline' => 'required|date|after:now',
+    //         ]);
     
-            \Log::info('Creating task with data:', $validated);
+    //         \Log::info('Creating task with data:', $validated);
     
-            $task = Task::create([
-                'user_id' => auth()->id(),
-                'title' => $validated['title'],
-                'description' => $validated['description'],
-                'subject' => $validated['subject'],
-                'deadline' => $validated['deadline'],
-                'is_completed' => false,
-            ]);
+    //         $task = Task::create([
+    //             'user_id' => auth()->id(),
+    //             'title' => $validated['title'],
+    //             'description' => $validated['description'],
+    //             'subject' => $validated['subject'],
+    //             'deadline' => $validated['deadline'],
+    //             'is_completed' => false,
+    //         ]);
     
-            \Log::info('Task created successfully:', ['task_id' => $task->id]);
+    //         \Log::info('Task created successfully:', ['task_id' => $task->id]);
     
-            return redirect()->route('dashboard')
-                ->with('success', 'Task added successfully!')
-                ->with('task_created', true);  // Add this flag
+    //         return redirect()->route('dashboard')
+    //             ->with('success', 'Task added successfully!')
+    //             ->with('task_created', true);  // Add this flag
     
-        } catch (\Exception $e) {
-            \Log::error('Error creating task:', [
-                'error' => $e->getMessage(),
-                'request_data' => $request->all()
-            ]);
+    //     } catch (\Exception $e) {
+    //         \Log::error('Error creating task:', [
+    //             'error' => $e->getMessage(),
+    //             'request_data' => $request->all()
+    //         ]);
     
-            return redirect()->route('dashboard')
-                ->with('error', 'Failed to create task. Please try again.');
-        }
-    }
+    //         return redirect()->route('dashboard')
+    //             ->with('error', 'Failed to create task. Please try again.');
+    //     }
+    // }
 
 public function editTask($id)
 {
@@ -203,6 +203,38 @@ public function showExams(Request $request)
     $subjects = \App\Models\Subject::all();
 
     return view('exams.index', compact('exams', 'subjects'));
+}
+
+public function storeTask(Request $request)
+{
+    try {
+        $validated = $request->validate([
+            'title' => 'required|string|max:255',
+            'description' => 'required|string',
+            'subject' => 'required|string|max:255',
+            'deadline' => 'required|date|after:now',
+        ]);
+
+        Task::create([
+            'user_id' => auth()->id(),
+            'title' => $validated['title'],
+            'description' => $validated['description'],
+            'subject' => $validated['subject'],
+            'deadline' => $validated['deadline'],
+            'is_completed' => false,
+        ]);
+        \Log::info('Redirecting with session', ['success' => session('toast_success')]);
+
+        return redirect()->route('dashboard')->with('toast_success', 'Task added successfully!');
+    } catch (\Illuminate\Validation\ValidationException $e) {
+        // Mesaje de validare detaliate
+        return redirect()->route('dashboard')
+            ->with('toast_error', implode(', ', $e->validator->errors()->all()));
+    } catch (\Exception $e) {
+        // Mesaj de eroare general
+        return redirect()->route('dashboard')
+            ->with('toast_error', 'Unexpected error: ' . $e->getMessage());
+    }
 }
 
 

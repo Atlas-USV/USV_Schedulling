@@ -6,7 +6,7 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
    
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/toastr.js/latest/css/toastr.min.css">
-    
+
 
     <script type="importmap">
     {
@@ -374,10 +374,11 @@ $statusChangedRequests = App\Models\Request::where('sender_id', Auth::id())
     </div>
 @endif
 
-@stack('scripts')
+<script src="https://cdnjs.cloudflare.com/ajax/libs/flowbite/2.2.1/flowbite.min.js"></script>
+
 </body>
 </html>
-
+@stack('scripts')
 <!-- Script pentru ascunderea toast-urilor după 3 secunde -->
 <script>
         setTimeout(() => {
