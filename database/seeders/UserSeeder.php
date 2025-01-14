@@ -42,14 +42,9 @@ class UserSeeder extends Seeder
         ]);
 
          // Assign role to the second user
-         $user3->assignRole('student');
-
-        // $user = User::where('email', 'test@mail.com')->first();
-
-        // if ($user) {
-        //     // Assign the permission
-        //     $permission = Permission::findByName('propose_exam');
-        //     $user->givePermissionTo($permission);
-        // }
+        $user3->assignRole('student');
+        $permission = Permission::findByName('propose_exam');
+        $user3->givePermissionTo($permission);
+       
     }
 }
