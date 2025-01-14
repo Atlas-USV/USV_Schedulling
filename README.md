@@ -52,7 +52,7 @@ Brief description of your project.
    ```bash
    php artisan migrate
    ```
-
+7. subgrupe.php to be placed in /storage folder before running SubjectsSeeder
 
 
 ## Running the Application
