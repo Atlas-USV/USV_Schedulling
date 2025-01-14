@@ -273,7 +273,7 @@
 @endif
 
     <!-- Content for Admin and Secretary -->
-    @if(auth()->user()->hasRole('admin'))
+    @if(auth()->user()->hasAnyRole(['admin', 'secretary']))
     <!-- Recent Users -->
     <div class="col-span-12 md:col-span-6 bg-white rounded-lg p-4 shadow-md">
         <h3 class="text-lg font-bold mb-3">Recent Users</h3>
