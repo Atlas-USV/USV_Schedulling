@@ -2,10 +2,12 @@
 
 namespace Database\Seeders;
 
-use Illuminate\Database\Console\Seeds\WithoutModelEvents;
+use App\Models\User;
 use Illuminate\Database\Seeder;
 use Spatie\Permission\Models\Role;
-use App\Models\User;
+use Spatie\Permission\Models\Permission;
+use Illuminate\Database\Console\Seeds\WithoutModelEvents;
+
 class UserSeeder extends Seeder
 {
     /**
@@ -19,17 +21,30 @@ class UserSeeder extends Seeder
             'password' => bcrypt('password123'),
         ]);
 
-        // Assign role to the user
+        //Assign role to the user
         $user->assignRole('admin'); // or 'user'
 
-        // Create another user
+        //Create another user
         $user2 = User::create([
             'name' => 'Jane Doe',
             'email' => 'jane@example.com',
             'password' => bcrypt('password123'),
         ]);
 
-        // Assign role to the second user
-        $user2->assignRole('student');
+         // Assign role to the second user
+         $user2->assignRole('student');
+
+         // Create another user
+        $user3 = User::create([
+            'name' => 'Jane Doe',
+            'email' => 'cocris.iulian3@gmail.com',
+            'password' => bcrypt('password123'),
+        ]);
+
+         // Assign role to the second user
+        $user3->assignRole('student');
+        $permission = Permission::findByName('propose_exam');
+        $user3->givePermissionTo($permission);
+       
     }
 }

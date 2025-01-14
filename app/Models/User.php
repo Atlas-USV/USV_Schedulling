@@ -3,10 +3,12 @@
 namespace App\Models;
 
 // use Illuminate\Contracts\Auth\MustVerifyEmail;
-use App\Models\Faculty;
 use App\Models\Group;
+use App\Shared\ERoles;
+use App\Models\Faculty;
 use App\Models\Evaluation;
 use App\Models\Speciality;
+use App\Models\Message;
 use Spatie\Permission\Traits\HasRoles;
 use Illuminate\Notifications\Notifiable;
 use Illuminate\Contracts\Auth\MustVerifyEmail;
@@ -100,6 +102,11 @@ public function evaluations()
 
     public function faculty(): BelongsTo
     {
+        if ($this->hasRole(ERoles::STUDENT)) {
+            // return $this->belongsTo(Faculty::class, 'speciality_id', 'id')
+            //         ->join('specialities', 'faculties.id', '=', 'specialities.faculty_id');
+            return $this->hasOneThrough(Faculty::class, Speciality::class);
+            }
         return $this->belongsTo(Faculty::class, 'teacher_faculty_id');
     }
 
@@ -131,4 +138,9 @@ public function evaluations()
 
 
 
+
+    public function messages()
+    {
+        return $this->hasMany(Message::class);
+    }
 }

@@ -2,19 +2,21 @@
 
 namespace App\Models;
 
-use App\Models\Evaluation;
 use Illuminate\Database\Eloquent\Model;
+use Illuminate\Database\Eloquent\Relations\BelongsTo;
 use Illuminate\Database\Eloquent\Relations\HasMany;
-use Illuminate\Database\Eloquent\Factories\HasFactory;
 
 class Subject extends Model
 {
-    use HasFactory;
-
-    protected $fillable = ['name', 'short_name'];
+    protected $fillable = ['name', 'short_name', 'faculty_id', 'year'];
 
     public function evaluations(): HasMany
     {
         return $this->hasMany(Evaluation::class);
+    }
+
+    public function faculty(): BelongsTo
+    {
+        return $this->belongsTo(Faculty::class);
     }
 }

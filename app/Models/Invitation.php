@@ -36,7 +36,7 @@ class Invitation extends Model
 
     public function speciality()
     {
-        return $this->belongsTo(Speciality::class);
+        return $this->belongsTo(Speciality::class,'speciality_id');
     }
 
     public function group()
@@ -46,6 +46,6 @@ class Invitation extends Model
 
     public function faculty()
     {
-        return $this->belongsTo(Faculty::class);
+        return $this->belongsTo(Faculty::class,'teacher_faculty_id','id');
     }
 }
