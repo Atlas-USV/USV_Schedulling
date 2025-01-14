@@ -68,11 +68,17 @@ class UserController extends Controller
                 return back()->with('error', 'The user\'s current group does not match the new selected speciality.');
             }
         }
+
+        // If the group is set in the request and the user does not have a speciality, set the user's speciality to the group's speciality
+        if ($request->group_id && !$user->speciality_id && !$request->speciality_id) {
+            $group = Group::find($request->group_id);
+            $user->speciality_id = $group->speciality_id;
+        }
         // Actualizare câmpuri
         $user->name = $request->name;
         $user->email = $request->email;
         $user->teacher_faculty_id = $request->faculty_id;
-        $user->speciality_id = $request->speciality_id;
+        //$user->speciality_id = $request->speciality_id;
 
         // Actualizare grup (pivot table)
         if ($request->group_id) {
