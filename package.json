@@ -15,6 +15,7 @@
     },
     "dependencies": {
         "@preline/select": "^2.6.0",
+        "axios": "^1.7.9",
         "flowbite-typography": "^1.0.5",
         "preline": "^2.6.0"
     }

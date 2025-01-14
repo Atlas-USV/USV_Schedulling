@@ -80,6 +80,15 @@
         </select>
         </div>
 
+        @if($user->roles->contains('name', 'student'))
+        <!-- Sef de grupa -->
+        <div class="mb-4">
+            <label for="group_leader" class="block text-gray-700 font-medium mb-2">Sef de grupa</label>
+            <input type="hidden" name="group_leader" value="0">
+            <input type="checkbox" name="group_leader" id="group_leader" class="form-checkbox h-5 w-5 text-blue-600" value="1" {{ $isLeader ? 'checked' : '' }}>
+        </div>
+        @endif
+
         <!-- Speciality (if student) -->
         @if($user->roles->contains('name', 'student'))
         <div class="mb-4">
@@ -159,17 +168,7 @@
             facultySelect.disabled = true;
         }
 
-        // On form submit, place all roleSelect values in an array
-        // const form = document.querySelector('form');
-        // form.addEventListener('submit', function (event) {
-        //     const rolesArray = roleSelect.value;
-        //     const rolesInput = document.createElement('input');
-        //     rolesInput.type = 'hidden';
-        //     rolesInput.name = 'roles';
-        //     rolesInput.value = JSON.stringify(rolesArray);
-        //     console.log(rolesInput.value)
-        //     form.appendChild(rolesInput);
-        // });
+       
     });
 </script>
 @endpush
