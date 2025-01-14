@@ -31,4 +31,8 @@ class Speciality extends Model
     {
         return $this->hasMany(User::class, 'specialty_id');
     }
+
+    public function faculty() {
+        return $this->belongsTo(Faculty::class);
+    }
 }

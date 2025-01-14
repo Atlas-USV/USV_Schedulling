@@ -5,6 +5,7 @@
         <div class="flex items-center justify-center mb-4 space-x-4">
             <!-- Titlul "My Account" -->
             <h2 class="text-2xl font-bold my-account-title">My Account</h2>
+            
 
             <!-- Container Avatar cu Iconiță -->
             <div class="relative group">
@@ -109,10 +110,87 @@
                     </div> 
                 </div>
             @else
-                <!-- Alte secțiuni sau mesaje pentru admin sau secretary -->
+              
+            @if (Auth::user()->hasRole('secretary'))
                 <div class="relative -right-10 bg-blue-100 p-10 rounded-lg shadow-lg max-w-xl w-full">
-                    <h2 class="text-3xl font-semibold mb-4 text-center">Administrator Section</h2>
-                    <p class="text-lg">Specific information or functionality for admins and secretaries will be displayed here.</p>
+                    <h2 class="text-3xl font-semibold mb-4 text-center">Quick view of Upcoming Exams</h2>
+
+                <div id="exam-display" class="space-y-4">
+                 <!-- Examenul curent va fi afișat aici -->
+                </div>
+
+                <div class="flex justify-between mt-4">
+                    <button id="prev-btn" class="bg-blue-500 text-white px-4 py-2 rounded disabled:opacity-50" disabled>Previous</button>
+                    <button id="next-btn" class="bg-blue-500 text-white px-4 py-2 rounded">Next</button>
+                </div>
+            </div>
+
+            <script>
+                let exams = @json($exams);  // Preia examenele din controller
+                let currentIndex = 0;
+
+            function displayExam(index) {
+                const examDisplay = document.getElementById('exam-display');
+                    if (exams.length > 0 && index >= 0 && index < exams.length) {
+                    const exam = exams[index];
+                    examDisplay.innerHTML = `
+                        <div class="bg-white p-4 rounded shadow space-y-8 text-lg">
+                            <p><strong>Faculty:</strong> ${exam.faculty}</p>
+                            <p><strong>Speciality:</strong> ${exam.speciality}</p>
+                            <p><strong>Group:</strong> ${exam.group}</p>
+                            <p><strong>Subject:</strong> ${exam.subject}</p>
+                            <p><strong>Exam Type:</strong> ${exam.exam_type}</p>
+                            <p><strong>Teacher:</strong> ${exam.teacher}</p>
+                            <p><strong>Other Examinators:</strong> ${exam.other_examinators ? exam.other_examinators : 'N/A'}</p>
+                            <p><strong>Room:</strong> ${exam.room}</p>
+                            <p><strong>Start Time:</strong> ${exam.start_time}</p>
+                            <p><strong>End Time:</strong> ${exam.end_time}</p>
+                        </div>
+                    `;
+                }
+            }
+
+            document.getElementById('prev-btn').addEventListener('click', function() {
+                if (currentIndex > 0) {
+                    currentIndex--;
+                    displayExam(currentIndex);
+                    toggleButtons();
+                }
+            });
+
+            document.getElementById('next-btn').addEventListener('click', function() {
+                if (currentIndex < exams.length - 1) {
+                    currentIndex++;
+                    displayExam(currentIndex);
+                    toggleButtons();
+                }
+            });
+
+            function toggleButtons() {
+                document.getElementById('prev-btn').disabled = currentIndex === 0;
+                document.getElementById('next-btn').disabled = currentIndex === exams.length - 1;
+            }
+
+            // Afișează primul examen la încărcare
+            displayExam(currentIndex);
+            toggleButtons();
+            </script>
+            @endif
+
+            @if (Auth::user()->hasRole('admin'))
+            <!-- Card pentru utilizatorii cu rolul de admin -->
+            <div class="relative -right-10 bg-blue-100 p-10 rounded-lg shadow-lg max-w-xl w-full">
+                <h2 class="text-3xl font-semibold mb-4 text-center">Admin Dashboard</h2>
+
+                <div class="space-y-8 text-lg">
+                    <p><strong>Number of Secretaries:</strong> {{ $numSecretaries }}</p>
+                    <p><strong>Number of Teachers:</strong> {{ $numTeachers }}</p>
+                    <p><strong>Number of Students:</strong> {{ $numStudents }}</p>
+                </div>
+            </div>
+            @endif
+
+                    </div>
                 </div>
             @endif
         </div>
@@ -178,22 +256,6 @@
                         <p><strong>End Time:</strong> {{ $recentExam->end_time }}</p>
                         <p><strong>Room:</strong> {{ $recentExam->room->name ?? 'N/A' }}</p>
 
-                        <!-- Afișează alți examinatori pe aceeași linie -->
-                        @if ($otherExaminatorsRecent && count($otherExaminatorsRecent) > 0)
-                            <p><strong>Other Examinators:</strong> {{ implode(', ', $otherExaminatorsRecent) }}</p>
-                        @else
-                            <p><strong>Other Examinators:</strong> -</p>
-                        @endif
-
-                        @if (Auth::user()->hasRole('student'))
-                            <p><strong>Grade:</strong> {{ $recentExam->grade ?? 'Not available' }}
-                            @if(isset($recentExam->grade) && $recentExam->grade > 5)
-                                <span class="text-green-500"> - Passed</span>
-                            @else 
-                                <span class="text-red-500"> - Failed</span>
-                            @endif
-                            </p>                        
-                        @endif
                     @else
                         <p>No past exams available.</p>
                     @endif
@@ -219,11 +281,7 @@
                         <p><strong>End Time:</strong> {{ $upcomingExam->end_time }}</p>
                         <p><strong>Room:</strong> {{ $upcomingExam->room->name ?? 'N/A' }}</p>
                         
-                        @if ($otherExaminatorsUpcoming && count($otherExaminatorsUpcoming) > 0)
-                            <p><strong>Other Examinators:</strong> {{ implode(', ', $otherExaminatorsUpcoming) }}</p>
-                        @else
-                            <p><strong>Other Examinators:</strong> -</p>
-                        @endif
+                        
                     @else
                         <p>No upcoming exams available.</p>
                     @endif
