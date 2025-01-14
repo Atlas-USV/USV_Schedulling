@@ -4,38 +4,73 @@ namespace Database\Seeders;
 
 use App\Models\Subject;
 use Illuminate\Database\Seeder;
-use Illuminate\Support\Facades\Http;
 use Illuminate\Support\Facades\Storage;
-use Illuminate\Database\Console\Seeds\WithoutModelEvents;
 
 class SubjectsSeeder extends Seeder
 {
     /**
-     * Run the database seeds.
+     * Rulează seeder-ul.
      */
     public function run()
     {
-      
-
-        $json = Storage::get('subgrupe.json');
+        // Citește fișierul JSON
+        $json = Storage::get('subgroup_details.json');
         $data = json_decode($json, true);
-        $topics = [];
+        $uniqueTopics = []; // Array pentru subiecte unice
+
         if (is_array($data)) {
             foreach ($data as $item) {
-                if (isset($item['topicShortName']) && (!empty($item['topicShortName']) || $item['topicShortName'] != null)) {
-                    $topics[$item['topicLongName']] = [
-                        'short_name' => $item['topicShortName'],
-                        'name' => $item['topicLongName'],
-                    ];
+                if (isset($item['details'][1])) {
+                    $groups = $item['details'][1];
+                    foreach ($groups as $groupId => $groupData) {
+                        if (strpos($groupData[1], 'FIESC') !== false) {
+                            foreach ($item['details'][0] as $subject) {
+                                if (
+                                    isset($subject['topicShortName'], $subject['topicLongName']) &&
+                                    !empty($subject['topicShortName']) &&
+                                    !empty($subject['topicLongName'])
+                                ) {
+                                    $year = $this->extractYearFromGroup($groupData[1]);
+
+                                    // Creează cheia unică pentru verificare
+                                    $uniqueKey = $subject['topicShortName'] . '-' . $year;
+
+                                    if (!isset($uniqueTopics[$uniqueKey])) {
+                                        // Adaugă subiectul în array-ul unic
+                                        $uniqueTopics[$uniqueKey] = [
+                                            'short_name' => $subject['topicShortName'],
+                                            'name' => $subject['topicLongName'],
+                                            'faculty_id' => 1, // ID-ul FIESC
+                                            'year' => $year,
+                                        ];
+                                    }
+                                }
+                            }
+                        }
+                    }
                 }
             }
         }
 
-        Subject::insert(array_map(function ($topic) {
-            return [
-            'short_name' => $topic['short_name'],
-            'name' => $topic['name'],
-            ];
-        }, $topics));
+        // Inserăm subiectele unice în baza de date
+        if (!empty($uniqueTopics)) {
+            Subject::insert(array_values($uniqueTopics));
+        }
+
+        $this->command->info('Inserare completă fără duplicate.');
+    }
+
+    /**
+     * Extrage anul din informațiile grupei.
+     *
+     * @param string $groupData
+     * @return int
+     */
+    private function extractYearFromGroup(string $groupData): int
+    {
+        if (preg_match('/C an (\d)/', $groupData, $matches)) {
+            return (int) $matches[1];
+        }
+        return 0; // An necunoscut
     }
 }
