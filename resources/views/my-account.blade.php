@@ -180,9 +180,9 @@
             @if (Auth::user()->hasRole('admin'))
             <!-- Card pentru utilizatorii cu rolul de admin -->
             <div class="relative -right-10 bg-blue-100 p-10 rounded-lg shadow-lg max-w-xl w-full">
-                <h2 class="text-3xl font-semibold mb-4 text-center">Admin Dashboard</h2>
+                <h2 class="text-3xl font-semibold mb-10 text-center">Quick view of Users Management</h2>
 
-                <div class="space-y-8 text-lg">
+                <div class="space-y-8 text-lg justify">
                     <p><strong>Number of Secretaries:</strong> {{ $numSecretaries }}</p>
                     <p><strong>Number of Teachers:</strong> {{ $numTeachers }}</p>
                     <p><strong>Number of Students:</strong> {{ $numStudents }}</p>
