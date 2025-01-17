@@ -65,16 +65,17 @@ class User extends Authenticatable implements MustVerifyEmail
         return $this->belongsTo(Speciality::class, 'speciality_id');
     }
 
-    public function faculty(): BelongsTo
+    public function faculty()
     {
         if ($this->hasRole(ERoles::STUDENT)) {
-            // return $this->belongsTo(Faculty::class, 'speciality_id', 'id')
-            //         ->join('specialities', 'faculties.id', '=', 'specialities.faculty_id');
-            return $this->hasOneThrough(Faculty::class, Speciality::class);
-            }
+            return $this->hasOneThrough(Faculty::class, Speciality::class, 'id', 'id', 'speciality_id', 'faculty_id');
+        }
         return $this->belongsTo(Faculty::class, 'teacher_faculty_id');
     }
-
+    // public function getFacultyAttribute(): ?Faculty
+    // {
+    //     return $this->getFaculty();
+    // }
     public function groups(): BelongsToMany
     {
         return $this->belongsToMany(Group::class, 'user_group', 'user_id', 'group_id')

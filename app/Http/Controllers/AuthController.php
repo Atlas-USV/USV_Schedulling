@@ -147,10 +147,6 @@ class AuthController extends Controller
         
         // Cookie::queue(Cookie::forget('laravel_session'));
         // Cookie::queue(Cookie::forget('XSRF-TOKEN'));
-<<<<<<< Updated upstream
-        return redirect('/');
-=======
         return redirect('home');
->>>>>>> Stashed changes
     }
 }

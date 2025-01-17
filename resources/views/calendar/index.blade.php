@@ -26,7 +26,8 @@
         window.rooms = @json($rooms);
         window.subjects = @json($subjects);
         // Get current user data and roles as JSON objects
-        window.currentUser = @json(auth()->user()->load(['faculty', 'speciality']));
+        window.currentUser = @json(auth()->user()->load(['speciality', 'faculty']));
+        console.log(window.currentUser)
         window.userRoles = @json(auth()->user()->roles->pluck('name'));
         // Filter cadri if user is secretary and not admin
         if (window.userRoles.includes('secretary')) {

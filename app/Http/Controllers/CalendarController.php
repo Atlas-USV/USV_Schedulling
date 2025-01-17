@@ -95,7 +95,7 @@ class CalendarController extends Controller
                     'teacher_id' => $evaluation->teacher_id,
                     'subject' => $evaluation->subject,
                     'color' => $eventColor,
-                    'faculty' => $evaluation->teacher->faculty // Now efficiently loaded
+                    'faculty' => $evaluation->teacher->faculty// Now efficiently loaded
                 ];
             });
 
