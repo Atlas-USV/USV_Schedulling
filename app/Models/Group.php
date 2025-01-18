@@ -17,6 +17,12 @@ class Group extends Model
     use HasFactory;
     protected $fillable = ['name', 'speciality_id', 'study_year', 'number'];
 
+    public function evaluations()
+    {
+    return $this->hasMany(Evaluation::class,'group_id');
+    }
+
+
     public function speciality(): BelongsTo
     {
         return $this->belongsTo(Speciality::class);
@@ -32,5 +38,6 @@ class Group extends Model
     {
         return $this->belongsToThrough(Faculty::class, Speciality::class);
     }
+    
     
 }

@@ -1,6 +1,7 @@
 <?php
 
 namespace App\Http\Controllers;
+use Illuminate\Foundation\Auth\AuthenticatesUsers;
 use App\Models\User;
 use App\Models\Group;
 use App\Models\Invitation;
@@ -140,7 +141,7 @@ class AuthController extends Controller
     public function logout(Request $request)
     {
         Auth::logout();
-
+    
         $request->session()->invalidate();
         $request->session()->regenerateToken();
 
@@ -148,4 +149,5 @@ class AuthController extends Controller
        
         return redirect('/');
     }
+    
 }

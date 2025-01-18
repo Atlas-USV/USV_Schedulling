@@ -4,7 +4,7 @@
 
 @section('content')
 
-<div class="container mx-auto p-4">
+<div class="container mx-auto p-4 dark:text-gray-100">
     <div class="flex items-center justify-between mb-6">
         <h1 class="text-2xl font-semibold">Requests</h1>
         <a href="{{ route('requests.create') }}" class="bg-blue-600 text-white px-4 py-2 rounded-lg hover:bg-blue-700">

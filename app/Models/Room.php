@@ -12,5 +12,15 @@ class Room extends Model
 
     protected $fillable = ['name', 'block', 'short_name'];
 
+    public static function validationRules(): array
+{
+    return [
+        'name' => 'nullable|string|max:255',
+        'block' => 'nullable|string|max:50',
+        'short_name' => 'nullable|string|max:50',
+    ];
+}
+
+
     
 }

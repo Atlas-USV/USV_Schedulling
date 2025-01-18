@@ -95,7 +95,7 @@ class CalendarController extends Controller
                     'teacher_id' => $evaluation->teacher_id,
                     'subject' => $evaluation->subject,
                     'color' => $eventColor,
-                    'faculty' => $evaluation->teacher->faculty// Now efficiently loaded
+                    'faculty' => $evaluation->teacher->faculty // Now efficiently loaded
                 ];
             });
 
@@ -164,8 +164,8 @@ class CalendarController extends Controller
     
     public function create(Request $request)
     {
-       // Log::info('Request: ', ['request' =>$request->all()]);
-    //    'exam_date' => Carbon::parse($data['start_time'])->format('Y-m-d'),
+      //Log::info('Request: ', ['request' =>$request->all()]);
+     //'exam_date' => Carbon::parse($data['start_time'])->format('Y-m-d'),
     try {
         $baseRules = [
             'type' => 'required|in:exam,colloquium,project,reexamination,retake',

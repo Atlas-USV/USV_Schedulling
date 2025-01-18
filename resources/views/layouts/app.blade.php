@@ -7,6 +7,14 @@
    
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/toastr.js/latest/css/toastr.min.css">
 
+    <script>
+        // On page load or when changing themes, best to add inline in `head` to avoid FOUC
+        if (localStorage.getItem('color-theme') === 'dark' || (!('color-theme' in localStorage) && window.matchMedia('(prefers-color-scheme: dark)').matches)) {
+            document.documentElement.classList.add('dark');
+        } else {
+            document.documentElement.classList.remove('dark')
+        }
+    </script>
 
     <script type="importmap">
     {
@@ -23,6 +31,8 @@
       <title>@yield('title', 'App')</title>
     @vite(['resources/css/app.css','resources/js/app.js'])
 
+    <!-- Page-specific Styles and Scripts -->
+    @yield('head')
 </head>
 
 
@@ -40,7 +50,50 @@
 </script>
 
 
+
 <body class="bg-gray-50 dark:bg-gray-800">
+
+<!-- Navbar doar cu iconița "My Account" -->
+<nav class=" bg-white border-gray-500 dark:bg-gray-900">
+    <div class="flex flex-wrap items-center justify-end mx-auto p-6 ">
+        <div class="flex items-center space-x-3 rtl:space-x-reverse">
+            <button type="button" class="flex text-sm bg-gray-800 rounded-full md:me-0 focus:ring-4 focus:ring-gray-300 dark:focus:ring-gray-600" id="user-menu-button" aria-expanded="false" data-dropdown-toggle="user-dropdown" data-dropdown-placement="bottom">
+                <span class="sr-only">Open user menu</span>
+                @if ($user->avatar)
+                    <img src="{{ asset('storage/' . $user->avatar) }}" alt="Avatar"
+                        class="w-10 h-10 rounded-full object-cover border">
+                @else
+                    <div class="w-10 h-10 rounded-full bg-gray-200 flex items-center justify-center text-gray-500 text-2xl">
+                        <span>{{ strtoupper(substr($user->name, 0, 1)) }}</span>
+                    </div>
+                @endif
+            </button>
+            <!-- Dropdown menu -->
+            <div class="z-50 hidden my-4 text-base list-none bg-white divide-y divide-gray-100 rounded-lg shadow dark:bg-gray-700 dark:divide-gray-600" id="user-dropdown">
+                <div class="px-4 py-3">
+                    <span class="block text-sm text-gray-900 dark:text-white">{{ $user->name }}</span>
+                    <span class="block text-sm text-gray-500 truncate dark:text-gray-400">{{ $user->email }}</span>
+                </div>
+                <ul class="py-2" aria-labelledby="user-menu-button">
+                    <li>
+                        <a href="{{ route('user.my-account') }}"  class="block px-4 py-2 text-sm text-gray-700 hover:bg-gray-100 dark:hover:bg-gray-600 dark:text-gray-200 dark:hover:text-white">My Account</a>
+                    </li>
+                    <li>
+    <form action="{{ route('logout') }}" method="GET">
+        @csrf
+        <button type="submit" class="block px-4 py-2 text-sm text-gray-700 hover:bg-gray-100 dark:hover:bg-gray-600 dark:text-gray-200 dark:hover:text-white">
+            Sign out
+        </button>
+    </form>
+</li>
+
+                </ul>
+            </div>
+        </div>
+    </div>
+</nav>
+
+
 <div class=" pt-8  bg-gray-50 dark:bg-gray-900">
   <button data-drawer-target="default-sidebar" data-drawer-toggle="default-sidebar" aria-controls="default-sidebar" type="button" class="inline-flex items-center p-2 mt-2 ms-3 text-sm text-gray-500 rounded-lg sm:hidden hover:bg-gray-100 focus:outline-none focus:ring-2 focus:ring-gray-200 dark:text-gray-400 dark:hover:bg-gray-700 dark:focus:ring-gray-600">
     <span class="sr-only">Open sidebar</span>
@@ -266,10 +319,70 @@ $statusChangedRequests = App\Models\Request::where('sender_id', Auth::id())
                   <span class="ml-3">Contact Us</span>
               </a>
           </li>
+
+           <!-- Meniu pentru schimbarea temei -->
+        <li>
+          <div class="overflow-y-auto py-5 px-2 dark:text-gray-100">
+              <label for="theme-toggle" class="flex items-center cursor-pointer">
+                  <span class="mr-2">Light/Dark Mode</span> 
+                  <input type="checkbox" id="theme-toggle" class="hidden">
+                  <div class="relative">
+                      <div class="switch-bg w-10 h-6 bg-gray-300 rounded-full shadow-inner transition-colors duration-300 ease-in-out"></div>
+                      <div class="dot absolute w-6 h-6 bg-white rounded-full shadow inset-y-0 left-0 transition-transform duration-300 ease-in-out transform"></div>
+                  </div>
+              </label>
+          </div>
+        </li>
+
       </ul>
 
       
   </div>
+
+  <style>
+        /* Schimbă fundalul switch-ului și poziția bulinei când este activ */
+        #theme-toggle:checked + div .switch-bg {
+            background-color: #3b82f6; /* Culoarea albastră */
+        }
+        #theme-toggle:checked + div .dot {
+            transform: translateX(1.5rem); /* Mută bulina în partea dreaptă */
+        }
+
+        /* Stiluri pentru titlul My Account în modul întunecat */
+        body.dark .my-account-title {
+            color: #E2E8F0; /* O nuanță deschisă pentru a contrasta cu fundalul întunecat */
+        }
+    </style>
+
+<script>
+    document.addEventListener('DOMContentLoaded', function () {
+    const themeSwitch = document.getElementById('theme-toggle');
+
+    // Check the current theme from localStorage
+    const currentTheme = localStorage.getItem('color-theme');
+
+    if (currentTheme === 'dark') {
+        document.documentElement.classList.add('dark');
+        themeSwitch.checked = true; // Set the switch to 'checked' for dark mode
+    } else {
+        document.documentElement.classList.remove('dark');
+        themeSwitch.checked = false; // Set the switch to 'unchecked' for light mode
+    }
+
+    // Listen for changes on the switch
+    themeSwitch.addEventListener('change', function () {
+        if (themeSwitch.checked) {
+            document.documentElement.classList.add('dark'); // Enable dark mode
+            localStorage.setItem('color-theme', 'dark'); // Store the preference
+        } else {
+            document.documentElement.classList.remove('dark'); // Disable dark mode
+            localStorage.setItem('color-theme', 'light'); // Store the preference
+        }
+    });
+});
+
+</script>
+
  
 </aside>
 <div id="main-content" class="sm:ml-64 relative  h-full bg-gray-50 lg:ml-64 dark:bg-gray-900">

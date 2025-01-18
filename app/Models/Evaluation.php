@@ -120,10 +120,9 @@ class Evaluation extends Model
         return $value ?? 'N/A'; // Default to 'N/A' if null
     }
 
-    // Get all the other examinators
-    public function getOtherExaminatorsAttribute($value)
+    public function otherExaminators()
     {
-        return json_decode($value);
+        return $this->belongsToMany(User::class, 'evaluation_examinator', 'evaluation_id', 'teacher_id');
     }
 
     public function creator()
