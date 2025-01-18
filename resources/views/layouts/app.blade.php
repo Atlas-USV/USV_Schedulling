@@ -7,6 +7,14 @@
    
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/toastr.js/latest/css/toastr.min.css">
 
+    <script>
+        // On page load or when changing themes, best to add inline in `head` to avoid FOUC
+        if (localStorage.getItem('color-theme') === 'dark' || (!('color-theme' in localStorage) && window.matchMedia('(prefers-color-scheme: dark)').matches)) {
+            document.documentElement.classList.add('dark');
+        } else {
+            document.documentElement.classList.remove('dark')
+        }
+    </script>
 
     <script type="importmap">
     {
@@ -23,6 +31,8 @@
       <title>@yield('title', 'App')</title>
     @vite(['resources/css/app.css','resources/js/app.js'])
 
+    <!-- Page-specific Styles and Scripts -->
+    @yield('head')
 </head>
 
 
@@ -44,7 +54,7 @@
 <body class="bg-gray-50 dark:bg-gray-800">
 
 <!-- Navbar doar cu iconița "My Account" -->
-<nav class="navbar bg-white border-gray-500 dark:bg-gray-900">
+<nav class=" bg-white border-gray-500 dark:bg-gray-900">
     <div class="max-w-screen-xl flex flex-wrap items-center justify-end mx-auto p-6 ">
         <div class="flex items-center space-x-3 rtl:space-x-reverse">
             <button type="button" class="flex text-sm bg-gray-800 rounded-full md:me-0 focus:ring-4 focus:ring-gray-300 dark:focus:ring-gray-600" id="user-menu-button" aria-expanded="false" data-dropdown-toggle="user-dropdown" data-dropdown-placement="bottom">
@@ -357,27 +367,32 @@ $statusChangedRequests = App\Models\Request::where('sender_id', Auth::id())
     </style>
 
 <script>
-    document.addEventListener('DOMContentLoaded', function() {
-        const themeToggle = document.getElementById('theme-toggle');
-        const body = document.body;
+    document.addEventListener('DOMContentLoaded', function () {
+    const themeSwitch = document.getElementById('theme-toggle');
 
-        // Verifică dacă tema este deja setată în localStorage
-        if (localStorage.getItem('theme') === 'dark') {
-            body.classList.add('dark');
-            themeToggle.checked = true;
+    // Check the current theme from localStorage
+    const currentTheme = localStorage.getItem('color-theme');
+
+    if (currentTheme === 'dark') {
+        document.documentElement.classList.add('dark');
+        themeSwitch.checked = true; // Set the switch to 'checked' for dark mode
+    } else {
+        document.documentElement.classList.remove('dark');
+        themeSwitch.checked = false; // Set the switch to 'unchecked' for light mode
+    }
+
+    // Listen for changes on the switch
+    themeSwitch.addEventListener('change', function () {
+        if (themeSwitch.checked) {
+            document.documentElement.classList.add('dark'); // Enable dark mode
+            localStorage.setItem('color-theme', 'dark'); // Store the preference
+        } else {
+            document.documentElement.classList.remove('dark'); // Disable dark mode
+            localStorage.setItem('color-theme', 'light'); // Store the preference
         }
-
-        // Ascultă evenimentul de schimbare pe checkbox
-        themeToggle.addEventListener('change', function() {
-            if (this.checked) {
-                body.classList.add('dark');
-                localStorage.setItem('theme', 'dark');
-            } else {
-                body.classList.remove('dark');
-                localStorage.setItem('theme', 'light');
-            }
-        });
     });
+});
+
 </script>
 
  
