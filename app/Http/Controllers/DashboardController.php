@@ -3,12 +3,14 @@
 namespace App\Http\Controllers;
 
 use App\Models\Room;
+use App\Models\Task;
 use App\Models\User;
 use App\Models\Group;
 use App\Models\Faculty;
 use App\Models\Subject;
 use Illuminate\Http\Request;
-use App\Models\Task;
+use Illuminate\Support\Collection;
+use Illuminate\Pagination\LengthAwarePaginator;
 
 class DashboardController extends Controller
 {
@@ -177,8 +179,17 @@ public function showExams(Request $request)
 
         // Verifică dacă utilizatorul are grupe asociate
         if ($groupIds->isEmpty()) {
+            // Create an empty paginator
+            $emptyPaginator = new LengthAwarePaginator(
+                Collection::make(), // Empty collection
+                0, // Total items
+                15, // Items per page
+                1, // Current page
+                ['path' => request()->url(), 'query' => request()->query()] // Pagination URL parameters
+            );
+        
             return view('exams.index', [
-                'exams' => \Illuminate\Pagination\LengthAwarePaginator::empty(), // Paginator gol
+                'exams' => $emptyPaginator,
                 'subjects' => \App\Models\Subject::all(),
             ]);
         }
