@@ -1,6 +1,7 @@
 # Project Name
 
-Brief description of your project.
+USV - Atlas Project.
+This is an application used to make schedulling exams easier for everyone involved (students, teachers and secretary).
 
 ## Prerequisites
 
