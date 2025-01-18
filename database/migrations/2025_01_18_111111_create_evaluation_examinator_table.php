@@ -14,10 +14,18 @@ class CreateEvaluationExaminatorTable extends Migration
             $table->foreignId('teacher_id')->constrained('users')->onDelete('cascade');
             $table->timestamps();
         });
+
+        Schema::table('evaluations', function (Blueprint $table) {
+            $table->dropColumn('other_examinators');
+        });
     }
 
     public function down()
     {
+        Schema::table('evaluations', function (Blueprint $table) {
+            $table->json('other_examinators')->nullable();
+        });
+
         Schema::dropIfExists('evaluation_examinator');
     }
-} 
+}

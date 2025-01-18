@@ -4,7 +4,7 @@
     <div class="relative w-full mx-auto mt-8 min-h-screen">
         <div class="flex items-center justify-center mb-4 space-x-4">
             <!-- Titlul "My Account" -->
-            <h2 class="text-2xl font-bold my-account-title">My Account</h2>
+            <h2 class="text-2xl font-bold my-account-title dark:text-gray-200">My Account</h2>
             
 
             <!-- Container Avatar cu Iconiță -->

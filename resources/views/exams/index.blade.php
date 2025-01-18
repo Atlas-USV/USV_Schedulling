@@ -5,9 +5,9 @@
 @section('content')
 <div class="flex items-center justify-between mb-6">
     @if(auth()->user()->hasRole('teacher'))
-        <h1 class="text-3xl font-bold">Exams You Teach</h1>
+        <h1 class="text-3xl font-bold text-gray-500 dark:text-gray-200">Exams You Teach</h1>
     @else
-        <h1 class="text-3xl font-bold">Exams for Your Group</h1>
+        <h1 class="text-3xl font-bold text-gray-500 dark:text-gray-200">Exams for Your Group</h1>
     @endif
     <!-- Button for PDF download -->
     <button id="download-pdf" class="bg-green-600 text-white px-4 py-2 rounded-lg hover:bg-green-700">

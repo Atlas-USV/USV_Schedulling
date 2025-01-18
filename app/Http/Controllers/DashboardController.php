@@ -29,13 +29,18 @@ class DashboardController extends Controller
         // Obține ID-ul grupei utilizatorului autentificat
         $groupIds = auth()->user()->groups()->select('groups.id')->pluck('id'); // Obține un array cu ID-urile grupelor
 
-    // Filtrează examenele pentru grupa utilizatorului
-    $upcomingExams = \App\Models\Evaluation::where('group_id', $groupIds) 
-        ->where('status', 'accepted')
-        ->where('exam_date', '>=', now())
-        ->orderBy('exam_date', 'asc')
-        ->take(4)
-        ->get();
+        \Log::info('Group IDs:', ['groupIds' => $groupIds]); // Log the group IDs
+
+        // Filtrează examenele pentru grupa utilizatorului doar dacă există ID-uri de grup
+        $upcomingExams = collect(); // Initializează o colecție goală
+        if ($groupIds->isNotEmpty()) {
+            $upcomingExams = \App\Models\Evaluation::whereIn('group_id', $groupIds)
+            ->where('status', 'accepted')
+            ->where('exam_date', '>=', now())
+            ->orderBy('exam_date', 'asc')
+            ->take(4)
+            ->get();
+        }
 
         $userName = auth()->user()->name;
 
