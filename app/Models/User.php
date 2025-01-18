@@ -135,14 +135,14 @@ public function evaluations()
         return $evaluation ? $evaluation->year_of_study : 'N/A'; // Returnează anul de studiu sau 'N/A'
     }
 
-    public function getYearsOfWork()
-    {
-        if (!$this->year_of_start) 
-        {
-            return 'N/A';
-        }
-        return now()->year - $this->year_of_start;
-    }
+    // public function getYearsOfWork()
+    // {
+    //     if (!$this->year_of_start) 
+    //     {
+    //         return 'N/A';
+    //     }
+    //     return now()->year - $this->year_of_start;
+    // }
 
 
 

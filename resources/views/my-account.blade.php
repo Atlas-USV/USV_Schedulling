@@ -54,17 +54,17 @@
                     @if (Auth::user()->hasRole('student'))
                         <p><strong>Speciality:</strong> {{ $speciality }}</p>
                         <p><strong>Group:</strong> {{ $group }}</p>
-                        <p><strong>Year of Study:</strong> {{ $yearOfStudy }}</p>
+                        <!-- <p><strong>Year of Study:</strong> {{ $yearOfStudy }}</p> -->
                     @endif
 
                     @if (Auth::user()->hasRole('teacher'))
                         <p><strong>Faculty:</strong> {{ $faculty }}</p>
-                        <p><strong>Years of Work:</strong> {{ $yearsOfWork }} years</p>
+                        <!-- <p><strong>Years of Work:</strong> {{ $yearsOfWork }} years</p> -->
                     @endif
 
                     @if (Auth::user()->hasRole('secretary'))
                         <p><strong>Faculty:</strong> {{ $faculty }}</p>
-                        <p><strong>Years of Work:</strong> {{ $yearsOfWork }} years</p>
+                        <!-- <p><strong>Years of Work:</strong> {{ $yearsOfWork }} years</p> -->
                     @endif
 
                 </div>      

@@ -177,8 +177,8 @@ class UserController extends Controller
         $group = $user->groups->pluck('name')->join(', ') ?: 'N/A';
         $faculty = $user->faculty ? $user->faculty->name : 'N/A';
         $role = $user->getRoleNames()->first();
-        $yearOfStudy = $user->getYearOfStudy(); // Obține anul de studiu
-        $yearsOfWork = $user->getYearsOfWork();
+        // $yearOfStudy = $user->getYearOfStudy(); // Obține anul de studiu
+        // $yearsOfWork = $user->getYearsOfWork();
 
         // Datele necesare pentru profesori
         $teacherGroups = $user->groups->pluck('name')->join(', ') ?: 'N/A';
@@ -187,7 +187,7 @@ class UserController extends Controller
         // Returnează view-ul cu toate datele
         return view('my-account', compact(
             'user', 'speciality', 'group', 'role', 'faculty',
-            'yearOfStudy', 'yearsOfWork', 'teacherGroups', 'teacherSpeciality',
+             'teacherGroups', 'teacherSpeciality',
             'upcomingExam', 'recentExam', 'otherExaminatorsRecent', 'otherExaminatorsUpcoming', 'exams', 'numSecretaries', 
             'numTeachers', 
             'numStudents'
