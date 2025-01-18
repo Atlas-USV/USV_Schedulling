@@ -105,7 +105,7 @@ public function evaluations()
         if ($this->hasRole(ERoles::STUDENT)) {
             // return $this->belongsTo(Faculty::class, 'speciality_id', 'id')
             //         ->join('specialities', 'faculties.id', '=', 'specialities.faculty_id');
-            return $this->hasOneThrough(Faculty::class, Speciality::class);
+            return $this->belongsTo(Faculty::class, Speciality::class);
             }
         return $this->belongsTo(Faculty::class, 'teacher_faculty_id');
     }
