@@ -19,26 +19,56 @@ class UserController extends Controller
     public function index()
     {
 
-        $users = User::with(['groups', 'faculty', 'roles', 'speciality'])->paginate(10);
+        $users = User::with([ 'faculty', 'roles', 'speciality'])->paginate(10);
+
+         // Obține toate grupurile asociate utilizatorilor
+    $userGroups = \DB::table('user_group')
+    ->join('groups', 'user_group.group_id', '=', 'groups.id')
+    ->select('user_group.user_id', 'groups.name as group_name')
+    ->get()
+    ->groupBy('user_id'); // Grupăm grupurile după `user_id`
+
+
         $roles = Role::all();
 
-        return view('users.index', compact('users', 'roles'));
+        return view('users.index', compact('users', 'roles', 'userGroups'));
     }
 
     public function edit($id)
-    {
-        $user = User::with('groups', 'faculty')->findOrFail($id);
-        $groups = Group::all();
-        $faculties = Faculty::all();
-        $roles = Role::all()->pluck('id','name')->toArray();
-        $specialities = Speciality::all();
-        $isLeader = $user->hasPermissionTo(EPermissions::PROPOSE_EXAM->value);
-        
-        return view('users.edit', compact('user', 'groups', 'faculties', 'roles', 'specialities', 'isLeader'));
+{
+   
+
+    $user = User::find($id);
+
+    if (!$user) {
+        \Log::error('User not found with ID: ' . $id);
+        abort(404, 'User not found');
     }
 
+    
+
+    $groups = Group::all();
+    $faculties = Faculty::all();
+    $roles = Role::all()->pluck('id', 'name')->toArray();
+    $specialities = Speciality::all();
+    $isLeader = $user->hasPermissionTo(EPermissions::PROPOSE_EXAM->value);
+
+    
+
+    
+    return view('users.edit', [
+        'editUser' => $user, // Variabilă redenumită
+        'groups' => $groups,
+        'faculties' => $faculties,
+        'roles' => $roles,
+        'specialities' => $specialities,
+        'isLeader' => $isLeader,
+    ]);
+}
+
     public function update(Request $request, $id)
-    {
+    {   
+        
         // dd($request);
         $request->validate([
             'name' => 'required|string|max:255',

@@ -12,20 +12,20 @@
         </div>
     @endif
 
-    <form action="{{ route('users.update', $user->id) }}" method="POST">
+    <form action="{{ route('users.update', $editUser->id) }}" method="POST">
         @csrf
         @method('PUT')
 
         <!-- Name -->
         <div class="mb-4">
             <label for="name" class="block text-gray-700 font-medium mb-2">Name</label>
-            <input type="text" name="name" id="name" value="{{ $user->name }}" class="w-full border rounded px-3 py-2 focus:outline-none focus:ring-2 focus:ring-blue-500" required>
+            <input type="text" name="name" id="name" value="{{ $editUser->name }}" class="w-full border rounded px-3 py-2 focus:outline-none focus:ring-2 focus:ring-blue-500" required>
         </div>
 
         <!-- Email -->
         <div class="mb-4">
             <label for="email" class="block text-gray-700 font-medium mb-2">Email</label>
-            <input type="email" name="email" id="email" value="{{ $user->email }}" class="w-full border rounded px-3 py-2 focus:outline-none focus:ring-2 focus:ring-blue-500" required>
+            <input type="email" name="email" id="email" value="{{ $editUser->email }}" class="w-full border rounded px-3 py-2 focus:outline-none focus:ring-2 focus:ring-blue-500" required>
         </div>
 
         <!-- Faculty -->
@@ -34,7 +34,7 @@
             <select name="faculty_id" id="faculty_id" class="w-full border rounded px-3 py-2 focus:outline-none focus:ring-2 focus:ring-blue-500">
                 <option value="">Select Faculty</option>
                 @foreach($faculties as $faculty)
-                    <option value="{{ $faculty->id }}" {{ $user->teacher_faculty_id == $faculty->id ? 'selected' : '' }}>
+                    <option value="{{ $faculty->id }}" {{ $editUser->teacher_faculty_id == $faculty->id ? 'selected' : '' }}>
                         {{ $faculty->name }}
                     </option>
                 @endforeach
@@ -47,7 +47,7 @@
             <select name="group_id" id="group_id" class="w-full border rounded px-3 py-2 focus:outline-none focus:ring-2 focus:ring-blue-500">
                 <option value="">Select Group</option>
                 @foreach($groups as $group)
-                    <option value="{{ $group->id }}" {{ $user->groups->contains('id', $group->id) ? 'selected' : '' }}>
+                    <option value="{{ $group->id }}" {{ $editUser->groups->contains('id', $group->id) ? 'selected' : '' }}>
                         {{ $group->name }}
                     </option>
                 @endforeach
@@ -73,7 +73,7 @@
         
             <option value="">Choose</option>
             @foreach($roles as $name => $id)
-                <option value="{{ $name }}" {{ $user->roles->contains('name', $name) ? 'selected' : '' }}>
+                <option value="{{ $name }}" {{ $editUser->roles->contains('name', $name) ? 'selected' : '' }}>
                     {{ $name }}
                 </option>
             @endforeach
@@ -96,7 +96,7 @@
             <select name="speciality_id" id="speciality_id" class="w-full border rounded px-3 py-2 focus:outline-none focus:ring-2 focus:ring-blue-500">
                 <option value="">Select Speciality</option>
                 @foreach($specialities as $speciality)
-                    <option value="{{ $speciality->id }}" {{ $user->speciality_id == $speciality->id ? 'selected' : '' }}>
+                    <option value="{{ $speciality->id }}" {{ $editUser->speciality_id == $speciality->id ? 'selected' : '' }}>
                         {{ $speciality->name }}
                     </option>
                 @endforeach

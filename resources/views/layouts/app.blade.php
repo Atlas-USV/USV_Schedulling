@@ -56,6 +56,7 @@
     <nav class=" bg-white border-gray-500 dark:bg-gray-900">
         <div class="flex flex-wrap items-center justify-end mx-auto p-6 ">
         @if (Auth::check())
+       
             <div class="flex items-center space-x-3 rtl:space-x-reverse">
               
                     <button type="button"

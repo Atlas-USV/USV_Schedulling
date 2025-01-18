@@ -22,10 +22,14 @@
                     <td class="px-6 py-4">{{ $user->name }}</td>
                     <td class="px-6 py-4">{{ $user->email }}</td>
                     <td class="px-6 py-4">
-                        @foreach($user->groups as $group)
-                            {{ $group->name }}
-                        @endforeach
-                    </td>
+    @if(isset($userGroups[$user->id]))
+        @foreach($userGroups[$user->id] as $group)
+            {{ $group->group_name }}
+        @endforeach
+    @else
+        N/A
+    @endif
+</td>
                     <td class="px-6 py-4">{{ $user->faculty ? $user->faculty->short_name : ($user->speciality ? $user->speciality->faculty->short_name : 'N/A') }}</td>
                     <td class="px-6 py-4">{{ $user->speciality ? $user->speciality->name : 'N/A' }}</td>
                     <td class="px-6 py-4">

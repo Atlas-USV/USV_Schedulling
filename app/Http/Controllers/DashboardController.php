@@ -178,7 +178,7 @@ public function showExams(Request $request)
         // Verifică dacă utilizatorul are grupe asociate
         if ($groupIds->isEmpty()) {
             return view('exams.index', [
-                'exams' => collect([]), // Returnează o colecție goală
+                'exams' => \Illuminate\Pagination\LengthAwarePaginator::empty(), // Paginator gol
                 'subjects' => \App\Models\Subject::all(),
             ]);
         }
@@ -203,8 +203,8 @@ public function showExams(Request $request)
         });
     }
 
-    // Ordonează examenele crescător după dată
-    $exams = $query->orderBy('exam_date', 'asc')->get();
+    // Ordonează examenele crescător după dată și adaugă paginație
+    $exams = $query->orderBy('exam_date', 'asc')->paginate(10); // 10 examene per pagină
 
     // Obține toate subiectele pentru dropdown-ul de filtrare
     $subjects = \App\Models\Subject::all();

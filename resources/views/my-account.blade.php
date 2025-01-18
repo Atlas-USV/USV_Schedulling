@@ -54,7 +54,7 @@
                     @if (Auth::user()->hasRole('student'))
                         <p><strong>Speciality:</strong> {{ $speciality }}</p>
                         <p><strong>Group:</strong> {{ $group }}</p>
-                        <!-- <p><strong>Year of Study:</strong> {{ $yearOfStudy }}</p> -->
+                        
                     @endif
 
                     @if (Auth::user()->hasRole('teacher'))
