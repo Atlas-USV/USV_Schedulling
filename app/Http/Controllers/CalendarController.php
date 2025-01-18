@@ -59,7 +59,7 @@ class CalendarController extends Controller
     {
         try {
             // Enable query logging
-            \DB::enableQueryLog();
+           
 
             // Fetch evaluations from the database
             $evaluations = \App\Models\Evaluation::with([
@@ -73,9 +73,7 @@ class CalendarController extends Controller
             ->where('status', 'accepted')
             ->get();
 
-            // Log the executed query
-            $queries = \DB::getQueryLog();
-            \Log::info('Executed queries:', $queries);
+          
 
             // Transform evaluations into event format 
             $events = $evaluations->map(function ($evaluation) {
