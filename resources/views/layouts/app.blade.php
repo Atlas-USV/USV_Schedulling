@@ -69,8 +69,14 @@
                         <a href="{{ route('user.my-account') }}"  class="block px-4 py-2 text-sm text-gray-700 hover:bg-gray-100 dark:hover:bg-gray-600 dark:text-gray-200 dark:hover:text-white">My Account</a>
                     </li>
                     <li>
-                        <a href="{{ route('logout') }}"  class="block px-4 py-2 text-sm text-gray-700 hover:bg-gray-100 dark:hover:bg-gray-600 dark:text-gray-200 dark:hover:text-white">Sign out</a>
-                    </li>
+    <form action="{{ route('logout') }}" method="GET">
+        @csrf
+        <button type="submit" class="block px-4 py-2 text-sm text-gray-700 hover:bg-gray-100 dark:hover:bg-gray-600 dark:text-gray-200 dark:hover:text-white">
+            Sign out
+        </button>
+    </form>
+</li>
+
                 </ul>
             </div>
         </div>
@@ -246,8 +252,15 @@ $statusChangedRequests = App\Models\Request::where('sender_id', Auth::id())
                 <a href="{{ route('password.change') }}" class="flex items-center p-2 pl-11 w-full text-base font-normal text-gray-900 rounded-lg transition duration-75 group hover:bg-gray-100 dark:text-white dark:hover:bg-gray-700"><strong>Change Password</strong></a>
               </li>
               <li>
-                <a href="{{ route('login') }}" class="flex items-center p-2 pl-11 w-full text-base font-normal text-gray-900 rounded-lg transition duration-75 group hover:bg-gray-100 dark:text-white dark:hover:bg-gray-700"><strong>Log Out</strong></a>
-              </li>
+    <form action="{{ route('logout') }}" method="GET">
+        @csrf
+        <button type="submit" class="flex items-center p-2 pl-11 w-full text-base font-normal text-gray-900 rounded-lg transition duration-75 group hover:bg-gray-100 dark:text-white dark:hover:bg-gray-700">
+            <strong>Sign out</strong>
+        </button>
+    </form>
+</li>
+
+</form>              
               @endif
               @if(!Auth::check())
               <li>
@@ -311,7 +324,7 @@ $statusChangedRequests = App\Models\Request::where('sender_id', Auth::id())
 
            <!-- Meniu pentru schimbarea temei -->
         <li>
-          <div class="overflow-y-auto py-5 px-2">
+          <div class="overflow-y-auto py-5 px-2 dark:text-gray-100">
               <label for="theme-toggle" class="flex items-center cursor-pointer">
                   <span class="mr-2"><strong>Light/Dark Mode</strong></span> 
                   <input type="checkbox" id="theme-toggle" class="hidden">

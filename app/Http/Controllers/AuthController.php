@@ -141,13 +141,11 @@ class AuthController extends Controller
     public function logout(Request $request)
     {
         Auth::logout();
-
+    
         $request->session()->invalidate();
         $request->session()->regenerateToken();
-
-        
-        // Cookie::queue(Cookie::forget('laravel_session'));
-        // Cookie::queue(Cookie::forget('XSRF-TOKEN'));
-        return redirect('home');
+    
+        return redirect()->route('login');  // Redirecționare către login
     }
+    
 }

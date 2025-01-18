@@ -3,11 +3,11 @@
 @section('title', 'Exams')
 
 @section('content')
-<div class="flex items-center justify-between mb-6">
+<div class="flex items-center justify-between mb-6 dark:text-gray-100">
     @if(auth()->user()->hasRole('teacher'))
         <h1 class="text-3xl font-bold">Exams You Teach</h1>
     @else
-        <h1 class="text-3xl font-bold">Exams for Your Group</h1>
+        <h1 class="text-3xl font-bold">Exams for Your Group </h1>
     @endif
     <!-- Filter Form -->
     <form method="GET" action="{{ route('exams.index') }}" class="flex items-center space-x-2">

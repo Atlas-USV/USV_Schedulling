@@ -228,7 +228,7 @@
 
 
         <!-- Calendar Section -->
-        <div id="calendar" class="mt-4"></div> <!-- Added mt-4 for spacing -->
+        <div id="calendar" class="mt-4 dark:text-gray-100"></div> <!-- Added mt-4 for spacing -->
     </div>
 
     @auth

@@ -3,7 +3,7 @@
 @section('title', 'Mesaje')
 
 @section('content')
-<div class="container mx-auto p-4">
+<div class="container mx-auto p-4 dark:text-gray-100" >
     <h1 class="text-2xl font-semibold mb-4">Inbox</h1>
 
     @if($messages->isEmpty())

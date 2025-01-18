@@ -67,17 +67,6 @@
                         <p><strong>Years of Work:</strong> {{ $yearsOfWork }} years</p>
                     @endif
 
-                    <!-- Meniu pentru schimbarea temei -->
-                    <div class="flex justify mb-4">
-                        <label for="theme-toggle" class="flex items-center cursor-pointer">
-                            <span class="mr-2"><strong>Light/Dark Mode</strong></span> 
-                            <input type="checkbox" id="theme-toggle" class="hidden">
-                            <div class="relative">
-                                <div class="switch-bg w-10 h-6 bg-gray-300 rounded-full shadow-inner transition-colors duration-300 ease-in-out"></div>
-                                <div class="dot absolute w-6 h-6 bg-white rounded-full shadow inset-y-0 left-0 transition-transform duration-300 ease-in-out transform"></div>
-                            </div>
-                        </label>
-                    </div>
                 </div>      
             </div>
 
@@ -196,20 +185,7 @@
         </div>
     </div>
 
-    <style>
-        /* Schimbă fundalul switch-ului și poziția bulinei când este activ */
-        #theme-toggle:checked + div .switch-bg {
-            background-color: #3b82f6; /* Culoarea albastră */
-        }
-        #theme-toggle:checked + div .dot {
-            transform: translateX(1.5rem); /* Mută bulina în partea dreaptă */
-        }
-
-        /* Stiluri pentru titlul My Account în modul întunecat */
-        body.dark .my-account-title {
-            color: #E2E8F0; /* O nuanță deschisă pentru a contrasta cu fundalul întunecat */
-        }
-    </style>
+    
 
     <!-- Script pentru comutarea între History și Upcoming -->
     <script>
