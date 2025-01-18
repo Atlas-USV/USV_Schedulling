@@ -168,6 +168,7 @@ Route::middleware(['auth'])->group(function () {
     Route::put('/tasks/{id}', [TaskController::class, 'update'])->name('tasks.update');
     Route::get('/tasks/{id}/edit', [DashboardController::class, 'editTask'])->name('tasks.edit');
     Route::get('/exams', [DashboardController::class, 'showExams'])->name('exams.index');
+    Route::get('/exams/{exam}/calendar', [DashboardController::class, 'viewInCalendar'])->name('exams.calendar');
     Route::post('/contactus', [ContactUsController::class, 'submitContactUs'])->name('contactus.submit');
     Route::get('/contactus', [ContactUsController::class, 'showContactUs'])->name('contactus');
 });
