@@ -1,129 +1,80 @@
 document.addEventListener("DOMContentLoaded", () => {
     const addTaskButton = document.querySelector("[data-modal-target='addTaskModal']");
-    const newTaskTitleInput = document.getElementById("newTaskTitle");
-    const modalTaskTitleInput = document.getElementById("modalTaskTitle");
+    const modal = document.getElementById("addTaskModal");
+    const taskForm = document.querySelector('#addTaskModal form');
     const subjectSelect = document.getElementById("subject");
     const deadlineInput = document.getElementById("deadline");
     const descriptionInput = document.getElementById("description");
-    const modal = document.getElementById("addTaskModal");
-    const taskForm = document.querySelector('#addTaskModal form');
 
-    if (addTaskButton && newTaskTitleInput && modalTaskTitleInput && subjectSelect && deadlineInput && descriptionInput && modal) {
-        // Modal opening logic
-        addTaskButton.addEventListener("click", (event) => {
-            const taskTitle = newTaskTitleInput.value.trim();
-
-            if (!taskTitle) {
-                event.preventDefault();
-                newTaskTitleInput.classList.add("border-red-500");
-                
-                return;
-            }
-
-            newTaskTitleInput.classList.remove("border-red-500");
-            modalTaskTitleInput.value = taskTitle;
+    if (addTaskButton && modal) {
+        // Open modal on button click
+        addTaskButton.addEventListener("click", () => {
             modal.classList.remove("hidden");
             modal.classList.add("flex");
         });
 
-        // Form submission handling
-        if (taskForm) {
-            taskForm.addEventListener('submit', async (e) => {
-                e.preventDefault();
-
-                const selectedSubject = subjectSelect.value;
-                const deadlineValue = deadlineInput.value;
-                const descriptionValue = descriptionInput.value.trim();
-
-                let isValid = true;
-
-                  // Check if deadline is today
-            const selectedDate = new Date(deadlineValue);
-            const today = new Date();
-
-            // Reset both dates to midnight for date-only comparison
-            selectedDate.setHours(0, 0, 0, 0);
-            today.setHours(0, 0, 0, 0);
-
-            if (selectedDate.getTime() === today.getTime()) {
-                isValid = false;
-                deadlineInput.classList.add("border-red-500");
-               
-            } else {
-                deadlineInput.classList.remove("border-red-500");
-            }
-
-                if (!descriptionValue) {
-                    isValid = false;
-                    descriptionInput.classList.add("border-red-500");
-                    
-                }
-
-                if (!selectedSubject || selectedSubject === "") {
-                    isValid = false;
-                    
-                }
-
-                if (!deadlineValue) {
-                    isValid = false;
-                    
-                }
-
-                if (!isValid) {
-                    return;
-                }
-
-                try {
-                    const formData = new FormData(taskForm);
-                    
-                    const response = await fetch(taskForm.action, {
-                        method: 'POST',
-                        body: formData,
-                        headers: {
-                            'X-CSRF-TOKEN': document.querySelector('meta[name="csrf-token"]').content,
-                            'Accept': 'application/json'
-                        },
-                        credentials: 'same-origin'
-                    });
-
-                    if (response.ok) {
-                        // Reset form and inputs
-                        taskForm.reset();
-                        newTaskTitleInput.value = '';
-                        
-                        // Close modal
-                        modal.classList.add('hidden');
-                        modal.classList.remove('flex');
-                        
-                        c
-                        
-                        // Reload the page after a short delay
-                        setTimeout(() => {
-                            window.location.reload();
-                        }, 500);
-                    } else {
-                        const errorData = await response.json();
-                       
-                    }
-                } catch (error) {
-                    console.error('Error:', error);
-                    
-                }
-            });
-        }
-
-        // Modal close button handling
+        // Close modal
         const closeModalButtons = document.querySelectorAll("[data-modal-toggle]");
         closeModalButtons.forEach((closeButton) => {
             closeButton.addEventListener("click", () => {
                 modal.classList.add("hidden");
                 modal.classList.remove("flex");
-                // Reset form on modal close
                 if (taskForm) {
-                    taskForm.reset();
-                    newTaskTitleInput.value = '';
+                    taskForm.reset(); // Reset form when modal is closed
                 }
             });
+        });
+
+        // Handle form submission
+        if (taskForm) {
+            taskForm.addEventListener('submit', (e) => {
+                const selectedSubject = subjectSelect?.value || '';
+                const deadlineValue = deadlineInput?.value || '';
+                const descriptionValue = descriptionInput?.value.trim() || '';
+            
+                let isValid = true;
+            
+                // Client-side validation
+                if (!selectedSubject) {
+                    isValid = false;
+                    subjectSelect.classList.add("border-red-500");
+                } else {
+                    subjectSelect.classList.remove("border-red-500");
+                }
+            
+                if (!descriptionValue) {
+                    isValid = false;
+                    descriptionInput.classList.add("border-red-500");
+                } else {
+                    descriptionInput.classList.remove("border-red-500");
+                }
+            
+                const selectedDate = new Date(deadlineValue);
+                const today = new Date();
+                today.setHours(0, 0, 0, 0);
+            
+                if (!deadlineValue || selectedDate < today) {
+                    isValid = false;
+                    deadlineInput.classList.add("border-red-500");
+                } else {
+                    deadlineInput.classList.remove("border-red-500");
+                }
+            
+               
+            });
+        }
+        
+        // Keep the existing toast auto-hide functionality
+        document.addEventListener("DOMContentLoaded", () => {
+            const successToast = document.getElementById("toast-success");
+            const errorToast = document.getElementById("toast-error");
+        
+            if (successToast || errorToast) {
+                setTimeout(() => {
+                    successToast?.classList.add("hidden");
+                    errorToast?.classList.add("hidden");
+                }, 3000);
+            }
         });
     }
 

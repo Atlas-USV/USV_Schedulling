@@ -245,15 +245,28 @@ public function storeTask(Request $request)
             'deadline' => $validated['deadline'],
             'is_completed' => false,
         ]);
-        \Log::info('Redirecting with session', ['success' => session('toast_success')]);
 
+        // Adaugă log înainte de redirecționare
+        \Log::info('Session messages:', [
+            'toast_success' => 'Task added successfully!',
+        ]);
+        
         return redirect()->route('dashboard')->with('toast_success', 'Task added successfully!');
+        
     } catch (\Illuminate\Validation\ValidationException $e) {
         // Mesaje de validare detaliate
+        \Log::info('Session messages:', [
+            'toast_error' => implode(', ', $e->validator->errors()->all()),
+        ]);
+
         return redirect()->route('dashboard')
             ->with('toast_error', implode(', ', $e->validator->errors()->all()));
     } catch (\Exception $e) {
         // Mesaj de eroare general
+        \Log::info('Session messages:', [
+            'toast_error' => 'Unexpected error: ' . $e->getMessage(),
+        ]);
+
         return redirect()->route('dashboard')
             ->with('toast_error', 'Unexpected error: ' . $e->getMessage());
     }
