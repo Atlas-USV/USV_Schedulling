@@ -59,7 +59,7 @@
                 </button>
             </h2>
             <div id="accordion-color-body-1" class="hidden" aria-labelledby="accordion-color-heading-1">
-                <div class="border border-t-0  border-gray-200 dark:bg-gray-800">
+                <div class="border border-t-0  border-gray-200 ">
 
                     <div class="p-4">
 
@@ -695,6 +695,14 @@
                 $('#event-group-li-info').show();
             } else {
                 $('#event-group-li-info').hide();
+            }
+          
+            if (event.other_examinators && event.other_examinators.length > 0) {
+                event.other_examinators.forEach(examinator => {
+                    $('#event-teacher-info-container').append(`<span class="other_examinators text-sm dark:text-gray-200">${examinator.name}</span>`);
+                });
+            } else {
+                $('#event-teacher-info-container .other_examinators').remove();
             }
             $('#description').html(event.description)
         }

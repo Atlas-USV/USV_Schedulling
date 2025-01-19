@@ -31,6 +31,10 @@ class CalendarController extends Controller
         $specialities = Speciality::all();
        
         $teachers = User::role('teacher')->get();
+        $teachers = User::role('teacher')->with('faculty:id,short_name')->get()->map(function ($teacher) {
+            $teacher->faculty_short_name = $teacher->faculty ? $teacher->faculty->short_name : null;
+            return $teacher;
+        });
         $groups = Group::with('speciality')->get()->map(function ($group) {
             $group->speciality_short_name = $group->speciality ? $group->speciality->short_name : null;
             return $group;
@@ -66,8 +70,10 @@ class CalendarController extends Controller
                 'subject',
                 'group:id,name,speciality_id',
                 'speciality:id,name', 
-                'teacher:id,name,teacher_faculty_id',
+                'teacher:id,name,teacher_faculty_id,email',
                 'room:id,name',
+                'otherExaminators',
+
                 'teacher.faculty:id,name' // Add eager loading for faculty relationship
             ])
             ->where('status', 'accepted')
@@ -93,7 +99,8 @@ class CalendarController extends Controller
                     'teacher_id' => $evaluation->teacher_id,
                     'subject' => $evaluation->subject,
                     'color' => $eventColor,
-                    'faculty' => $evaluation->teacher->faculty // Now efficiently loaded
+                    'faculty' => $evaluation->teacher->faculty ,// Now efficiently loaded
+                    'other_examinators'=>$evaluation->otherExaminators
                 ];
             });
 
@@ -181,13 +188,13 @@ class CalendarController extends Controller
         $this->addConditionalRules($request, $validator);
 
         $validatedData = $validator->validated();
-
+        Log::info('Validated Data: ', $validatedData);
         // Add 'exam_date' to the validated data
         $validatedData['exam_date'] = Carbon::parse($validatedData['start_time'])->format('Y-m-d');
 
         // Check if teacher and group are from same faculty
         $teacher = \App\Models\User::find($validatedData['teacher_id']);
-        $group = \App\Models\Group::find($validatedData['group_id']);
+        $group = isset($validatedData['group_id']) ? \App\Models\Group::find($validatedData['group_id']) : null;
         
         if ($group && $teacher) {
             $groupFacultyId = $group->speciality->faculty_id;
@@ -214,7 +221,26 @@ class CalendarController extends Controller
             ], 400);
         }
         $validatedData['status'] = 'accepted';
+        if (isset($validatedData['group_id'])) {
+            $group = \App\Models\Group::find($validatedData['group_id']);
+            if ($group) {
+                $validatedData['speciality_id'] = $group->speciality_id;
+            }
+        }
+        // Save 'other_examinators' in another variable and then unset
+        $otherExaminators = $validatedData['other_examinators'] ?? null;
+        Log::info('Other Examinators: ', ['examinators' => $otherExaminators]);
+        unset($validatedData['other_examinators']);
+
         $evaluation = \App\Models\Evaluation::create($validatedData);
+        if ($otherExaminators) {
+            foreach ($otherExaminators as $examinatorId) {
+            \App\Models\EvaluationExaminator::create([
+                'evaluation_id' => $evaluation->id,
+                'teacher_id' => $examinatorId,
+            ]);
+            }
+        }
         // Handle the specific type
         $eventColor = EvaluationTypes::from($evaluation->type)->getColor();
         $evaluationEvent =  [
