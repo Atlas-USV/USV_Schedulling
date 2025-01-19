@@ -28,21 +28,28 @@ class DashboardController extends Controller
         ->take(4)  // Limit to 4 tasks
         ->get();
 
-        // Obține ID-ul grupei utilizatorului autentificat
-        $groupIds = auth()->user()->groups()->select('groups.id')->pluck('id'); // Obține un array cu ID-urile grupelor
-
-        \Log::info('Group IDs:', ['groupIds' => $groupIds]); // Log the group IDs
-
-        // Filtrează examenele pentru grupa utilizatorului doar dacă există ID-uri de grup
         $upcomingExams = collect(); // Initializează o colecție goală
-        if ($groupIds->isNotEmpty()) {
-            $upcomingExams = \App\Models\Evaluation::whereIn('group_id', $groupIds)
+
+    if (auth()->user()->hasRole('teacher')) {
+        // Pentru profesori, obține examenele pe care le predau
+        $upcomingExams = \App\Models\Evaluation::where('teacher_id', auth()->id())
             ->where('status', 'accepted')
             ->where('exam_date', '>=', now())
             ->orderBy('exam_date', 'asc')
             ->take(4)
             ->get();
+    } else {
+        // Pentru studenți, obține examenele grupelor lor
+        $groupIds = auth()->user()->groups()->pluck('id');
+        if ($groupIds->isNotEmpty()) {
+            $upcomingExams = \App\Models\Evaluation::whereIn('group_id', $groupIds)
+                ->where('status', 'accepted')
+                ->where('exam_date', '>=', now())
+                ->orderBy('exam_date', 'asc')
+                ->take(4)
+                ->get();
         }
+    }
 
         $userName = auth()->user()->name;
 
