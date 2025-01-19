@@ -6,17 +6,21 @@
     <meta name="csrf-token" content="{{ csrf_token() }}">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
 
+    <script>
+    // Check localStorage or use light theme by default
+    const userPrefersDark = localStorage.getItem('color-theme') === 'dark'
+
+    if (userPrefersDark) {
+        document.documentElement.classList.add('dark');
+    } else {
+        document.documentElement.classList.remove('dark');
+    }
+</script>
+
+
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/toastr.js/latest/css/toastr.min.css">
 
-    <script>
-        // On page load or when changing themes, best to add inline in `head` to avoid FOUC
-        if (localStorage.getItem('color-theme') === 'dark' || (!('color-theme' in localStorage) && window.matchMedia(
-                '(prefers-color-scheme: dark)').matches)) {
-            document.documentElement.classList.add('dark');
-        } else {
-            document.documentElement.classList.remove('dark')
-        }
-    </script>
+   
 
     <script type="importmap">
     {
@@ -357,7 +361,6 @@
                             @if (!Auth::check())
                                 <li>
                                     <a href="{{ route('login') }}"
-                                        onclick="event.preventDefault(); document.getElementById('logout-form').submit();"
                                         class="flex items-center p-2 pl-11 w-full text-base font-normal text-gray-900 rounded-lg transition duration-75 group hover:bg-gray-100 dark:text-white dark:hover:bg-gray-700">Sign
                                         In</a>
                                 </li>
@@ -484,33 +487,7 @@
                 }
             </style>
 
-            <script>
-                document.addEventListener('DOMContentLoaded', function() {
-                    const themeSwitch = document.getElementById('theme-toggle');
-
-                    // Check the current theme from localStorage
-                    const currentTheme = localStorage.getItem('color-theme');
-
-                    if (currentTheme === 'dark') {
-                        document.documentElement.classList.add('dark');
-                        themeSwitch.checked = true; // Set the switch to 'checked' for dark mode
-                    } else {
-                        document.documentElement.classList.remove('dark');
-                        themeSwitch.checked = false; // Set the switch to 'unchecked' for light mode
-                    }
-
-                    // Listen for changes on the switch
-                    themeSwitch.addEventListener('change', function() {
-                        if (themeSwitch.checked) {
-                            document.documentElement.classList.add('dark'); // Enable dark mode
-                            localStorage.setItem('color-theme', 'dark'); // Store the preference
-                        } else {
-                            document.documentElement.classList.remove('dark'); // Disable dark mode
-                            localStorage.setItem('color-theme', 'light'); // Store the preference
-                        }
-                    });
-                });
-            </script>
+           
 
 
         </aside>
@@ -596,4 +573,29 @@
     @if (session('toast_error'))
         toastr.error('{{ session('toast_error') }}');
     @endif
+</script>
+
+<script>
+    document.addEventListener('DOMContentLoaded', function () {
+        const themeToggle = document.getElementById('theme-toggle');
+
+        // Initialize the theme toggle based on localStorage
+        const currentTheme = localStorage.getItem('color-theme');
+        if (currentTheme === 'dark') {
+            themeToggle.checked = true;
+        } else {
+            themeToggle.checked = false;
+        }
+
+        // Listen for changes on the toggle switch
+        themeToggle.addEventListener('change', function () {
+            if (themeToggle.checked) {
+                document.documentElement.classList.add('dark');
+                localStorage.setItem('color-theme', 'dark');
+            } else {
+                document.documentElement.classList.remove('dark');
+                localStorage.setItem('color-theme', 'light');
+            }
+        });
+    });
 </script>
