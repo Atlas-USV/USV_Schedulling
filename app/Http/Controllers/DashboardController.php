@@ -177,8 +177,12 @@ public function showExams(Request $request)
 
         // Verifică dacă utilizatorul are grupe asociate
         if ($groupIds->isEmpty()) {
+            $emptyExams = new \Illuminate\Pagination\LengthAwarePaginator([], 0, 10, 1, [
+                'path' => \Illuminate\Pagination\Paginator::resolveCurrentPath()
+            ]);
+        
             return view('exams.index', [
-                'exams' => \Illuminate\Pagination\LengthAwarePaginator::empty(), // Paginator gol
+                'exams' => $emptyExams,
                 'subjects' => \App\Models\Subject::all(),
             ]);
         }
