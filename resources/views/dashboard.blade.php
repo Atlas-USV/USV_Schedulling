@@ -8,6 +8,7 @@
 @endpush
 
 @section('content')
+
     <div class="dashboard-container grid grid-cols-12 gap-4 p-6" style="font-family: Lexend, 'Noto Sans', sans-serif;">
         <!-- Good Afternoon Section -->
         <div
@@ -71,27 +72,18 @@
     </svg>
 </a> 
 </div>
-            <!-- Quick Add Section -->
-    <div class="col-span-12 bg-white rounded-lg p-4 shadow-md">
-        <h3 class="text-lg font-bold mb-3">Quick Add</h3>
-        <div class="flex gap-2">
-            <input
-                type="text"
-                id="newTaskTitle"
-                class="form-input rounded-lg flex-1 border-gray-300"
-                placeholder="Add a task title..."
-                required
-            />
-            <button
-                type="button"
-                data-modal-target="addTaskModal"
-                data-modal-toggle="addTaskModal"
-                class="bg-blue-600 text-white px-4 py-2 rounded-lg hover:bg-blue-700"
-            >
-                Add Task
-            </button>
-        </div>
-    </div>
+        <!-- Quick Add Section -->
+<div class="col-span-12 bg-white rounded-lg p-4 shadow-md">
+    <h3 class="text-lg font-bold mb-3">Quick Add</h3>
+    <button
+        type="button"
+        data-modal-target="addTaskModal"
+        data-modal-toggle="addTaskModal"
+        class="bg-blue-600 text-white px-4 py-2 rounded-lg hover:bg-blue-700"
+    >
+        Add Task
+    </button>
+</div>
 
             <!-- Upcoming Tasks -->
             <div class="col-span-12 md:col-span-8 bg-white rounded-lg p-4 shadow-md">
@@ -139,7 +131,7 @@
             </div>
 
             <!-- Add Task Modal -->
-<div id="addTaskModal" tabindex="-1" aria-hidden="true" 
+            <div id="addTaskModal" tabindex="-1" aria-hidden="true" 
     class="hidden overflow-y-auto overflow-x-hidden fixed top-0 right-0 left-0 z-50 justify-center items-center w-full md:inset-0 h-modal md:h-full">
     <div class="relative p-4 w-full max-w-md h-full md:h-auto">
         <div class="relative p-4 text-center bg-white rounded-lg shadow dark:bg-gray-800 sm:p-5">
@@ -156,7 +148,12 @@
             </button>
             <form action="{{ route('tasks.store') }}" method="POST">
                 @csrf
-                <input type="hidden" id="modalTaskTitle" name="title">
+                <div class="mb-4">
+                    <label for="title" class="block mb-2 text-sm font-medium text-gray-700 dark:text-white">
+                        Task Title
+                    </label>
+                    <input type="text" id="title" name="title" class="form-input rounded-lg w-full border-gray-300 focus:ring-primary-300 dark:border-gray-600 dark:bg-gray-700 dark:focus:ring-primary-800" placeholder="Task title..." required>
+                </div>
                 <div class="mb-4">
                     <label for="description" class="block mb-2 text-sm font-medium text-gray-700 dark:text-white">
                         Task Description
@@ -327,4 +324,17 @@
 
 @push('scripts')
 @vite('resources/js/dashboardscripts.js')
+<script>
+    document.addEventListener("DOMContentLoaded", () => {
+    const successToast = document.getElementById("toast-success");
+    const errorToast = document.getElementById("toast-error");
+
+    if (successToast || errorToast) {
+        setTimeout(() => {
+            successToast?.classList.add("hidden");
+            errorToast?.classList.add("hidden");
+        }, 3000); // Ascunde toast-urile după 3 secunde
+    }
+});
+</script>
 @endpush

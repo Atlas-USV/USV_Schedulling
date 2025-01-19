@@ -179,17 +179,12 @@ public function showExams(Request $request)
 
         // Verifică dacă utilizatorul are grupe asociate
         if ($groupIds->isEmpty()) {
-            // Create an empty paginator
-            $emptyPaginator = new LengthAwarePaginator(
-                Collection::make(), // Empty collection
-                0, // Total items
-                15, // Items per page
-                1, // Current page
-                ['path' => request()->url(), 'query' => request()->query()] // Pagination URL parameters
-            );
+            $emptyExams = new \Illuminate\Pagination\LengthAwarePaginator([], 0, 10, 1, [
+                'path' => \Illuminate\Pagination\Paginator::resolveCurrentPath()
+            ]);
         
             return view('exams.index', [
-                'exams' => $emptyPaginator,
+                'exams' => $emptyExams,
                 'subjects' => \App\Models\Subject::all(),
             ]);
         }
@@ -256,15 +251,28 @@ public function storeTask(Request $request)
             'deadline' => $validated['deadline'],
             'is_completed' => false,
         ]);
-        \Log::info('Redirecting with session', ['success' => session('toast_success')]);
 
+        // Adaugă log înainte de redirecționare
+        \Log::info('Session messages:', [
+            'toast_success' => 'Task added successfully!',
+        ]);
+        
         return redirect()->route('dashboard')->with('toast_success', 'Task added successfully!');
+        
     } catch (\Illuminate\Validation\ValidationException $e) {
         // Mesaje de validare detaliate
+        \Log::info('Session messages:', [
+            'toast_error' => implode(', ', $e->validator->errors()->all()),
+        ]);
+
         return redirect()->route('dashboard')
             ->with('toast_error', implode(', ', $e->validator->errors()->all()));
     } catch (\Exception $e) {
         // Mesaj de eroare general
+        \Log::info('Session messages:', [
+            'toast_error' => 'Unexpected error: ' . $e->getMessage(),
+        ]);
+
         return redirect()->route('dashboard')
             ->with('toast_error', 'Unexpected error: ' . $e->getMessage());
     }
