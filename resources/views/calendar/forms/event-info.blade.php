@@ -61,9 +61,9 @@
                         </span>
                         <span id="event-group-info" class="dark:text-gray-300"></span> <!-- Group info -->
                         </li>
-                        <li id="event-teacher-li-info">
-                            <div class="flex items-center mb-2.5">
-                                <span class="me-2 font-semibold text-gray-400">
+                        <li id="event-teacher-li-info" class="flex items-center mb-2.5">
+                            <div class="flex mb-2.5">
+                                <span class="me-2 mt-1 font-semibold text-gray-400">
                                     <svg class="w-6 h-6 text-gray-400 dark:text-white" aria-hidden="true" xmlns="http://www.w3.org/2000/svg" width="24" height="24" fill="currentColor" viewBox="0 0 24 24">
                                         <path fill-rule="evenodd" d="M12 4a4 4 0 1 0 0 8 4 4 0 0 0 0-8Zm-2 9a4 4 0 0 0-4 4v1a2 2 0 0 0 2 2h8a2 2 0 0 0 2-2v-1a4 4 0 0 0-4-4h-4Z" clip-rule="evenodd"/>
                                     </svg>
@@ -73,6 +73,7 @@
                                 <div class="flex flex-col space-y-0" id="event-teacher-info-container">
                                     <span id="event-teacher-info" class="dark:text-gray-300"></span> <!-- Teacher info -->
                                     <span id="event-teacher-email" class="text-gray-500 dark:text-gray-300 text-sm" style="margin-top: -8px;"></span> <!-- Teacher info type -->
+                                    
                                 </div>
                             </div>
 

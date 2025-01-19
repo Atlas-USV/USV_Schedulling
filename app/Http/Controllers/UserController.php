@@ -18,16 +18,30 @@ class UserController extends Controller
 {
     public function index()
     {
+        $user = Auth::user();
+        $query = User::with(['faculty', 'roles', 'speciality']);
 
-        $users = User::with([ 'faculty', 'roles', 'speciality'])->paginate(10);
+        if ($user->hasRole('admin')){
 
-         // Obține toate grupurile asociate utilizatorilor
-    $userGroups = \DB::table('user_group')
-    ->join('groups', 'user_group.group_id', '=', 'groups.id')
-    ->select('user_group.user_id', 'groups.name as group_name')
-    ->get()
-    ->groupBy('user_id'); // Grupăm grupurile după `user_id`
+        }
+        else if ($user->hasRole('secretary') && $user->teacher_faculty_id) {
+            $query->where(function ($q) use ($user) {
+                // Check for users with no faculty or matching faculty
+                $q->whereDoesntHave('faculty') // Users with no faculty
+                  ->orWhereHas('faculty', function ($q) use ($user) {
+                      $q->where('id', $user->teacher_faculty_id); // Faculty matches
+                  });
+            });
+        }
 
+        $users = $query->paginate(10);
+
+        // Obține toate grupurile asociate utilizatorilor
+        $userGroups = \DB::table('user_group')
+            ->join('groups', 'user_group.group_id', '=', 'groups.id')
+            ->select('user_group.user_id', 'groups.name as group_name')
+            ->get()
+            ->groupBy('user_id'); // Grupăm grupurile după `user_id`
 
         $roles = Role::all();
 
@@ -89,46 +103,56 @@ class UserController extends Controller
             }
         }
 
-        // Assign or remove propose_exam permission based on group_leader
-        if ($request->group_leader == "1") {
-            $user->givePermissionTo(EPermissions::PROPOSE_EXAM->value);
-        } else {
-            $user->revokePermissionTo(EPermissions::PROPOSE_EXAM->value);
-        }
-        // Check if user already has a group and speciality is changed
-        if ($user->groups->isNotEmpty() && $request->speciality_id && $user->speciality_id != $request->speciality_id) {
-            $group = $user->groups->first();
-            if ($group->speciality_id != $request->speciality_id) {
-                return back()->with('error', 'The user\'s current group does not match the new selected speciality.');
-            }
-        }
+    // Assign or remove propose_exam permission based on group_leader
+    if ($request->group_leader == "1") {
+        $user->givePermissionTo(EPermissions::PROPOSE_EXAM->value);
+    } else {
+        $user->revokePermissionTo(EPermissions::PROPOSE_EXAM->value);
+    }
 
-        // If the group is set in the request and the user does not have a speciality, set the user's speciality to the group's speciality
-        if ($request->group_id && !$user->speciality_id && !$request->speciality_id) {
-            $group = Group::find($request->group_id);
-            $user->speciality_id = $group->speciality_id;
-        }
-        // Actualizare câmpuri
-        $user->name = $request->name;
-        $user->email = $request->email;
-        $user->teacher_faculty_id = $request->faculty_id;
-        //$user->speciality_id = $request->speciality_id;
-
-        // Actualizare grup (pivot table)
-        if ($request->group_id) {
-            $user->groups()->sync([$request->group_id]);
-        }
-        // Actualizare rol
-        if ($request->roles) {
-            $user->syncRoles($request->roles);
-        }
-
-        if ($user->save()) {
-            return redirect()->route('users.index')->with('success', 'User updated successfully!');
-        } else {
-            return back()->with('error', 'An error occurred while updating the user.');
+    // Check if user already has a group and speciality is changed
+    if ($user->groups->isNotEmpty() && $request->speciality_id && $user->speciality_id != $request->speciality_id) {
+        $group = $user->groups->first();
+        if ($group->speciality_id != $request->speciality_id) {
+            return back()->with('error', 'The user\'s current group does not match the new selected speciality.');
         }
     }
+
+    // If the group is set in the request and the user does not have a speciality, set the user's speciality to the group's speciality
+    if ($request->group_id && !$user->speciality_id && !$request->speciality_id) {
+        $group = Group::find($request->group_id);
+        $user->speciality_id = $group->speciality_id;
+    }
+
+    // Check if the user is assigned or being assigned the "student" role
+
+
+    // Update user fields
+    $user->name = $request->name;
+    $user->email = $request->email;
+    $user->teacher_faculty_id = $request->faculty_id;
+
+    // Update roles
+    if ($request->roles) {
+        $user->syncRoles($request->roles);
+    }
+    $roles =  $user->roles->pluck('name')->toArray();
+    if (in_array('student', $roles)) {
+
+        if (!$request->group_id) {
+            //return back()->with('error', 'A user with the "student" role must be assigned to a group.');
+        }
+        $user->groups()->sync([$request->group_id]);
+    } else {
+        // If not a "student", detach the user from any groups
+        $user->groups()->detach();
+    }
+    if ($user->save()) {
+        return redirect()->route('users.index')->with('success', 'User updated successfully!');
+    } else {
+        return back()->with('error', 'An error occurred while updating the user.');
+    }
+}
 
     public function getGroupsByFaculty($faculty_id)
 {

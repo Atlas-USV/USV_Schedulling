@@ -189,29 +189,7 @@
 
     <!-- Script pentru comutarea între History și Upcoming -->
     <script>
-        document.addEventListener('DOMContentLoaded', function () {
-            const historyBtn = document.getElementById('btn-history');
-            const upcomingBtn = document.getElementById('btn-upcoming');
-            const examInfo = document.getElementById('exam-info');
-            const themeToggle = document.getElementById('theme-toggle');
-
-            // Verifică tema curentă și setează tema la încărcarea paginii
-            const currentTheme = localStorage.getItem('theme');
-            if (currentTheme === 'dark') {
-                document.body.classList.add('dark');
-                themeToggle.checked = true;
-            }
-
-            // Când switch-ul este schimbat
-            themeToggle.addEventListener('change', function () {
-                if (themeToggle.checked) {
-                    document.body.classList.add('dark');
-                    localStorage.setItem('theme', 'dark');
-                } else {
-                    document.body.classList.remove('dark');
-                    localStorage.setItem('theme', 'light');
-                }
-            });
+       
 
             historyBtn.addEventListener('click', function () {
                 examInfo.innerHTML = `

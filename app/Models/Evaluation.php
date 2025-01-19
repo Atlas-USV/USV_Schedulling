@@ -8,6 +8,7 @@ use App\Models\User;
 use App\Models\Group;
 use App\Models\Subject;
 use App\Models\Speciality;
+use App\Models\EvaluationExaminator;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\HasMany;
@@ -135,5 +136,9 @@ class Evaluation extends Model
         return $this->belongsTo(User::class, 'updated_by');
     }
 
+    public function examinators()
+    {
+        return $this->hasMany(EvaluationExaminator::class);
+    }
     
 }
