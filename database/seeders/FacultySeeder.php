@@ -5,7 +5,7 @@ namespace Database\Seeders;
 use App\Models\Faculty;
 use Illuminate\Database\Seeder;
 use Illuminate\Database\Console\Seeds\WithoutModelEvents;
-use Illuminate\Support\Facades\Http; 
+use Illuminate\Support\Facades\Http;
 
 class FacultySeeder extends Seeder
 {
@@ -22,12 +22,12 @@ class FacultySeeder extends Seeder
          $url = 'https://orar.usv.ro/orar/vizualizare/data/facultati.php?json';
 
          // Obține datele de la endpoint
-         $response = Http::get($url);
- 
+         $response = Http::withOptions(['verify' => false])->get($url);
+
          // Verifică dacă request-ul a fost cu succes
          if ($response->ok()) {
              $faculties = $response->json();
- 
+
              // Iterează prin facultăți
              foreach ($faculties as $faculty) {
                  // Verifică dacă toate câmpurile necesare sunt completate
@@ -52,6 +52,6 @@ class FacultySeeder extends Seeder
              // Afișează eroare dacă request-ul eșuează
              $this->command->error('Nu s-a putut obține lista facultăților.');
          }
-     
+
     }
 }

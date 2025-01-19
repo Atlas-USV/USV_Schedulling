@@ -1,42 +1,39 @@
 version: '3.8'
 services:
   db:
-    image: mysql
-    container_name: usv_schedulling_mysql
-    restart: always
+    image: mysql:8.0.40
+    container_name: atlas_mysql
+    # restart: always
     environment:
-      MYSQL_ROOT_PASSWORD: 'erp_p'
-      MYSQL_DATABASE: 'erp_p'
-      MYSQL_USER: 'erp_p'
-      MYSQL_PASSWORD: 'erp_p'
+      MYSQL_ROOT_PASSWORD: 'admin'
+      MYSQL_DATABASE: 'db_atlas'
+      MYSQL_USER: 'root'
+      MYSQL_PASSWORD: 'admin'
     volumes:
-      - usv_schedulling_mysqldata:/var/lib/mysql
+      - mysqldata:/var/lib/mysql
     ports:
       - 3308:3306
     networks:
-      - usv_schedulling_network
-
+      - atlas
   redis:
+    container_name: atlas_redis
     image: redis
-    container_name: usv_schedulling_redis
-    restart: always
     hostname: redis
     ports:
-      - 6377:6379
+     - 6380:6380
     volumes:
-      - usv_schedulling_redisdata:/data
+      - redisdata:/data
     networks:
-      - usv_schedulling_network
+      - atlas
     healthcheck:
       test: ["CMD", "redis-cli", "ping"]
       retries: 3
       timeout: 5s
 
 networks:
-  usv_schedulling_network:
-
+  atlas:
 volumes:
-  usv_schedulling_mysqldata:
+  mysqldata:
     driver: local
-  usv_schedulling_redisdata:
+  redisdata:
     driver: local

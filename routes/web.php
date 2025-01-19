@@ -16,19 +16,20 @@ use App\Http\Controllers\ResetPasswordController;
 use App\Http\Controllers\ChangePasswordController;
 use App\Http\Controllers\ForgotPasswordController;
 use App\Http\Controllers\RequestController;
+use App\Http\Controllers\ExamController;
 
 
 Route::get('/', function () {
     return view('Home.home');
 })->name('home');
 Route::get('/features', function () {
-    return view('Home.features'); 
+    return view('Home.features');
 })->name('features');
 Route::get('/contact', function () {
-    return view('Home.contact'); 
+    return view('Home.contact');
 })->name('contact');
 Route::get('/contactus', function () {
-    return view('ContactUs.contactus'); 
+    return view('ContactUs.contactus');
 })->name('contactus');
 
 
@@ -96,6 +97,7 @@ Route::middleware(['auth'])->group(function () {
     Route::put('/tasks/{id}', [TaskController::class, 'update'])->name('tasks.update');
     Route::get('/tasks/{id}/edit', [DashboardController::class, 'editTask'])->name('tasks.edit');
     Route::get('/exams', [DashboardController::class, 'showExams'])->name('exams.index');
+    Route::get('/exams/download-pdf', [ExamController::class, 'downloadPdf'])->name('exams.downloadPdf');
 
 
 
@@ -204,4 +206,3 @@ Route::get('/groups/by-faculty/{faculty_id}', [UserController::class, 'getGroups
 });
 
 
-    

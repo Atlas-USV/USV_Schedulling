@@ -15,7 +15,7 @@ class SpecialtiesSeeder extends Seeder
         $endpoint = 'https://orar.usv.ro/orar/vizualizare/data/subgrupe.php?json';
 
         // Fetch JSON data
-        $response = Http::get($endpoint);
+        $response = Http::withOptions(['verify' => false])->get($endpoint);
 
         // Verificăm răspunsul
         if ($response->successful()) {

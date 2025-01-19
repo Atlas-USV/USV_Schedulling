@@ -9,6 +9,9 @@
     @else
         <h1 class="text-3xl font-bold text-gray-500 dark:text-gray-200">Exams for Your Group</h1>
     @endif
+    <button id="download-pdf" class="bg-green-600 text-white px-4 py-2 rounded-lg hover:bg-green-700 dark:hover:bg-green-400">
+        Download PDF
+    </button>
 </div>
 
 <div class="overflow-x-auto">
@@ -59,7 +62,7 @@
                         <td class="py-3 px-6">{{ $exam->group->name }}</td>
                     @endif
                     <td class="py-3 px-6">
-                        <a href="{{ route('exams.calendar', ['exam' => $exam->id]) }}" 
+                        <a href="{{ route('exams.calendar', ['exam' => $exam->id]) }}"
                            class="bg-blue-600 text-white px-4 py-2 rounded-lg hover:bg-blue-700  dark:hover:bg-blue-400">
                             View in Calendar
                         </a>
@@ -105,9 +108,9 @@
         }
     });
 
-    // Placeholder functionality for PDF download
+    // PDF download functionality
     document.getElementById('download-pdf')?.addEventListener('click', function() {
-        alert('Funcționalitatea de descărcare PDF va fi implementată în curând!');
+        window.location.href = "{{ route('exams.downloadPdf') }}";
     });
 </script>
 @endpush

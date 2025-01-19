@@ -45,6 +45,6 @@ class UserSeeder extends Seeder
         $user3->assignRole('student');
         $permission = Permission::findByName('propose_exam');
         $user3->givePermissionTo($permission);
-       
+
     }
 }

@@ -36,7 +36,7 @@ class UserController extends Controller
 
     public function edit($id)
 {
-   
+
 
     $user = User::find($id);
 
@@ -45,7 +45,7 @@ class UserController extends Controller
         abort(404, 'User not found');
     }
 
-    
+
 
     $groups = Group::all();
     $faculties = Faculty::all();
@@ -53,9 +53,9 @@ class UserController extends Controller
     $specialities = Speciality::all();
     $isLeader = $user->hasPermissionTo(EPermissions::PROPOSE_EXAM->value);
 
-    
 
-    
+
+
     return view('users.edit', [
         'editUser' => $user, // Variabilă redenumită
         'groups' => $groups,
@@ -67,8 +67,8 @@ class UserController extends Controller
 }
 
     public function update(Request $request, $id)
-    {   
-        
+    {
+
         // dd($request);
         $request->validate([
             'name' => 'required|string|max:255',
@@ -146,7 +146,7 @@ class UserController extends Controller
 
         $exams = [];
         if ($user->hasRole('secretary')) {
-            $exams = Evaluation::with(['subject', 'room', 'teacher', 'group', 'speciality.faculty'])
+            $exams = Evaluation::with(['subject', 'room', 'teacher', 'group', 'speciality','faculty'])
                 ->where('exam_date', '>', now())
                 ->orderBy('exam_date', 'asc')
                 ->get()
@@ -218,8 +218,8 @@ class UserController extends Controller
         return view('my-account', compact(
             'user', 'speciality', 'group', 'role', 'faculty',
              'teacherGroups', 'teacherSpeciality',
-            'upcomingExam', 'recentExam', 'otherExaminatorsRecent', 'otherExaminatorsUpcoming', 'exams', 'numSecretaries', 
-            'numTeachers', 
+            'upcomingExam', 'recentExam', 'otherExaminatorsRecent', 'otherExaminatorsUpcoming', 'exams', 'numSecretaries',
+            'numTeachers',
             'numStudents'
         ));
     }

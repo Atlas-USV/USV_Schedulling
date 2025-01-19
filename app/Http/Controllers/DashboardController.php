@@ -19,7 +19,7 @@ class DashboardController extends Controller
         $subjects = Subject::all();
         $teachers = User::role('admin')->get();
         $rooms = Room::all();
-        
+
         $tasks = Task::where('user_id', auth()->id())
         ->orderBy('deadline', 'asc')  // Order by deadline
         ->where('deadline', '>=', now())  // Only future tasks
@@ -64,11 +64,11 @@ class DashboardController extends Controller
                 ->get();
         }
 
-        
+
         \Log::info('Upcoming Exams:', ['upcomingExams' => $upcomingExams]);
 
 
-    
+
         return view('dashboard', compact('groups', 'faculties', 'subjects', 'teachers', 'rooms', 'tasks',  'userName', 'upcomingExams', 'userRole', 'recentUsers', 'pendingExams', 'requests'));
     }
 
@@ -82,9 +82,9 @@ class DashboardController extends Controller
     //             'subject' => 'required|string|max:255',
     //             'deadline' => 'required|date|after:now',
     //         ]);
-    
+
     //         \Log::info('Creating task with data:', $validated);
-    
+
     //         $task = Task::create([
     //             'user_id' => auth()->id(),
     //             'title' => $validated['title'],
@@ -93,19 +93,19 @@ class DashboardController extends Controller
     //             'deadline' => $validated['deadline'],
     //             'is_completed' => false,
     //         ]);
-    
+
     //         \Log::info('Task created successfully:', ['task_id' => $task->id]);
-    
+
     //         return redirect()->route('dashboard')
     //             ->with('success', 'Task added successfully!')
     //             ->with('task_created', true);  // Add this flag
-    
+
     //     } catch (\Exception $e) {
     //         \Log::error('Error creating task:', [
     //             'error' => $e->getMessage(),
     //             'request_data' => $request->all()
     //         ]);
-    
+
     //         return redirect()->route('dashboard')
     //             ->with('error', 'Failed to create task. Please try again.');
     //     }
@@ -180,7 +180,7 @@ public function showExams(Request $request)
             $emptyExams = new \Illuminate\Pagination\LengthAwarePaginator([], 0, 10, 1, [
                 'path' => \Illuminate\Pagination\Paginator::resolveCurrentPath()
             ]);
-        
+
             return view('exams.index', [
                 'exams' => $emptyExams,
                 'subjects' => \App\Models\Subject::all(),
@@ -254,9 +254,9 @@ public function storeTask(Request $request)
         \Log::info('Session messages:', [
             'toast_success' => 'Task added successfully!',
         ]);
-        
+
         return redirect()->route('dashboard')->with('toast_success', 'Task added successfully!');
-        
+
     } catch (\Illuminate\Validation\ValidationException $e) {
         // Mesaje de validare detaliate
         \Log::info('Session messages:', [

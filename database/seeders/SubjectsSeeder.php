@@ -92,10 +92,11 @@ class SubjectsSeeder extends Seeder
         $url = 'https://orar.usv.ro/orar/vizualizare/data/facultati.php?json';
 
          // Obține datele de la endpoint
-         $response = Http::get($url);
- 
+        $response = Http::withOptions(['verify' => false])->get($url);
+
+
          // Verifică dacă request-ul a fost cu succes
-       
+
         $external_faculties = $response->json();
         $db_faculties = \DB::table('faculties')->get();
 
@@ -138,5 +139,5 @@ class SubjectsSeeder extends Seeder
 
     }
 
-    
+
 }
