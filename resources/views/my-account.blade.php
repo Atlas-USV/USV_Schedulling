@@ -130,7 +130,6 @@
                             <p><strong>Subject:</strong> ${exam.subject}</p>
                             <p><strong>Exam Type:</strong> ${exam.exam_type}</p>
                             <p><strong>Teacher:</strong> ${exam.teacher}</p>
-                            <p><strong>Other Examinators:</strong> ${exam.other_examinators ? exam.other_examinators : 'N/A'}</p>
                             <p><strong>Room:</strong> ${exam.room}</p>
                             <p><strong>Start Time:</strong> ${exam.start_time}</p>
                             <p><strong>End Time:</strong> ${exam.end_time}</p>
