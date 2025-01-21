@@ -4,7 +4,7 @@
     <div class="relative w-full mx-auto mt-8 min-h-screen">
         <div class="flex items-center justify-center mb-4 space-x-4">
             <!-- Titlul "My Account" -->
-            <h2 class="text-2xl font-bold my-account-title dark:text-gray-200">My Account</h2>
+            <h2 class="text-2xl font-bold my-account-title">My Account</h2>
             
 
             <!-- Container Avatar cu Iconiță -->
@@ -59,14 +59,25 @@
 
                     @if (Auth::user()->hasRole('teacher'))
                         <p><strong>Faculty:</strong> {{ $faculty }}</p>
-                        <!-- <p><strong>Years of Work:</strong> {{ $yearsOfWork }} years</p> -->
+                        
                     @endif
 
                     @if (Auth::user()->hasRole('secretary'))
                         <p><strong>Faculty:</strong> {{ $faculty }}</p>
-                        <!-- <p><strong>Years of Work:</strong> {{ $yearsOfWork }} years</p> -->
+                        
                     @endif
 
+                    <!-- Meniu pentru schimbarea temei
+                    <div class="flex justify mb-4">
+                        <label for="theme-toggle" class="flex items-center cursor-pointer">
+                            <span class="mr-2"><strong>Light/Dark Mode</strong></span> 
+                            <input type="checkbox" id="theme-toggle" class="hidden">
+                            <div class="relative">
+                                <div class="switch-bg w-10 h-6 bg-gray-300 rounded-full shadow-inner transition-colors duration-300 ease-in-out"></div>
+                                <div class="dot absolute w-6 h-6 bg-white rounded-full shadow inset-y-0 left-0 transition-transform duration-300 ease-in-out transform"></div>
+                            </div>
+                        </label>
+                    </div> -->
                 </div>      
             </div>
 
@@ -185,11 +196,48 @@
         </div>
     </div>
 
-    
+    <style>
+        /* Schimbă fundalul switch-ului și poziția bulinei când este activ */
+        #theme-toggle:checked + div .switch-bg {
+            background-color: #3b82f6; /* Culoarea albastră */
+        }
+        #theme-toggle:checked + div .dot {
+            transform: translateX(1.5rem); /* Mută bulina în partea dreaptă */
+        }
 
+        /* Stiluri pentru titlul My Account în modul întunecat */
+        body.dark .my-account-title {
+            color: #E2E8F0; /* O nuanță deschisă pentru a contrasta cu fundalul întunecat */
+        }
+    </style>
+@endsection
+
+@push('scripts')
     <!-- Script pentru comutarea între History și Upcoming -->
     <script>
-       
+        document.addEventListener('DOMContentLoaded', function () {
+            const historyBtn = document.getElementById('btn-history');
+            const upcomingBtn = document.getElementById('btn-upcoming');
+            const examInfo = document.getElementById('exam-info');
+            const themeToggle = document.getElementById('theme-toggle');
+
+            // Verifică tema curentă și setează tema la încărcarea paginii
+            const currentTheme = localStorage.getItem('theme');
+            if (currentTheme === 'dark') {
+                document.body.classList.add('dark');
+                themeToggle.checked = true;
+            }
+
+            // Când switch-ul este schimbat
+            themeToggle.addEventListener('change', function () {
+                if (themeToggle.checked) {
+                    document.body.classList.add('dark');
+                    localStorage.setItem('theme', 'dark');
+                } else {
+                    document.body.classList.remove('dark');
+                    localStorage.setItem('theme', 'light');
+                }
+            });
 
             historyBtn.addEventListener('click', function () {
                 examInfo.innerHTML = `
@@ -243,4 +291,4 @@
             });
         });
     </script>
-@endsection
+@endpush

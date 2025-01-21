@@ -304,7 +304,7 @@
                         <p class="text-sm text-gray-500">
                             {{ $exam->exam_date->format('d M Y') }} | {{ $exam->start_time->format('H:i') }}
                         </p>
-                        <p class="text-sm text-gray-400">Room: {{ $exam->room->name }}</p>
+                        <p class="text-sm text-gray-400"> Room: {{ $exam->room->name ?? 'Not selected yet' }}</p>
                     </div>
                 </li>
             @empty

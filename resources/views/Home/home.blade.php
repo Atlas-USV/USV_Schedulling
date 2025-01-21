@@ -38,8 +38,10 @@
 <main class="flex items-center justify-center h-[calc(100vh-160px)] px-8 bg-gray-50 dark:bg-gray-900">
     <div class="flex items-center space-x-8">
         <!-- Poza -->
-        <img src="https://i.ibb.co/DbL7DkM/Atlas2.jpg" alt="Image" class="w-auto h-auto max-h-[80%]">
-        <!-- Textul -->
+        <img src="https://i.ibb.co/DbL7DkM/Atlas2.jpg" 
+     alt="Image" 
+     class="w-full max-w-[500px] h-auto max-h-[60%] object-contain">        
+     <!-- Textul -->
         <div class="text-left">
             <p class="text-8xl font-bold leading-tight text-gray-900 dark:text-white">
                 Lifting the<br> 

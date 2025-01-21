@@ -19,12 +19,26 @@ class ExamController extends Controller
             // Teacher: only exams where they are assigned as the teacher
             $exams = Evaluation::with(['subject', 'room', 'group'])
                 ->where('teacher_id', $user->id)
+                ->where(function ($query) {
+                    $query->where('exam_date', '>', now())
+                        ->orWhere(function ($query) {
+                            $query->where('exam_date', '=', now()->toDateString())
+                                ->where('end_time', '>=', now());
+                        });
+                })
                 ->get();
         } else {
             // Student: only exams for their groups
             $groupIds = $user->groups()->pluck('id'); // User's groups
             $exams = Evaluation::with(['subject', 'room', 'group'])
                 ->whereIn('group_id', $groupIds)
+                ->where(function ($query) {
+                    $query->where('exam_date', '>', now())
+                        ->orWhere(function ($query) {
+                            $query->where('exam_date', '=', now()->toDateString())
+                                ->where('end_time', '>=', now());
+                        });
+                })
                 ->get();
         }
 

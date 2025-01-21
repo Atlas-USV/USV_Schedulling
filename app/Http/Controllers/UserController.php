@@ -164,89 +164,64 @@ class UserController extends Controller
 }
 
 
-    public function myAccount()
-    {
-        $user = Auth::user(); // Utilizatorul autentificat
+public function myAccount()
+{
+    $user = Auth::user(); // Utilizatorul autentificat
 
-        $exams = [];
-        if ($user->hasRole('secretary')) {
-            $exams = Evaluation::with(['subject', 'room', 'teacher', 'group', 'speciality','faculty'])
-                ->where('exam_date', '>', now())
-                ->orderBy('exam_date', 'asc')
-                ->get()
-                ->map(function ($exam) {
-                    return [
-                        'speciality' => $exam->speciality ? $exam->speciality->name : 'N/A',
-                        'group' => $exam->group ? $exam->group->name : 'N/A',
-                        'subject' => $exam->subject ? $exam->subject->name : 'N/A',
-                        'exam_type' => $exam->type ?: 'N/A',
-                        'teacher' => $exam->teacher ? $exam->teacher->name : 'N/A',
-                        'room' => $exam->room ? $exam->room->name : 'N/A',
-                        'start_time' => $exam->start_time ? $exam->start_time->format('d M Y, H:i') : 'N/A',
-                        'end_time' => $exam->end_time ? $exam->end_time->format('d M Y, H:i') : 'N/A',
-                        'faculty' => $exam->speciality->faculty ? $exam->speciality->faculty->name : 'N/A',
-                    ];
-                });
-        }
-
-        // Verifică dacă utilizatorul este student sau profesor și preia evaluările acestora
-        if ($user->hasRole('student') || $user->hasRole('teacher')) {
-            $upcomingExam = $user->evaluations() // Evaluările asociate utilizatorului
-                ->with(['group', 'subject', 'speciality', 'otherExaminators']) // Include relația otherExaminators
-                ->where('exam_date', '>', now())
-                ->orderBy('exam_date', 'asc')
-                ->first();
-        } else {
-            $upcomingExam = null;
-        }
-
-        // Preia examenul recent pentru student/profesor
-        if ($user->hasRole('student') || $user->hasRole('teacher')) {
-            $recentExam = $user->evaluations()
-                ->with(['group', 'subject', 'speciality', 'otherExaminators']) // Include relația otherExaminators
-                ->where('exam_date', '<', now())
-                ->orderBy('exam_date', 'desc')
-                ->first();
-        } else {
-            $recentExam = null;
-        }
-
-        // Variabile pentru admin
-        $numSecretaries = 0;
-        $numTeachers = 0;
-        $numStudents = 0;
-
-        if ($user->hasRole('admin')) {
-            $numSecretaries = User::role('secretary')->count();
-            $numTeachers = User::role('teacher')->count();
-            $numStudents = User::role('student')->count();
-        }
-
-        // Pregătește lista de alți examinatori pentru examenele viitoare și recente
-        $otherExaminatorsUpcoming = $upcomingExam ? $upcomingExam->otherExaminators->pluck('name')->join(', ') : 'N/A';
-        $otherExaminatorsRecent = $recentExam ? $recentExam->otherExaminators->pluck('name')->join(', ') : 'N/A';
-
-        // Date adiționale despre utilizator
-        $speciality = $user->speciality ? $user->speciality->name : 'N/A';
-        $group = $user->groups->pluck('name')->join(', ') ?: 'N/A';
-        $faculty = $user->faculty ? $user->faculty->name : 'N/A';
-        $role = $user->getRoleNames()->first();
-        // $yearOfStudy = $user->getYearOfStudy(); // Obține anul de studiu
-        // $yearsOfWork = $user->getYearsOfWork();
-
-        // Datele necesare pentru profesori
-        $teacherGroups = $user->groups->pluck('name')->join(', ') ?: 'N/A';
-        $teacherSpeciality = $user->speciality ? $user->speciality->name : 'N/A';
-
-        // Returnează view-ul cu toate datele
-        return view('my-account', compact(
-            'user', 'speciality', 'group', 'role', 'faculty',
-             'teacherGroups', 'teacherSpeciality',
-            'upcomingExam', 'recentExam', 'otherExaminatorsRecent', 'otherExaminatorsUpcoming', 'exams', 'numSecretaries',
-            'numTeachers',
-            'numStudents'
-        ));
+    $exams = [];
+    if ($user->hasRole('secretary')) {
+        $exams = Evaluation::with(['subject', 'room', 'teacher', 'group', 'speciality', 'faculty'])
+            ->where('exam_date', '>', now())
+            ->orderBy('exam_date', 'asc')
+            ->get()
+            ->map(function ($exam) {
+                return [
+                    'speciality' => $exam->speciality ? $exam->speciality->name : 'N/A',
+                    'group' => $exam->group ? $exam->group->name : 'N/A',
+                    'subject' => $exam->subject ? $exam->subject->name : 'N/A',
+                    'exam_type' => $exam->type ?: 'N/A',
+                    'teacher' => $exam->teacher ? $exam->teacher->name : 'N/A',
+                    'room' => $exam->room ? $exam->room->name : 'N/A',
+                    'start_time' => $exam->start_time ? $exam->start_time->format('d M Y, H:i') : 'N/A',
+                    'end_time' => $exam->end_time ? $exam->end_time->format('d M Y, H:i') : 'N/A',
+                    'faculty' => $exam->speciality->faculty ? $exam->speciality->faculty->name : 'N/A',
+                ];
+            });
     }
+
+    $upcomingExam = $user->hasRole('student') || $user->hasRole('teacher') ? $user->evaluations()
+        ->with(['group', 'subject', 'speciality', 'otherExaminators'])
+        ->where('exam_date', '>', now())
+        ->where('status', 'accepted')
+        ->orderBy('exam_date', 'asc')
+        ->first() : null;
+
+    $recentExam = $user->hasRole('student') || $user->hasRole('teacher') ? $user->evaluations()
+        ->with(['group', 'subject', 'speciality', 'otherExaminators'])
+        ->where('exam_date', '<', now())
+        ->where('status', 'accepted')
+        ->orderBy('exam_date', 'desc')
+        ->first() : null;
+
+    $numSecretaries = $user->hasRole('admin') ? User::role('secretary')->count() : 0;
+    $numTeachers = $user->hasRole('admin') ? User::role('teacher')->count() : 0;
+    $numStudents = $user->hasRole('admin') ? User::role('student')->count() : 0;
+
+    // Preia grupurile utilizatorului
+    $groupIds = $user->groups->pluck('id')->toArray(); // Preia doar ID-urile grupurilor
+    $groups = Group::whereIn('id', $groupIds)->pluck('name')->toArray(); // Obține numele grupurilor pe baza ID-urilor
+    $group = !empty($groups) ? implode(', ', $groups) : 'N/A';
+
+    // Preia alte informații despre utilizator
+    $speciality = $user->speciality ? $user->speciality->name : 'N/A';
+    $faculty = $user->faculty ? $user->faculty->name : 'N/A';
+    $role = $user->getRoleNames()->first();
+
+    return view('my-account', compact(
+        'user', 'speciality', 'group', 'role', 'faculty',
+        'upcomingExam', 'recentExam', 'exams', 'numSecretaries', 'numTeachers', 'numStudents'
+    ));
+}
 
 
 

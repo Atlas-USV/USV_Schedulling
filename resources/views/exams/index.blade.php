@@ -14,7 +14,7 @@
     </button>
 </div>
 
-<div class="overflow-x-auto">
+<div class="">
     <table class="min-w-full bg-white border-collapse border border-gray-200 dark:bg-gray-800">
         <thead class="bg-gray-100 text-gray-600 uppercase text-sm leading-normal dark:bg-gray-700 dark:text-gray-400">
             <tr class="bg-gray-100 text-gray-600 uppercase text-sm leading-normal dark:bg-gray-700 dark:text-gray-400">
