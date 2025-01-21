@@ -696,7 +696,7 @@
             } else {
                 $('#event-group-li-info').hide();
             }
-          
+            $('#event-teacher-info-container .other_examinators').remove();
             if (event.other_examinators && event.other_examinators.length > 0) {
                 event.other_examinators.forEach(examinator => {
                     $('#event-teacher-info-container').append(`<span class="other_examinators text-sm dark:text-gray-200">${examinator.name}</span>`);
