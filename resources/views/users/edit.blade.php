@@ -46,10 +46,10 @@
             <label for="group_id" class="block text-gray-700 font-medium mb-2">Group</label>
             <select name="group_id" id="group_id" class="w-full border rounded px-3 py-2 focus:outline-none focus:ring-2 focus:ring-blue-500">
                 <option value="">Select Group</option>
-                @foreach($groups as $group)
-                    <option value="{{ $group->id }}" {{ $editUser->groups->contains('id', $group->id) ? 'selected' : '' }}>
-                        {{ $group->name }}
-                    </option>
+
+                @foreach ($groups as $group)
+                        <option value="{{ $group->id }}" data-speciality-id="{{ $group->speciality_id }}" {{ $editUser->groups->contains('id', $group->id) ? 'selected' : '' }}>
+                            {{ $group->name }}</option>
                 @endforeach
             </select>
         </div>
@@ -80,7 +80,7 @@
         </select>
         </div>
 
-        @if($user->roles->contains('name', 'student'))
+        @if($editUser->roles->contains('name', 'student'))
         <!-- Sef de grupa -->
         <div class="mb-4">
             <label for="group_leader" class="block text-gray-700 font-medium mb-2">Sef de grupa</label>
@@ -90,11 +90,10 @@
         @endif
 
         <!-- Speciality (if student) -->
-        @if($user->roles->contains('name', 'student'))
         <div class="mb-4">
             <label for="speciality_id" class="block text-gray-700 font-medium mb-2">Speciality</label>
             <select name="speciality_id" id="speciality_id" class="w-full border rounded px-3 py-2 focus:outline-none focus:ring-2 focus:ring-blue-500">
-                <option value="">Select Speciality</option>
+                <option value="">Selecteaza o specialitate</option>
                 @foreach($specialities as $speciality)
                     <option value="{{ $speciality->id }}" {{ $editUser->speciality_id == $speciality->id ? 'selected' : '' }}>
                         {{ $speciality->name }}
@@ -102,7 +101,6 @@
                 @endforeach
             </select>
         </div>
-        @endif
 
         <!-- Submit -->
         <div class="flex justify-end mt-6">
@@ -115,60 +113,110 @@
 
 @push('scripts')
 <script>
+    window.userRoles = @json($editUser->roles->pluck('name'));
     document.addEventListener('DOMContentLoaded', function () {
         const facultySelect = document.getElementById('faculty_id');
         const groupSelect = document.getElementById('group_id');
         const roleSelect = window.HSSelect.getInstance('#role');
-       
+
+        function initRoleDropdown(val){
+            var group = $('#group_id')
+                var speciality = $('#speciality_id')
+                var faculty = $('#faculty_id')
+                // Get the group name (text inside the option)
+                if(val.includes('student')){
+                    //$('#faculty_id').empty();
+                    $('#faculty_id').prop('disabled', true)
+                    group.prop('disabled', false)
+                    speciality.prop('disabled', false)
+                    faculty.val(undefined)
+                }
+                else if(val.includes('secretary') || val.includes('teacher')){
+                    group.val(undefined);
+                    $('#group_id').trigger('change');
+                    group.prop('disabled', true)
+                    speciality.val(undefined);
+                    $('#speciality_id').trigger('change');
+                    speciality.prop('disabled', true)
+                    faculty.disabled = false
+                }
+                else{
+                    $('#faculty_id').prop('disabled', false)
+                    group.prop('disabled', false)
+                    speciality.prop('disabled', false)
+
+                }
+        }
+        initRoleDropdown(roleSelect.value)
         document.body.addEventListener('click', function (event) {
             // Check if the clicked element has the `data-remove` attribute
             if (event.target.closest('[data-remove]')) {
-                if(roleSelect.value.includes('student')){
-                    facultySelect.disabled = true;
-                } else {
-                    facultySelect.disabled = false;
+                initRoleDropdown(roleSelect.value)
+            }
+        });
+        $('#speciality_id').change(function(){
+                var selectedOption = $(this).find('option:selected');
+                if(selectedOption.val() !== ''){
+                    $('#group_id').empty();
+                    $('#group_id').append('<option value="">Selecteaza o grupa</option>');
+                    @json($groups).forEach(function(group) {
+                        if(group.speciality_id == selectedOption.val()){
+                            $('#group_id').append('<option value="'+group.id+'" data-speciality-id="'+group.speciality_id+'">'+group.name+'</option>');
+                        }
+                    });
+                }else{
+                    $('#group_id').empty();
+                    $('#group_id').append('<option value="">Selecteaza o grupa</option>');
+                    @json($groups).forEach(function(group) {
+                            $('#group_id').append('<option value="'+group.id+'" data-speciality-id="'+group.speciality_id+'">'+group.name+'</option>');
+                    });
                 }
+            })
+    // Listen for changes on the groups dropdown
+            roleSelect.on('change', (val) => {
+                initRoleDropdown(val)
             }
-        });
 
-        facultySelect.addEventListener('change', function () {
-            const facultyId = this.value;
-
-            // Reset dropdown for groups
-            groupSelect.innerHTML = '<option value="">Select Group</option>';
-
-            if (facultyId) {
-                fetch(`/groups/by-faculty/${facultyId}`)
-                    .then(response => response.json())
-                    .then(data => {
-                        data.forEach(group => {
-                            const option = document.createElement('option');
-                            option.value = group.id;
-                            option.textContent = group.name;
-                            groupSelect.appendChild(option);
-                        });
+            )
+            $('#group_id').change(function() {
+                var selectedGroupSpecialityId = $('#group_id option:selected').data('speciality-id');
+                if (selectedGroupSpecialityId === undefined) {
+                    $('#speciality_id').empty();
+                    $('#speciality_id').append('<option value="">Selecteaza o specialitate</option>');
+                    @json($specialities).forEach(function(speciality) {
+                        $('#speciality_id').append('<option value="' + speciality.id + '">' + speciality.name + '</option>');
+                    });
+                    $('#speciality_id').prop('disabled', false)
+                    //$('#role_dropdown').prop('disabled', false)
+                }
+                else{
+                    Object.keys(@json($roles)).forEach(function(roleName){
+                        console.log(roleName)
+                        if(roleName.toLowerCase() == 'student'){
+                            // $('#role_dropdown').val(role.id);
+                            // $('#role_dropdown').trigger('change')
+                        }
                     })
-                    .catch(error => console.error('Error fetching groups:', error));
-            }
-        });
+                    //$('#role_dropdown').prop('disabled', true)
+                     // Clear and repopulate the specialities dropdown
+                    $('#speciality_id').empty();
+                    $('#speciality_id').append('<option value="">Selecteaza o specialitate</option>'); // Default option
 
-        roleSelect.on('change', (val) => {
-            const roleId = this.value;
-            console.log(val);
-            // Assuming role ID 'student' is the role that should disable the faculty select
-            if (val.includes('student')) {
-                facultySelect.disabled = true;
-            } else {
-                facultySelect.disabled = false;
-            }
-        });
-
-        // Disable faculty select if role is student on page load
-        if (roleSelect.value.includes('student')) {
-            facultySelect.disabled = true;
-        }
-
-       
-    });
+                    // Loop through the specialities
+                    @json($specialities).forEach(function(speciality) {
+                        if (speciality.id == selectedGroupSpecialityId) {
+                            $('#speciality_id').append('<option value="' + speciality.id + '">' + speciality.name + '</option>');
+                        }
+                        if(selectedGroupSpecialityId == speciality.id){
+                            $('#speciality_id').val(speciality.id)
+                            $('#speciality_id').prop('disabled', true)
+                        }
+                    });
+                    
+                }
+               
+            })
+      
+        })
 </script>
 @endpush
