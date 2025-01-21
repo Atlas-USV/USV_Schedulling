@@ -17,7 +17,7 @@ use Illuminate\Database\Eloquent\Factories\HasFactory;
 class TeacherSchedule extends Model
 {
     use HasFactory;
-
+    
     protected $fillable = [
         'teacher_id',
         'day_of_week',

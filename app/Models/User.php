@@ -151,4 +151,8 @@ public function evaluations()
     {
         return $this->hasMany(Message::class);
     }
+    public function schedules()
+{
+    return $this->hasMany(TeacherSchedule::class, 'teacher_id');
+}
 }

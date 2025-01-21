@@ -97,19 +97,20 @@
 @endif
 
 <section>
-        <nav class="bg-white border-t border-gray-300 px-4 lg:px-6 py-2.5 dark:bg-gray-800 fixed bottom-0 left-0 w-full z-10">
-            <div class="flex flex-wrap justify-between items-center mx-auto max-w-screen-xl">
-                 <div class="max-w-screen-xl mx-auto px-4 text-center">
-                    <p class="text-sm">© 2025 Exam Planner Pro. All rights reserved.</p>
-                    <div class="flex flex-col justify-center mt-4 space-y-4">
-                        <a href="#" class="flex items-center justify-center p-2 pl-9 w-auto text-base font-normal text-gray-900 rounded-lg transition duration-75 group ">Privacy Policy</a>
-                        <a href="#" class="flex items-center justify-center p-2 pl-9 w-auto text-base font-normal text-gray-900 rounded-lg transition duration-75 group ">Terms of Service</a>
-                        <a href="#" class="flex items-center justify-center p-2 pl-9 w-auto text-base font-normal text-gray-900 rounded-lg transition duration-75 group ">Contact</a>
-                    </div>
+    <nav class="bg-white border-t border-gray-300 px-2 lg:px-4 py-1.5 dark:bg-gray-800 fixed bottom-0 left-0 w-full z-10">
+        <div class="flex flex-wrap justify-between items-center mx-auto max-w-screen-xl">
+            <div class="max-w-screen-xl mx-auto px-2 text-center">
+                <p class="text-xs">© 2025 Exam Planner Pro. All rights reserved.</p>
+                <div class="flex flex-col justify-center mt-1 space-y-1">
+                    <a href="{{ route('policy') }}" class="flex items-center justify-center p-1 text-sm font-normal text-gray-900 rounded-lg transition duration-75 group">Privacy Policy</a>
+                    <a href="{{ route('service') }}" class="flex items-center justify-center p-1 text-sm font-normal text-gray-900 rounded-lg transition duration-75 group">Terms of Service</a>
+                    <a href="{{ route('contact') }}" class="flex items-center justify-center p-1 text-sm font-normal text-gray-900 rounded-lg transition duration-75 group">Contact</a>
                 </div>
             </div>
-        </nav>
+        </div>
+    </nav>
 </section>
+
 
 <script src="https://cdn.jsdelivr.net/npm/flowbite@2.5.2/dist/flowbite.min.js"></script>
 </body>

@@ -17,6 +17,8 @@ use App\Http\Controllers\ChangePasswordController;
 use App\Http\Controllers\ForgotPasswordController;
 use App\Http\Controllers\RequestController;
 use App\Http\Controllers\ExamController;
+use App\Http\Controllers\AddInfoController;
+
 
 
 Route::get('/', function () {
@@ -28,6 +30,12 @@ Route::get('/features', function () {
 Route::get('/contact', function () {
     return view('Home.contact');
 })->name('contact');
+Route::get('/policy', function () {
+    return view('Home.policy'); 
+})->name('policy');
+Route::get('/service', function () {
+    return view('Home.service'); 
+})->name('service');
 Route::get('/contactus', function () {
     return view('ContactUs.contactus');
 })->name('contactus');
@@ -44,11 +52,18 @@ Route::get('/modal', function(){
     return view('components.create-event-modal');
 });
 
-Route::post('/teachers/{teacherId}/schedule', [TeacherController::class, 'storeSchedule'])->name('teachers.storeSchedule');
+
+Route::get('/teachers/{teacherId}/schedule', [TeacherController::class, 'getSchedule'])->name('teachers.schedule');
 
 Route::middleware(['auth', 'role:student'])->group(function () {
     Route::get('/Teachers', [TeacherController::class, 'index'])->name('Teachers.index');
     });
+
+Route::middleware(['auth', 'role:teacher'])->group(function () {
+    Route::post('/addinfo', [TeacherController::class, 'storeSchedule'])->name('addinfo.store');
+    Route::get('/addinfo', [AddInfoController::class, 'create'])->name('addinfo.create');
+    
+});
 
 Route::middleware(['guest'])->group(function () {
     Route::get('/register/{invitation_id}', [AuthController::class, 'showRegisterForm'])
