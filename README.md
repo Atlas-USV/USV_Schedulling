@@ -76,6 +76,11 @@ For setup instructions, you can also refer to this [tutorial video](https://www.
      php artisan db:seed
      ```
 
+9. Create a symbolic link to the storage directory
+   ```bash
+   php artisan storage:link
+   ```
+
 ## Running the Application
 
 1. Start Laravel development server
