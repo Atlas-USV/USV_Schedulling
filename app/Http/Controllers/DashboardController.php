@@ -27,10 +27,10 @@ class DashboardController extends Controller
         ->get();
 
         // Obține ID-ul grupei utilizatorului autentificat
-    $groupId = auth()->user()->group_id; // Asumând că utilizatorul are `group_id` în modelul User
+        $groupIds = auth()->user()->groups()->select('groups.id')->pluck('id'); // Obține un array cu ID-urile grupelor
 
     // Filtrează examenele pentru grupa utilizatorului
-    $upcomingExams = \App\Models\Evaluation::where('group_id', $groupId) 
+    $upcomingExams = \App\Models\Evaluation::where('group_id', $groupIds) 
         ->where('status', 'accepted')
         ->where('exam_date', '>=', now())
         ->orderBy('exam_date', 'asc')
@@ -39,7 +39,7 @@ class DashboardController extends Controller
 
         $userName = auth()->user()->name;
 
-        $userRole = auth()->user()->role;
+        $userRole = auth()->user()->roles->pluck('name');
 
         // Ultimii 5 utilizatori adăugați
     $recentUsers = User::orderBy('created_at', 'desc')->take(5)->get();
@@ -59,8 +59,8 @@ class DashboardController extends Controller
                 ->get();
         }
 
-        \Log::info('User Role:', ['role' => $userRole]);
-        \Log::info('Authenticated User:', ['user' => auth()->user()]);
+        
+        \Log::info('Upcoming Exams:', ['upcomingExams' => $upcomingExams]);
 
 
     
@@ -167,27 +167,29 @@ public function showExams(Request $request)
         $query = \App\Models\Evaluation::where('teacher_id', auth()->id())
             ->where('status', 'accepted');
     } else {
-        // Dacă este student, afișează examenele pentru grupa sa
-        $groupId = auth()->user()->group_id; // Asumând că utilizatorul are `group_id` în modelul User
+        // Dacă este student, obține toate grupele asociate utilizatorului
+        $groupIds = auth()->user()->groups()->pluck('groups.id');
 
-        // Verifică dacă utilizatorul are un grup asociat
-        if (!$groupId) {
+        // Verifică dacă utilizatorul are grupe asociate
+        if ($groupIds->isEmpty()) {
             return view('exams.index', [
                 'exams' => collect([]), // Returnează o colecție goală
                 'subjects' => \App\Models\Subject::all(),
             ]);
         }
 
-        $query = \App\Models\Evaluation::where('group_id', $groupId)
+        $query = \App\Models\Evaluation::whereIn('group_id', $groupIds)
             ->where('status', 'accepted');
     }
 
-    // Aplica filtrul de timp (past/current)
-    if ($request->filter === 'past') {
-        $query->where('exam_date', '<', now());
-    } elseif ($request->filter === 'current') {
-        $query->where('exam_date', '>=', now());
-    }
+    // Filtrează examenele curente (ziua curentă sau viitor)
+    $query->where(function ($q) {
+        $q->where('exam_date', '>', now())
+            ->orWhere(function ($q2) {
+                $q2->where('exam_date', '=', now()->toDateString())
+                    ->where('end_time', '>=', now());
+            });
+    });
 
     // Aplica filtrul pentru subiect, dacă este setat
     if ($request->has('subject') && !empty($request->subject)) {
@@ -203,6 +205,21 @@ public function showExams(Request $request)
     $subjects = \App\Models\Subject::all();
 
     return view('exams.index', compact('exams', 'subjects'));
+}
+public function viewInCalendar($id)
+{
+    $exam = \App\Models\Evaluation::findOrFail($id);
+
+    $googleCalendarUrl = sprintf(
+        'https://www.google.com/calendar/render?action=TEMPLATE&text=%s&dates=%s/%s&details=%s&location=%s',
+        urlencode($exam->subject->name),
+        $exam->exam_date->format('Ymd\THis'),
+        $exam->exam_date->format('Ymd\THis', strtotime('+2 hours')), // Adjust duration as needed
+        urlencode($exam->description ?? 'No details available'),
+        urlencode($exam->room->name ?? 'No room specified')
+    );
+
+    return redirect($googleCalendarUrl);
 }
 
 public function storeTask(Request $request)

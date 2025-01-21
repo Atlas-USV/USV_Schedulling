@@ -100,21 +100,29 @@ public function evaluations()
         return $this->belongsTo(Speciality::class, 'speciality_id');
     }
 
-    public function faculty(): BelongsTo
+    public function faculty()
     {
         if ($this->hasRole(ERoles::STUDENT)) {
-            // return $this->belongsTo(Faculty::class, 'speciality_id', 'id')
-            //         ->join('specialities', 'faculties.id', '=', 'specialities.faculty_id');
-            return $this->belongsTo(Faculty::class, Speciality::class);
-            }
+            return $this->hasOneThrough(Faculty::class, Speciality::class, 'id', 'id', 'speciality_id', 'faculty_id');
+        }
         return $this->belongsTo(Faculty::class, 'teacher_faculty_id');
     }
-
-    public function groups(): BelongsToMany 
+    // public function getFacultyAttribute(): ?Faculty
+    // {
+    //     return $this->getFaculty();
+    // }
+    public function groups(): BelongsToMany
     {
-        return $this->belongsToMany(Group::class, 'user_group', 'user_id', 'group_id');
-                    
+        return $this->belongsToMany(Group::class, 'user_group', 'user_id', 'group_id')
+                    ->withTimestamps()
+                    ->withTimestamps()
+                ->select('groups.id');
     }
+
+    // public function evaluations(): HasMany
+    // {
+    //     return $this->hasMany(Evaluation::class, 'teacher_id');
+    // }
 
     public function sendEmailVerificationNotification()
     {
@@ -127,14 +135,14 @@ public function evaluations()
         return $evaluation ? $evaluation->year_of_study : 'N/A'; // Returnează anul de studiu sau 'N/A'
     }
 
-    public function getYearsOfWork()
-    {
-        if (!$this->year_of_start) 
-        {
-            return 'N/A';
-        }
-        return now()->year - $this->year_of_start;
-    }
+    // public function getYearsOfWork()
+    // {
+    //     if (!$this->year_of_start) 
+    //     {
+    //         return 'N/A';
+    //     }
+    //     return now()->year - $this->year_of_start;
+    // }
 
 
 
