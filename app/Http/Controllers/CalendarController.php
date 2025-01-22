@@ -304,14 +304,31 @@ protected function checkForOverlaps($data): array {
                 'message' => 'Această grupă are deja programat un examen la această materie în acest an.'
             ];
         }
+        $examDate = Carbon::parse($data['exam_date'])->toDateString(); // Only the date part
+        $startTime = Carbon::parse($data['start_time'])->setTimezone('UTC')->format('H:i:s');
+        $endTime = Carbon::parse($data['end_time'])->setTimezone('UTC')->format('H:i:s');
 
-        // Check 2: Time conflicts for group
-        $groupConflict = Evaluation::whereYear('exam_date', $examYear)
+        // Check 2: Time conflicts for group on the same day
+        $groupConflict = Evaluation::whereDate('exam_date', $examDate)
+            ->where('group_id', $data['group_id'])
+            ->whereTime('start_time', '<', $endTime)
+            ->whereTime('end_time', '>', $startTime)
+            ->first();
+
+            
+        \Log::info('Checking for group conflict', [
+            'query' => Evaluation::whereDate('exam_date', $data['exam_date'])
             ->where('group_id', $data['group_id'])
             ->where('start_time', '<', $data['end_time'])
             ->where('end_time', '>', $data['start_time'])
-            ->first();
-
+            ->toSql(),
+            'bindings' => Evaluation::whereDate('exam_date', $data['exam_date'])
+            ->where('group_id', $data['group_id'])
+            ->where('start_time', '<', $data['end_time'])
+            ->where('end_time', '>', $data['start_time'])
+            ->getBindings(),
+            'conflict' => $groupConflict
+        ]);
         if ($groupConflict) {
             return [
                 'hasOverlap' => true,
