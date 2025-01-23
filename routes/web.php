@@ -98,7 +98,7 @@ Route::middleware(['auth'])->group(function(){
         // ->middleware('can:propose_exam');
 });
 
-Route::middleware(['role:admin|secretary'])->group(function() {
+Route::middleware(['auth', 'role:admin|secretary'])->group(function() {
     Route::post('/create-invitation',[ InvitationController::class,'store'])->name('invitation.store');
     Route::get('/invitation', [InvitationController::class,'create'])->name('invitation');
     Route::get('/invitations', [InvitationController::class, 'getInvitations'])->name('invitations');
@@ -191,6 +191,7 @@ Route::middleware(['auth'])->group(function () {
 });
 
 Route::middleware(['auth', 'role:admin|secretary'])->group(function () {
+    
     Route::get('/evaluations/pending', [AdminEvaluationController::class, 'index'])->name('evaluations.pending');
     Route::post('/evaluations/{evaluation}/accept', [AdminEvaluationController::class, 'accept'])->name('evaluations.accept');
     Route::delete('/evaluations/{id}', [AdminEvaluationController::class, 'delete'])->name('evaluations.delete');
