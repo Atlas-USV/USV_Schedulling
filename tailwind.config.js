@@ -1,10 +1,12 @@
 /** @type {import('tailwindcss').Config} */
 export default {
+  darkMode: 'class',
   content: [
     "./resources/**/*.blade.php",
     "./resources/**/*.js",
     "./resources/**/*.vue",
-    "./node_modules/flowbite/**/*.js"
+    "./node_modules/flowbite/**/*.js",
+    './node_modules/preline/dist/*.js',
   ],
   theme: {
     extend: {
@@ -14,10 +16,14 @@ export default {
     },
   },
   plugins: [
-      require('flowbite/plugin'),
+      require('flowbite/plugin')({
+        datatables: true
+        
+      }),
       require('flowbite-typography')({
-        wysiwyg: true
-      })
+        wysiwyg: true,
+      }),
+      require('preline/plugin'),
       // require('@tailwindcss/forms'),
   ],
 }

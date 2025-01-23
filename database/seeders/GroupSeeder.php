@@ -12,16 +12,16 @@ class GroupSeeder extends Seeder
     public function run()
     {
         $endpoint = 'https://orar.usv.ro/orar/vizualizare/data/subgrupe.php?json';
-        $response = Http::get($endpoint);
+        $response = Http::withOptions(['verify' => false])->get($endpoint);
 
-        
+
         $nextNumber = 1;
 
         if ($response->successful()) {
             $data = $response->json();
 
             foreach ($data as $item) {
-                
+
                 $speciality = Speciality::where('short_name', $item['specializationShortName'])->first();
 
                 if ($speciality) {
@@ -30,11 +30,11 @@ class GroupSeeder extends Seeder
 
                     Group::updateOrCreate(
                         [
-                            'name' => $item['groupName'], 
+                            'name' => $item['groupName'],
                             'speciality_id' => $speciality->id,
                         ],
                         [
-                            'number' => $number, 
+                            'number' => $number,
                             'study_year' => $item['studyYear'],
                         ]
                     );

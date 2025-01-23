@@ -6,47 +6,35 @@ use Carbon\Carbon;
 use App\Models\Room;
 use App\Models\User;
 use App\Models\Group;
+use App\Shared\ERoles;
 use App\Models\Faculty;
 use App\Models\Subject;
 use App\Models\Evaluation;
 use App\Models\Speciality;
+use App\Shared\EPermissions;
 use Illuminate\Http\Request;
 use App\Shared\EvaluationTypes;
 use Spatie\Permission\Models\Role;
 use Illuminate\Support\Facades\Log;
 use App\Http\Controllers\Controller;
 use Illuminate\Support\Facades\Auth;
+use Illuminate\Support\Facades\Gate;
 use Illuminate\Support\Facades\Validator;
+use Illuminate\Foundation\Auth\Access\AuthorizesRequests;
 
 class CalendarController extends Controller
 {
+    
     public function load(Request $request){
         
-        $user = Auth::user();
         $faculties = Faculty::all();
         $specialities = Speciality::all();
-        // if ($user->hasRole('secretary')) {
-        //     // Filter users by faculty_id and role 'teacher'
-        //     $teachers = User::role('teacher') // Filters users with the 'teacher' role
-        //         ->where('teacher_faculty_id', $user->teacher_faculty_id)
-        //         ->get();
-        //         $groups = Group::with('speciality') // Eager load the speciality relationship
-        //         ->whereHas('speciality.faculty', function ($query) use ($user) {
-        //             $query->where('id', $user->teacher_faculty_id); // Filter by faculty ID
-        //         })->orderBy('speciality_id') // Sort by speciality_id
-        //         ->orderBy('study_year')   // Then by study_year
-        //         ->get();
-                
-        // } else {
-        //     // Fetch all users or apply other logic for different roles
-        //     $teachers = User::role('teacher')->get();
-        //     $groups = Group::with('speciality')
-        //     ->orderBy('speciality_id') // Sort by speciality_id
-        //     ->orderBy('study_year')   // Then by study_year
-        //     ->get();
-            
-        // }
+       
         $teachers = User::role('teacher')->get();
+        $teachers = User::role('teacher')->with('faculty:id,short_name')->get()->map(function ($teacher) {
+            $teacher->faculty_short_name = $teacher->faculty ? $teacher->faculty->short_name : null;
+            return $teacher;
+        });
         $groups = Group::with('speciality')->get()->map(function ($group) {
             $group->speciality_short_name = $group->speciality ? $group->speciality->short_name : null;
             return $group;
@@ -57,22 +45,43 @@ class CalendarController extends Controller
             
         $subjects = Subject::all();
         $rooms = Room::all();
-    
-        return view('calendar.index', compact('groups', 'faculties', 'specialities', 'teachers', 'subjects', 'rooms', 'evaluationTypes'));
+
+        $user = null;
+        $canProposeExam = false;
+        
+        if (Auth::check()) {
+            $user = Auth::user()->load(['speciality']);
+            $canProposeExam = auth()->user()->hasRole(ERoles::STUDENT->value) && 
+                             auth()->user()->can(EPermissions::PROPOSE_EXAM->value);
+        }
+
+        return view('calendar.index', compact('groups', 'faculties', 'specialities', 'teachers', 
+                   'subjects', 'rooms', 'evaluationTypes','canProposeExam', 'user'));
     }
 
     public function getAllEvents(Request $request)
     {
         try {
+            // Enable query logging
+           
+
             // Fetch evaluations from the database
             $evaluations = \App\Models\Evaluation::with([
                 'subject',
                 'group:id,name,speciality_id',
-                'speciality:id,name',
-                'teacher',
+                'speciality:id,name', 
+                'teacher:id,name,teacher_faculty_id,email',
                 'room:id,name',
-            ])->get();
-            // Transform evaluations into event format
+                'otherExaminators',
+
+                'teacher.faculty:id,name' // Add eager loading for faculty relationship
+            ])
+            ->where('status', 'accepted')
+            ->get();
+
+          
+
+            // Transform evaluations into event format 
             $events = $evaluations->map(function ($evaluation) {
                 $eventColor = EvaluationTypes::from($evaluation->type)->getColor();
                 return [
@@ -89,7 +98,9 @@ class CalendarController extends Controller
                     'description' => $evaluation->description,
                     'teacher_id' => $evaluation->teacher_id,
                     'subject' => $evaluation->subject,
-                    'color' => $eventColor, // Add color to the event
+                    'color' => $eventColor,
+                    'faculty' => $evaluation->teacher->faculty ,// Now efficiently loaded
+                    'other_examinators'=>$evaluation->otherExaminators
                 ];
             });
 
@@ -108,11 +119,58 @@ class CalendarController extends Controller
             ], 500);
         }
     }
-
+    public function propose(Request $request) {
+        // Authorization check for creating an Evaluation
+        Gate::authorize('propose', Evaluation::class);
+    
+        // Validation rules
+        $baseRules = [
+            'type' => 'required|in:exam,colloquium,project',
+            'teacher_id' => 'required|exists:users,id',
+            'start_time' => 'required|date|before:end_time',
+            'end_time' => 'required|date|after:start_time',
+            'subject_id' => 'required|exists:subjects,id'
+        ];
+        $validatedData = $request->validate($baseRules);
+        $validatedData['exam_date'] = Carbon::parse($validatedData['start_time'])->format('Y-m-d');
+        
+        // Check if user has a group
+        $groupId = Auth::user()->groups ? Auth::user()->groups->first()->id : null;
+        if (is_null($groupId)) {
+            return response()->json([
+                'success' => false,
+                'message' => 'Eroare de validare',
+                'errors' => [
+                    'group_id' => ['Studentul nu este intr-o grupa']
+                ]
+            ], 422);
+        }
+        
+        $validatedData['group_id'] = $groupId;
+        
+        // Check for overlap with the group's exam date
+        $overlapCheck = $this->checkForOverlaps($validatedData);
+        if ($overlapCheck['hasOverlap']) {
+            return response()->json([
+                'message' => 'Eroare de suprapunere',
+                'errors' => [
+                    'schedule' => [$overlapCheck['message']]
+                ]
+            ], 400);
+        }
+        
+        $evaluation = \App\Models\Evaluation::create($validatedData);
+        return response()->json([
+            'success' => true,
+            'message' => 'Exam proposal is sent.',
+            'data' => $evaluation,
+        ], 201);
+    }
+    
     public function create(Request $request)
     {
-       // Log::info('Request: ', ['request' =>$request->all()]);
-    //    'exam_date' => Carbon::parse($data['start_time'])->format('Y-m-d'),
+      //Log::info('Request: ', ['request' =>$request->all()]);
+     //'exam_date' => Carbon::parse($data['start_time'])->format('Y-m-d'),
     try {
         $baseRules = [
             'type' => 'required|in:exam,colloquium,project,reexamination,retake',
@@ -130,18 +188,59 @@ class CalendarController extends Controller
         $this->addConditionalRules($request, $validator);
 
         $validatedData = $validator->validated();
-
+        Log::info('Validated Data: ', $validatedData);
         // Add 'exam_date' to the validated data
         $validatedData['exam_date'] = Carbon::parse($validatedData['start_time'])->format('Y-m-d');
-        if($this->checkForOverlaps($validatedData)){
-             return response()->json([
-            'message' => 'Eroare de suprapunere',
-            'errors' => [
-                'schedule' => ['The schedule overlaps with an existing one.']
-            ]
-        ], 400); // HTTP 400: Bad Request
+
+        // Check if teacher and group are from same faculty
+        $teacher = \App\Models\User::find($validatedData['teacher_id']);
+        $group = isset($validatedData['group_id']) ? \App\Models\Group::find($validatedData['group_id']) : null;
+        
+        if ($group && $teacher) {
+            $groupFacultyId = $group->speciality->faculty_id;
+            $teacherFacultyId = $teacher->teacher_faculty_id;
+            
+            if ($groupFacultyId !== $teacherFacultyId) {
+                return response()->json([
+                    'success' => false,
+                    'message' => 'Validation error',
+                    'errors' => [
+                        'teacher_id' => ['Cadrul didactic trebuie să fie din aceeași facultate cu grupa']
+                    ]
+                ], 422);
+            }
         }
+
+        $overlapCheck = $this->checkForOverlaps($validatedData);
+        if ($overlapCheck['hasOverlap']) {
+            return response()->json([
+                'message' => 'Eroare de suprapunere',
+                'errors' => [
+                    'schedule' => [$overlapCheck['message']]
+                ]
+            ], 400);
+        }
+        $validatedData['status'] = 'accepted';
+        if (isset($validatedData['group_id'])) {
+            $group = \App\Models\Group::find($validatedData['group_id']);
+            if ($group) {
+                $validatedData['speciality_id'] = $group->speciality_id;
+            }
+        }
+        // Save 'other_examinators' in another variable and then unset
+        $otherExaminators = $validatedData['other_examinators'] ?? null;
+        Log::info('Other Examinators: ', ['examinators' => $otherExaminators]);
+        unset($validatedData['other_examinators']);
+
         $evaluation = \App\Models\Evaluation::create($validatedData);
+        if ($otherExaminators) {
+            foreach ($otherExaminators as $examinatorId) {
+            \App\Models\EvaluationExaminator::create([
+                'evaluation_id' => $evaluation->id,
+                'teacher_id' => $examinatorId,
+            ]);
+            }
+        }
         // Handle the specific type
         $eventColor = EvaluationTypes::from($evaluation->type)->getColor();
         $evaluationEvent =  [
@@ -182,31 +281,125 @@ class CalendarController extends Controller
         ], 500);
     }
 }
-protected function checkForOverlaps($data): bool{
-    return Evaluation::whereYear('exam_date', now()->year)
-            ->where(function($query) use ($data){
-            $query->where('start_time', '<', $data['end_time'])
-            ->where('end_time', '>', $data['start_time']);
-        })
-        ->where(function ($query) use ($data) {
-            $query->where('room_id', $data['room_id'])
-                  ->orWhere('teacher_id', $data['teacher_id'])
-                //   ->orWhere(function ($subQuery) use ($data) {
-                      // Case 1: When group_id is null, check specialty_id + year_of_study
-                    //   if (empty($data['group_id']) &&  isset($data['speciality_id'], $data['year_of_study'])) {
-                    //       $subQuery->whereNull('group_id')
-                    //                ->where('speciality_id', $data['speciality_id'])
-                    //                ->where('year_of_study', $data['year_of_study']);
-                    //   }
-                //   })
-                  ->orWhere(function ($subQuery) use ($data) {
-                      // Case 2: When specialty_id and year_of_study are null, check group_id
-                      if (isset($data['group_id'])) {
-                          $subQuery->where('group_id', $data['group_id']);
-                      }
-                  });
-        })
-        ->exists();
+protected function checkForOverlaps($data): array {
+    $examYear = Carbon::parse($data['exam_date'])->year;
+    
+    if (in_array($data['type'], [EvaluationTypes::EXAM->value, EvaluationTypes::COLLOQUIUM->value, EvaluationTypes::PROJECT->value])) {
+        // Check 1: If group already has this subject scheduled
+        $existingSubjectEvaluation = Evaluation::whereYear('exam_date', $examYear)
+            ->where('group_id', $data['group_id'])
+            ->where('subject_id', $data['subject_id'])
+            ->first();
+
+        \Log::info('Checking for existing subject evaluation', [
+            'year' => $examYear,
+            'group_id' => $data['group_id'],
+            'subject_id' => $data['subject_id'],
+            'found' => !is_null($existingSubjectEvaluation)
+        ]);
+
+        if ($existingSubjectEvaluation) {
+            return [
+                'hasOverlap' => true,
+                'message' => 'Această grupă are deja programat un examen la această materie în acest an.'
+            ];
+        }
+        $examDate = Carbon::parse($data['exam_date'])->toDateString(); // Only the date part
+        $startTime = Carbon::parse($data['start_time'])->setTimezone('UTC')->format('H:i:s');
+        $endTime = Carbon::parse($data['end_time'])->setTimezone('UTC')->format('H:i:s');
+
+        // Check 2: Time conflicts for group on the same day
+        $groupConflict = Evaluation::whereDate('exam_date', $examDate)
+            ->where('group_id', $data['group_id'])
+            ->whereTime('start_time', '<', $endTime)
+            ->whereTime('end_time', '>', $startTime)
+            ->first();
+
+            
+        \Log::info('Checking for group conflict', [
+            'query' => Evaluation::whereDate('exam_date', $data['exam_date'])
+            ->where('group_id', $data['group_id'])
+            ->where('start_time', '<', $data['end_time'])
+            ->where('end_time', '>', $data['start_time'])
+            ->toSql(),
+            'bindings' => Evaluation::whereDate('exam_date', $data['exam_date'])
+            ->where('group_id', $data['group_id'])
+            ->where('start_time', '<', $data['end_time'])
+            ->where('end_time', '>', $data['start_time'])
+            ->getBindings(),
+            'conflict' => $groupConflict
+        ]);
+        if ($groupConflict) {
+            return [
+                'hasOverlap' => true,
+                'message' => 'Această grupă are deja programat un alt examen în acest interval orar.'
+            ];
+        }
+
+        // Check 3: Time conflicts for teacher
+        $teacherConflict = Evaluation::whereYear('exam_date', $examYear)
+            ->where('teacher_id', $data['teacher_id'])
+            ->where('start_time', '<', $data['end_time'])
+            ->where('end_time', '>', $data['start_time'])
+            ->first();
+
+        if ($teacherConflict) {
+            return [
+                'hasOverlap' => true,
+                'message' => 'Profesorul selectat are deja programat un alt examen în acest interval orar.'
+            ];
+        }
+
+        // Check 4: Time conflicts for room (if room is specified)
+        if (isset($data['room_id'])) {
+            $roomConflict = Evaluation::whereYear('exam_date', $examYear)
+                ->where('room_id', $data['room_id'])
+                ->where('start_time', '<', $data['end_time'])
+                ->where('end_time', '>', $data['start_time'])
+                ->first();
+
+            if ($roomConflict) {
+                return [
+                    'hasOverlap' => true,
+                    'message' => 'Sala selectată este deja ocupată în acest interval orar.'
+                ];
+            }
+        }
+    } else {
+        // For retakes and reexaminations, only check teacher and room conflicts
+        
+        // Check 1: Time conflicts for teacher
+        $teacherConflict = Evaluation::whereYear('exam_date', $examYear)
+            ->where('teacher_id', $data['teacher_id'])
+            ->where('start_time', '<', $data['end_time'])
+            ->where('end_time', '>', $data['start_time'])
+            ->first();
+
+        if ($teacherConflict) {
+            return [
+                'hasOverlap' => true,
+                'message' => 'Profesorul selectat are deja programat un alt examen în acest interval orar.'
+            ];
+        }
+
+        // Check 2: Time conflicts for room (if room is specified)
+        if (isset($data['room_id'])) {
+            $roomConflict = Evaluation::whereYear('exam_date', $examYear)
+                ->where('room_id', $data['room_id'])
+                ->where('start_time', '<', $data['end_time'])
+                ->where('end_time', '>', $data['start_time'])
+                ->first();
+
+            if ($roomConflict) {
+                return [
+                    'hasOverlap' => true,
+                    'message' => 'Sala selectată este deja ocupată în acest interval orar.'
+                ];
+            }
+        }
+    }
+    
+    return ['hasOverlap' => false, 'message' => ''];
 }
 
 protected function addConditionalRules(Request $request, $validator): void

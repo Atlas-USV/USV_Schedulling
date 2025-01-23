@@ -8,6 +8,7 @@ use App\Models\User;
 use App\Models\Group;
 use App\Models\Subject;
 use App\Models\Speciality;
+use App\Models\EvaluationExaminator;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\HasMany;
@@ -95,6 +96,18 @@ class Evaluation extends Model
     {
         return $this->belongsTo(Speciality::class);
     }
+    // Faculty relationship through teacher
+    public function faculty()
+    {
+        return $this->hasOneThrough(
+            Faculty::class,
+            User::class,
+            'id', // Foreign key on users table
+            'id', // Foreign key on faculties table
+            'teacher_id', // Local key on evaluations table
+            'teacher_faculty_id' // Local key on users table
+        );
+    }
 
     // Method to check if this is a re-examination
     public function isReexamination()
@@ -108,10 +121,9 @@ class Evaluation extends Model
         return $value ?? 'N/A'; // Default to 'N/A' if null
     }
 
-    // Get all the other examinators
-    public function getOtherExaminatorsAttribute($value)
+    public function otherExaminators()
     {
-        return json_decode($value);
+        return $this->belongsToMany(User::class, 'evaluation_examinator', 'evaluation_id', 'teacher_id');
     }
 
     public function creator()
@@ -124,5 +136,9 @@ class Evaluation extends Model
         return $this->belongsTo(User::class, 'updated_by');
     }
 
+    public function examinators()
+    {
+        return $this->hasMany(EvaluationExaminator::class);
+    }
     
 }

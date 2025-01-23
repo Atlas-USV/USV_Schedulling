@@ -15,8 +15,9 @@ class RoomSeeder extends Seeder
     {
         try {
             // Replace this URL with your actual API endpoint
-            $response = Http::get('https://orar.usv.ro/orar/vizualizare/data/sali.php?json');
-            
+            $url = 'https://orar.usv.ro/orar/vizualizare/data/sali.php?json';
+            $response = Http::withOptions(['verify' => false])->get($url);
+
             if ($response->successful()) {
                 $rooms = $response->json();
                 // \Log::info('Parsed rooms:', $rooms);

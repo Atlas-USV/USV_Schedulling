@@ -1,10 +1,9 @@
 <?php
-
 namespace Database\Seeders;
 
-use Illuminate\Database\Console\Seeds\WithoutModelEvents;
 use Illuminate\Database\Seeder;
 use Spatie\Permission\Models\Role;
+
 class UserRoles extends Seeder
 {
     /**
@@ -12,10 +11,15 @@ class UserRoles extends Seeder
      */
     public function run(): void
     {
-        Role::create(['name' => 'admin']);
-        Role::create(['name' => 'teacher']);
-        Role::create(['name' => 'secretary']);
-        Role::create(['name' => 'student']);
-        
+        $roles = ['admin', 'teacher', 'secretary', 'student'];
+
+        foreach ($roles as $role) {
+            // Verifică dacă rolul există deja
+            if (!Role::where('name', $role)->exists()) {
+                Role::create(['name' => $role]);
+            } else {
+                \Log::info("Role `{$role}` already exists.");
+            }
+        }
     }
 }

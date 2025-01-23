@@ -11,6 +11,8 @@
                 <th class="px-6 py-3">Email</th>
                 <th class="px-6 py-3">Grupă</th>
                 <th class="px-6 py-3">Facultate</th>
+                <th class ="px-6 py-3">Specialitate</th>
+                <th class="px-6 py-3">Roluri</th>
                 <th class="px-6 py-3">Opțiuni</th>
             </tr>
         </thead>
@@ -20,11 +22,19 @@
                     <td class="px-6 py-4">{{ $user->name }}</td>
                     <td class="px-6 py-4">{{ $user->email }}</td>
                     <td class="px-6 py-4">
-                        @foreach($user->groups as $group)
-                            {{ $group->name }}
-                        @endforeach
+    @if(isset($userGroups[$user->id]))
+        @foreach($userGroups[$user->id] as $group)
+            {{ $group->group_name }}
+        @endforeach
+    @else
+        N/A
+    @endif
+</td>
+                    <td class="px-6 py-4">{{ $user->faculty ? $user->faculty->short_name : ($user->speciality ? $user->speciality->faculty->short_name : 'N/A') }}</td>
+                    <td class="px-6 py-4">{{ $user->speciality ? $user->speciality->name : 'N/A' }}</td>
+                    <td class="px-6 py-4">
+                        {{ $user->roles->pluck('name')->join(', ') }}
                     </td>
-                    <td class="px-6 py-4">{{ $user->faculty ? $user->faculty->name : 'N/A' }}</td>
                     <td class="px-6 py-4">
                         <a href="{{ route('users.edit', $user->id) }}" class="text-blue-600 hover:underline">Edit</a>
                     </td>
@@ -39,3 +49,10 @@
     {{ $users->links('vendor.pagination.flowbite') }}
 </div>
 @endsection
+<script>
+    document.addEventListener('DOMContentLoaded', function() {
+        @foreach($users as $user)
+            console.log('Roles for {{ $user->name }}: ', @json($user->roles->pluck('name')));
+        @endforeach
+    });
+</script>

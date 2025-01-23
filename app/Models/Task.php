@@ -20,6 +20,7 @@ class Task extends Model
 
     protected $casts = [
         'deadline' => 'datetime',
+        'is_completed' => 'boolean'
     ];
 
     // Relație cu utilizatorii

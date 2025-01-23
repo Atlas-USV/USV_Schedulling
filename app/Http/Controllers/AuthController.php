@@ -1,6 +1,7 @@
 <?php
 
 namespace App\Http\Controllers;
+use Illuminate\Foundation\Auth\AuthenticatesUsers;
 use App\Models\User;
 use App\Models\Group;
 use App\Models\Invitation;
@@ -39,7 +40,7 @@ class AuthController extends Controller
 
         if (Auth::attempt($request->only('email', 'password'))) {
             $request->session()->regenerate();
-            return redirect()->intended('/');
+            return redirect()->route('dashboard');
         }
 
         return back()->withErrors([
@@ -67,72 +68,86 @@ class AuthController extends Controller
     // Handle registration request
     public function register(Request $request, $invitation_id)
     {
-         // Validate the request data
-        $request->validate([
-            'name' => 'required|string|max:255',
-            // 'email' => 'required|email|unique:users,email',
-            'password' => 'required|string|min:8|confirmed',
-        ]);
-        // Retrieve the invitation by ID
-        $invitation = Invitation::findOrFail($invitation_id);
-        
-        // Check if the invitation is valid (optional: ensure the invitation is not expired)
-        if ($invitation->expires_at != null && $invitation->expires_at < now()) {
-            abort(419);
-        }
-
-        // Create the user
-        $user = User::create([
-            'name' => $request->name,
-            'email' => $invitation->email,
-            'password' => Hash::make($request->password),
-        ]);
-       
-
-        if ($invitation->group_id) {
-            $group = Group::find($invitation->group_id); // Find the group by ID
-        
-            if ($group) {
-                // Assign group speciality_id to the user
-                $user->speciality_id = $group->speciality_id;
-                $user->groups()->attach($group->id);
+        try {
+            // Validate the request data
+            $validatedData = $request->validate([
+                'name' => 'required|string|max:255',
+                'password' => 'required|string|min:8|confirmed',
+            ]);
+    
+            // Retrieve the invitation by ID
+            $invitation = Invitation::findOrFail($invitation_id);
+    
+            // Check if the invitation is valid (optional: ensure the invitation is not expired)
+            if ($invitation->expires_at != null && $invitation->expires_at < now()) {
+                abort(419, 'The invitation has expired.');
             }
-            
-        
-            // If a teacher_faculty_id is present, assign it
+    
+            // Create the user
+            $user = User::create([
+                'name' => $validatedData['name'],
+                'email' => $invitation->email,
+                'password' => Hash::make($validatedData['password']),
+            ]);
+    
+            if ($invitation->group_id) {
+                $group = Group::find($invitation->group_id);
+                if ($group) {
+                    $user->speciality_id = $group->speciality_id;
+                    $user->groups()->attach($group->id);
+                }
+            }
+    
+            if ($invitation->role_id) {
+                $role = Role::find($invitation->role_id);
+                if ($role) {
+                    $user->assignRole($role);
+                }
+            }
+    
             if ($invitation->teacher_faculty_id) {
                 $user->teacher_faculty_id = $invitation->teacher_faculty_id;
             }
+    
+            $user->save();
+    
+            // Delete the invitation
+            Invitation::where('email', $invitation->email)->delete();
+    
+            // Log in the user
+            Auth::login($user);
+    
+            // Regenerate the session to prevent session fixation attacks
+            $request->session()->regenerate();
+    
+            // Flash success message
+            session()->flash('toast_success', 'Te-ai registrat cu success');
+    
+            // Redirect to the home page
+            return redirect()->route('home');
+        } catch (\Illuminate\Validation\ValidationException $e) {
+            // Flash validation errors
+            $errorMessages = collect($e->errors())->flatten()->implode(' '); 
+            session()->flash('toast_error', $errorMessages);
+            return back()->withErrors($e->errors())->withInput();
+        } catch (\Exception $e) {
+            // Flash general errors
+            session()->flash('toast_error', 'A aparut o eroare in timpul registrarii');
+            return back()->withInput();
         }
-        if ($invitation->role_id) {
-            $role = Role::find($invitation->role_id);  // Find the role by ID
-            if ($role) {
-                $user->assignRole($role);  // Assign the role to the user
-            }
-        }
-        if ($invitation->teacher_faculty_id) {
-            $user->teacher_faculty_id = $invitation->teacher_faculty_id;  // Assign faculty_id
-        }
-        $user->save();
-       
-        Invitation::where('email', $invitation->email)->delete();
-        Auth::login($user);
-
-        // Regenerate the session to avoid session fixation attacks
-        $request->session()->regenerate();
-
-        // Redirect to the desired page (e.g., dashboard)
-        return redirect()->route('home');
     }
-
+    
     // Handle logout request
     public function logout(Request $request)
     {
         Auth::logout();
-
+    
         $request->session()->invalidate();
         $request->session()->regenerateToken();
 
-        return redirect('/login');
+        
+       
+        return redirect('/');
     }
+    
 }

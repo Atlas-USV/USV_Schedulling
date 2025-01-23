@@ -7,7 +7,7 @@
 \Carbon\Carbon::setLocale('ro');
 @endphp
 <div class="relative overflow-x-auto shadow-md sm:rounded-lg">
-    <table class="w-full text-sm text-left text-gray-500 dark:text-gray-400">
+    <table class="w-full text-sm text-left text-gray-500 dark:text-gray-200">
         <thead class="text-xs text-gray-700 uppercase bg-gray-50 dark:bg-gray-700 dark:text-gray-400">
             <tr>
                 <th scope="col" class="px-6 py-3">Subject</th>
@@ -28,8 +28,8 @@
                 <tr class="bg-white border-b dark:bg-gray-800 dark:border-gray-700 hover:bg-gray-50 dark:hover:bg-gray-600">
                     <td class="px-6 py-4">{{ $evaluation->subject->name }}</td>
                     <td class="px-6 py-4">{{ $evaluation->teacher->name }}</td>
-                    <td class="px-6 py-4">{{ $evaluation->group->name }}</td>
-                    <td class="px-6 py-4">{{ $evaluation->room->name }}</td>
+                    <td class="px-6 py-4">{{ $evaluation->group ? $evaluation->group->name : 'N/A' }}</td>
+                    <td class="px-6 py-4">{{ $evaluation->room ? $evaluation->room->name : 'N/A' }}</td>
                     <td class="px-6 py-4">{{ \Carbon\Carbon::parse($evaluation->exam_date)->translatedFormat('l, d M Y') }}</td>
                     <td class="px-6 py-4">{{ $evaluation->start_time }}</td>
                     <td class="px-6 py-4">{{ $evaluation->end_time }}</td>
@@ -37,18 +37,22 @@
                     <td class="px-6 py-4">{{ $evaluation->status }}</td>
                     <td class="px-6 py-4">{{ $evaluation->creator ? $evaluation->creator->name : 'Unknown' }}</td>
                     <td class="px-6 py-4 flex gap-2 justify-center items-center">
-    <!-- Accept Button -->
-    <button type="button" onclick="openModal({{ $evaluation->id }})" class="bg-green-700 text-white px-5 py-2.5 rounded-lg">
-    Accept
-</button>
+                    
+     <!-- Accept Button -->
+     <button type="button" onclick="openModal({{ $evaluation->id }})" 
+        class="focus:outline-none text-white bg-green-700 hover:bg-green-800 focus:ring-4 focus:ring-green-300 font-medium rounded-lg text-sm px-5 py-2.5">
+        Accept
+    </button>
+    
+    <!-- Decline Button inside form -->
+    <form action="{{ route('evaluations.decline', $evaluation->id) }}" method="POST" class="m-0">
+        @csrf
+        <button type="button" onclick="openDeclineModal({{ $evaluation->id }})" 
+            class="focus:outline-none text-white bg-yellow-700 hover:bg-yellow-800 focus:ring-4 focus:ring-yellow-300 font-medium rounded-lg text-sm px-5 py-2.5">
+            Decline
+        </button>
     </form>
-    <!-- Decline Button -->
-<form action="{{ route('evaluations.decline', $evaluation->id) }}" method="POST">
-    @csrf
-    <button type="button" onclick="openDeclineModal({{ $evaluation->id }})" class="focus:outline-none text-white bg-yellow-700 hover:bg-yellow-800 focus:ring-4 focus:ring-yellow-300 font-medium rounded-lg text-sm px-5 py-2.5 me-2 mb-2 dark:bg-yellow-600 dark:hover:bg-yellow-700 dark:focus:ring-yellow-900">
-    Decline
-</button>
-</form>
+
     
 </td>
                 </tr>

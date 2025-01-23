@@ -19,6 +19,11 @@ use Illuminate\Foundation\Auth\User as Authenticatable;
 use Illuminate\Database\Eloquent\Relations\BelongsToMany;
 use App\Notifications\CustomEmailVerificationNotification;
 
+/**
+ * @method bool save() Salvează modelul în baza de date.
+ */
+
+
 class User extends Authenticatable implements MustVerifyEmail
 {
     use HasFactory, Notifiable, HasRoles;
@@ -34,6 +39,9 @@ class User extends Authenticatable implements MustVerifyEmail
         'password',
         'speciality_id',
         'teacher_faculty_id',
+        'background_color', 
+        'avatar',     // Adaugă și avatar dacă vrei să îl salvezi
+        'year_of_start',
         
     ];
 
@@ -60,39 +68,91 @@ class User extends Authenticatable implements MustVerifyEmail
         ];
     }
 
+    public function evaluationsAsStudent()
+{
+    return $this->hasManyThrough(
+        Evaluation::class,
+        UserGroup::class,
+        'user_id',     // Foreign key on UserGroup table
+        'group_id',    // Foreign key on Evaluation table
+        'id',          // Local key on User table
+        'group_id'     // Local key on UserGroup table
+    );
+}
+
+    public function evaluationsAsTeacher()
+{
+    return $this->hasMany(Evaluation::class, 'teacher_id', 'id');
+}
+
+public function evaluations()
+{
+    if ($this->hasRole('student')) {
+        return $this->evaluationsAsStudent();
+    } elseif ($this->hasRole('teacher')) {
+        return $this->evaluationsAsTeacher();
+    }
+    return null; // Or handle admin/other roles as needed
+}
+
     public function speciality(): BelongsTo
     {
         return $this->belongsTo(Speciality::class, 'speciality_id');
     }
 
-    public function faculty(): BelongsTo
+    public function faculty()
     {
         if ($this->hasRole(ERoles::STUDENT)) {
-            // return $this->belongsTo(Faculty::class, 'speciality_id', 'id')
-            //         ->join('specialities', 'faculties.id', '=', 'specialities.faculty_id');
-            return $this->hasOneThrough(Faculty::class, Speciality::class);
-            }
+            return $this->hasOneThrough(Faculty::class, Speciality::class, 'id', 'id', 'speciality_id', 'faculty_id');
+        }
         return $this->belongsTo(Faculty::class, 'teacher_faculty_id');
     }
-
+    // public function getFacultyAttribute(): ?Faculty
+    // {
+    //     return $this->getFaculty();
+    // }
     public function groups(): BelongsToMany
     {
         return $this->belongsToMany(Group::class, 'user_group', 'user_id', 'group_id')
-                    ->withTimestamps();
+                    ->withTimestamps()
+                    ->withTimestamps()
+                ->select('groups.id');
     }
 
-    public function evaluations(): HasMany
-    {
-        return $this->hasMany(Evaluation::class, 'teacher_id');
-    }
+    // public function evaluations(): HasMany
+    // {
+    //     return $this->hasMany(Evaluation::class, 'teacher_id');
+    // }
 
     public function sendEmailVerificationNotification()
     {
         $this->notify(new CustomEmailVerificationNotification());
     }
 
+    public function getYearOfStudy()
+    {
+        $evaluation = $this->evaluationsAsStudent()->first(); // Obține prima evaluare a studentului
+        return $evaluation ? $evaluation->year_of_study : 'N/A'; // Returnează anul de studiu sau 'N/A'
+    }
+
+    // public function getYearsOfWork()
+    // {
+    //     if (!$this->year_of_start) 
+    //     {
+    //         return 'N/A';
+    //     }
+    //     return now()->year - $this->year_of_start;
+    // }
+
+
+
+
     public function messages()
     {
         return $this->hasMany(Message::class);
     }
+    public function schedules()
+{
+    return $this->hasMany(TeacherSchedule::class, 'teacher_id');
+}
 }

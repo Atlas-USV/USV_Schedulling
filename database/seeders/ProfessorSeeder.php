@@ -11,11 +11,12 @@ class ProfessorSeeder extends Seeder
 {
     public function run()
     {
-        
+
         $url = "https://orar.usv.ro/orar/vizualizare/data/cadre.php?json";
 
         // Obține datele de la endpoint
-        $response = Http::get($url);
+        $response = Http::withOptions(['verify' => false])->get($url);
+
 
         if ($response->successful()) {
             $professors = $response->json();
@@ -41,7 +42,7 @@ class ProfessorSeeder extends Seeder
                     ],
                     [
                         'name' => $professor['firstName'] . ' ' . $professor['lastName'], // Concatenăm numele
-                        'password' => bcrypt('TemporaryPassword123'), 
+                        'password' => bcrypt('TemporaryPassword123'),
                         'teacher_faculty_id' => $faculty->id, // Atribuim facultatea
                     ]
                 );

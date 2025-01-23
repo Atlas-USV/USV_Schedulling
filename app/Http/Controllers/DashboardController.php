@@ -3,12 +3,14 @@
 namespace App\Http\Controllers;
 
 use App\Models\Room;
+use App\Models\Task;
 use App\Models\User;
 use App\Models\Group;
 use App\Models\Faculty;
 use App\Models\Subject;
 use Illuminate\Http\Request;
-use App\Models\Task;
+use Illuminate\Support\Collection;
+use Illuminate\Pagination\LengthAwarePaginator;
 
 class DashboardController extends Controller
 {
@@ -19,20 +21,39 @@ class DashboardController extends Controller
         $subjects = Subject::all();
         $teachers = User::role('admin')->get();
         $rooms = Room::all();
-    
-        // Obține task-urile utilizatorului curent (limitate la 4)
-        $tasks = Task::where('user_id', auth()->id())->take(4)->get();
 
-        $upcomingExams = \App\Models\Evaluation::where('group_id', 1) // Modifică dacă grupul e dinamic
-        ->where('status', 'accepted')
-        ->where('exam_date', '>=', now())
-        ->orderBy('exam_date', 'asc')
-        ->take(4)
+        $tasks = Task::where('user_id', auth()->id())
+        ->orderBy('deadline', 'asc')  // Order by deadline
+        ->where('deadline', '>=', now())  // Only future tasks
+        ->take(4)  // Limit to 4 tasks
         ->get();
+
+        $upcomingExams = collect(); // Initializează o colecție goală
+
+    if (auth()->user()->hasRole('teacher')) {
+        // Pentru profesori, obține examenele pe care le predau
+        $upcomingExams = \App\Models\Evaluation::where('teacher_id', auth()->id())
+            ->where('status', 'accepted')
+            ->where('exam_date', '>=', now())
+            ->orderBy('exam_date', 'asc')
+            ->take(4)
+            ->get();
+    } else {
+        // Pentru studenți, obține examenele grupelor lor
+        $groupIds = auth()->user()->groups()->pluck('id');
+        if ($groupIds->isNotEmpty()) {
+            $upcomingExams = \App\Models\Evaluation::whereIn('group_id', $groupIds)
+                ->where('status', 'accepted')
+                ->where('exam_date', '>=', now())
+                ->orderBy('exam_date', 'asc')
+                ->take(4)
+                ->get();
+        }
+    }
 
         $userName = auth()->user()->name;
 
-        $userRole = auth()->user()->role;
+        $userRole = auth()->user()->roles->pluck('name');
 
         // Ultimii 5 utilizatori adăugați
     $recentUsers = User::orderBy('created_at', 'desc')->take(5)->get();
@@ -43,39 +64,61 @@ class DashboardController extends Controller
         ->take(5)
         ->get();
 
-        \Log::info('User Role:', ['role' => $userRole]);
-        \Log::info('Authenticated User:', ['user' => auth()->user()]);
+
+        $requests = [];
+        if (auth()->user()->hasRole('teacher')) {
+            $requests = \App\Models\Request::where('teacher_id', auth()->id())
+                ->orderBy('created_at', 'desc')
+                ->take(10) // Limitează numărul de cereri afișate
+                ->get();
+        }
 
 
-    
-        return view('dashboard', compact('groups', 'faculties', 'subjects', 'teachers', 'rooms', 'tasks',  'userName', 'upcomingExams', 'userRole', 'recentUsers', 'pendingExams'));
+        \Log::info('Upcoming Exams:', ['upcomingExams' => $upcomingExams]);
+
+
+
+        return view('dashboard', compact('groups', 'faculties', 'subjects', 'teachers', 'rooms', 'tasks',  'userName', 'upcomingExams', 'userRole', 'recentUsers', 'pendingExams', 'requests'));
     }
 
 
-    public function storeTask(Request $request)
-{
-    $request->validate([
-        'title' => 'required|string|max:255',
-        'description' => 'required|string',
-        'subject' => 'required|string|max:255',
-        'deadline' => 'required|date|after:now',
-    ]);
+    // public function storeTask(Request $request)
+    // {
+    //     try {
+    //         $validated = $request->validate([
+    //             'title' => 'required|string|max:255',
+    //             'description' => 'required|string',
+    //             'subject' => 'required|string|max:255',
+    //             'deadline' => 'required|date|after:now',
+    //         ]);
 
-    
+    //         \Log::info('Creating task with data:', $validated);
 
-    Task::create([
-        'user_id' => auth()->id(),
-        'title' => $request->title,
-        'description' => $request->description,
-        'subject' => $request->subject ?? 'General', // Setează "General" ca valoare implicită
-        'deadline' => $request->deadline,
-        'is_completed' => false,
-    ]);
+    //         $task = Task::create([
+    //             'user_id' => auth()->id(),
+    //             'title' => $validated['title'],
+    //             'description' => $validated['description'],
+    //             'subject' => $validated['subject'],
+    //             'deadline' => $validated['deadline'],
+    //             'is_completed' => false,
+    //         ]);
 
-   
+    //         \Log::info('Task created successfully:', ['task_id' => $task->id]);
 
-    return redirect()->route('dashboard')->with('success', 'Task added successfully!');
-}
+    //         return redirect()->route('dashboard')
+    //             ->with('success', 'Task added successfully!')
+    //             ->with('task_created', true);  // Add this flag
+
+    //     } catch (\Exception $e) {
+    //         \Log::error('Error creating task:', [
+    //             'error' => $e->getMessage(),
+    //             'request_data' => $request->all()
+    //         ]);
+
+    //         return redirect()->route('dashboard')
+    //             ->with('error', 'Failed to create task. Please try again.');
+    //     }
+    // }
 
 public function editTask($id)
 {
@@ -132,27 +175,39 @@ public function deleteTask($id)
 
 public function showExams(Request $request)
 {
-    // Obține `group_id` din relația user-group
-    $groupId = auth()->user()->groups()->pluck('groups.id')->first();
+    // Verifică rolul utilizatorului
+    if (auth()->user()->hasRole('teacher')) {
+        // Dacă este profesor, afișează examenele pe care le predă
+        $query = \App\Models\Evaluation::where('teacher_id', auth()->id())
+            ->where('status', 'accepted');
+    } else {
+        // Dacă este student, obține toate grupele asociate utilizatorului
+        $groupIds = auth()->user()->groups()->pluck('groups.id');
 
-    // Verifică dacă utilizatorul are un grup asociat
-    if (!$groupId) {
-        return view('exams.index', [
-            'exams' => collect([]), // Returnează o colecție goală
-            'subjects' => \App\Models\Subject::all(),
-        ]);
+        // Verifică dacă utilizatorul are grupe asociate
+        if ($groupIds->isEmpty()) {
+            $emptyExams = new \Illuminate\Pagination\LengthAwarePaginator([], 0, 10, 1, [
+                'path' => \Illuminate\Pagination\Paginator::resolveCurrentPath()
+            ]);
+
+            return view('exams.index', [
+                'exams' => $emptyExams,
+                'subjects' => \App\Models\Subject::all(),
+            ]);
+        }
+
+        $query = \App\Models\Evaluation::whereIn('group_id', $groupIds)
+            ->where('status', 'accepted');
     }
 
-    // Construiește query-ul
-    $query = \App\Models\Evaluation::where('group_id', $groupId)
-    ->where('status', 'accepted');
-
-    // Aplica filtrul de timp (past/current)
-    if ($request->filter === 'past') {
-        $query->where('exam_date', '<', now());
-    } elseif ($request->filter === 'current') {
-        $query->where('exam_date', '>=', now());
-    }
+    // Filtrează examenele curente (ziua curentă sau viitor)
+    $query->where(function ($q) {
+        $q->where('exam_date', '>', now())
+            ->orWhere(function ($q2) {
+                $q2->where('exam_date', '=', now()->toDateString())
+                    ->where('end_time', '>=', now());
+            });
+    });
 
     // Aplica filtrul pentru subiect, dacă este setat
     if ($request->has('subject') && !empty($request->subject)) {
@@ -161,13 +216,73 @@ public function showExams(Request $request)
         });
     }
 
-    // Ordonează examenele crescător după dată
-    $exams = $query->orderBy('exam_date', 'asc')->get();
+    // Ordonează examenele crescător după dată și adaugă paginație
+    $exams = $query->orderBy('exam_date', 'asc')->paginate(10); // 10 examene per pagină
 
     // Obține toate subiectele pentru dropdown-ul de filtrare
     $subjects = \App\Models\Subject::all();
 
     return view('exams.index', compact('exams', 'subjects'));
+}
+public function viewInCalendar($id)
+{
+    $exam = \App\Models\Evaluation::findOrFail($id);
+
+    $googleCalendarUrl = sprintf(
+        'https://www.google.com/calendar/render?action=TEMPLATE&text=%s&dates=%s/%s&details=%s&location=%s',
+        urlencode($exam->subject->name),
+        $exam->exam_date->format('Ymd\THis'),
+        $exam->exam_date->format('Ymd\THis', strtotime('+2 hours')), // Adjust duration as needed
+        urlencode($exam->description ?? 'No details available'),
+        urlencode($exam->room->name ?? 'No room specified')
+    );
+
+    return redirect($googleCalendarUrl);
+}
+
+public function storeTask(Request $request)
+{
+    try {
+        $validated = $request->validate([
+            'title' => 'required|string|max:255',
+            'description' => 'required|string',
+            'subject' => 'required|string|max:255',
+            'deadline' => 'required|date|after:now',
+        ]);
+
+        Task::create([
+            'user_id' => auth()->id(),
+            'title' => $validated['title'],
+            'description' => $validated['description'],
+            'subject' => $validated['subject'],
+            'deadline' => $validated['deadline'],
+            'is_completed' => false,
+        ]);
+
+        // Adaugă log înainte de redirecționare
+        \Log::info('Session messages:', [
+            'toast_success' => 'Task added successfully!',
+        ]);
+
+        return redirect()->route('dashboard')->with('toast_success', 'Task added successfully!');
+
+    } catch (\Illuminate\Validation\ValidationException $e) {
+        // Mesaje de validare detaliate
+        \Log::info('Session messages:', [
+            'toast_error' => implode(', ', $e->validator->errors()->all()),
+        ]);
+
+        return redirect()->route('dashboard')
+            ->with('toast_error', implode(', ', $e->validator->errors()->all()));
+    } catch (\Exception $e) {
+        // Mesaj de eroare general
+        \Log::info('Session messages:', [
+            'toast_error' => 'Unexpected error: ' . $e->getMessage(),
+        ]);
+
+        return redirect()->route('dashboard')
+            ->with('toast_error', 'Unexpected error: ' . $e->getMessage());
+    }
 }
 
 

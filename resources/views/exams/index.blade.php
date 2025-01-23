@@ -4,84 +4,113 @@
 
 @section('content')
 <div class="flex items-center justify-between mb-6">
-    <h1 class="text-3xl font-bold">Planned Exams</h1>
-    <!-- Filter Form -->
-    <form method="GET" action="{{ route('exams.index') }}" class="flex items-center space-x-2">
-        <select name="subject" class="form-select rounded-lg border-gray-300 focus:ring-blue-500 focus:border-blue-500">
-            <option value="">All Subjects</option>
-            @foreach($subjects as $subject)
-                <option value="{{ $subject->name }}" {{ request('subject') === $subject->name ? 'selected' : '' }}>
-                    {{ $subject->name }}
-                </option>
-            @endforeach
-        </select>
-        <button type="submit" class="bg-blue-600 text-white font-medium text-sm px-5 py-2.5 rounded-lg hover:bg-blue-700">
-            Filter
-        </button>
-    </form>
-</div>
-
-<div class="flex space-x-6 mb-4">
-    <a href="{{ route('exams.index', array_merge(request()->all(), ['filter' => 'current'])) }}" 
-       class="px-4 py-2 {{ request('filter') === 'current' || !request('filter') ? 'bg-blue-600 text-white' : 'bg-gray-200 text-gray-700' }} font-medium rounded-lg hover:bg-blue-700 focus:outline-none">
-       Current
-    </a>
-    <a href="{{ route('exams.index', array_merge(request()->all(), ['filter' => 'past'])) }}" 
-       class="px-4 py-2 {{ request('filter') === 'past' ? 'bg-blue-600 text-white' : 'bg-gray-200 text-gray-700' }} font-medium rounded-lg hover:bg-blue-700 focus:outline-none">
-       Past
-    </a>
-</div>
-
-    @if($exams->isEmpty())
-        <div class="flex flex-col items-center justify-center mt-20">
-            <svg class="w-16 h-16 text-gray-400" fill="none" stroke="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg">
-                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 2a2 2 0 012 2v16a2 2 0 01-4 0V4a2 2 0 012-2zM10 10h4m-2 2v4"></path>
-            </svg>
-            <p class="mt-4 text-gray-500 text-lg">No exams found.</p>
-        </div>
+    @if(auth()->user()->hasRole('teacher'))
+        <h1 class="text-3xl font-bold text-gray-500 dark:text-gray-200">Exams You Teach</h1>
     @else
-        <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
-            @foreach($exams as $exam)
-                <div class="bg-white rounded-lg shadow-md p-6">
-                    <h2 class="text-lg font-bold text-gray-800">{{ $exam->subject->name }}</h2>
-                    <p class="text-sm text-gray-600 mt-2">
-                        {{ $exam->exam_date->format('d M Y') }} | {{ $exam->start_time->format('H:i') }} - {{ $exam->end_time->format('H:i') }}
-                    </p>
-                    <p class="text-sm text-gray-600">Room: {{ $exam->room->name }}</p>
-                    <p class="text-sm text-gray-600">Type: {{ $exam->type }}</p>
-                    <!-- Toggle Additional Info Button -->
-                    <button type="button" class="mt-4 bg-blue-500 text-white text-sm px-4 py-2 rounded-lg hover:bg-blue-600 focus:outline-none toggle-info">
-                        Show Additional Info
-                    </button>
-                    <!-- Hidden Additional Info -->
-                    <div class="additional-info mt-4 hidden">
-                        <p class="text-sm text-gray-600"><strong>Teacher:</strong> {{ $exam->teacher->name }}</p>
-                        <p class="text-sm text-gray-600"><strong>Group:</strong> {{ $exam->group->name }}</p>
-                        <p class="text-sm text-gray-600"><strong>Description:</strong> {{ $exam->description }}</p>
-                    </div>
-                </div>
-            @endforeach
-        </div>
+        <h1 class="text-3xl font-bold text-gray-500 dark:text-gray-200">Exams for Your Group</h1>
     @endif
+    <button id="download-pdf" class="bg-green-600 text-white px-4 py-2 rounded-lg hover:bg-green-700 dark:hover:bg-green-400">
+        Download PDF
+    </button>
+</div>
+
+<div class="">
+    <table class="min-w-full bg-white border-collapse border border-gray-200 dark:bg-gray-800">
+        <thead class="bg-gray-100 text-gray-600 uppercase text-sm leading-normal dark:bg-gray-700 dark:text-gray-400">
+            <tr class="bg-gray-100 text-gray-600 uppercase text-sm leading-normal dark:bg-gray-700 dark:text-gray-400">
+                <th class="py-3 px-6 text-left">
+                    <div class="relative">
+                        <select id="filter-subject" name="subject"
+                        data-hs-select='{
+                        "hasSearch": true,
+                        "searchPlaceholder": "Search subjects...",
+                        "searchClasses": "block w-full text-sm border-gray-200 rounded-lg focus:border-blue-500 focus:ring-blue-500 py-2 px-3",
+                        "searchWrapperClasses": "bg-white p-2 -mx-1 sticky top-0 dark:bg-gray-800",
+                        "placeholder": "All Subjects",
+                        "toggleClasses": "relative py-2.5 ps-4 pe-9 flex gap-x-2 text-nowrap w-full cursor-pointer bg-gray-50 border border-gray-300 rounded-lg text-start text-sm focus:outline-none focus:ring-2 focus:ring-blue-500 dark:bg-gray-800 dark:border-gray-600",
+                        "dropdownClasses": "mt-2 max-h-40 pb-1 px-1 space-y-0.5 z-20 w-72 bg-white border border-gray-200 rounded-lg overflow-hidden overflow-y-auto dark:bg-gray-700 dark:border-gray-600",
+                        "optionClasses": "py-2 px-4 w-full text-sm text-gray-800 cursor-pointer hover:bg-gray-100 rounded-lg focus:outline-none focus:bg-gray-100 dark:text-gray-300 dark:hover:bg-gray-600"
+                    }'>
+                            <option value="">All Subjects</option>
+                            @foreach($subjects as $subject)
+                                <option value="{{ $subject->name }}" {{ request('subject') === $subject->name ? 'selected' : '' }}>
+                                    {{ $subject->name }}
+                                </option>
+                            @endforeach
+                        </select>
+                    </div>
+                </th>
+                <th class="py-3 px-6 text-left">Date</th>
+                <th class="py-3 px-6 text-left">Time</th>
+                <th class="py-3 px-6 text-left">Room</th>
+                <th class="py-3 px-6 text-left">Type</th>
+                @if(auth()->user()->hasRole('teacher'))
+                    <th class="py-3 px-6 text-left">Group</th>
+                @endif
+                <th class="py-3 px-6 text-left">Actions</th>
+            </tr>
+        </thead>
+        <tbody class="text-gray-600 text-sm font-light dark:text-gray-300">
+            @forelse($exams as $exam)
+                <tr class="border-b border-gray-200 hover:bg-gray-100 dark:border-gray-600 dark:hover:bg-gray-700">
+                    <td class="py-3 px-6">{{ $exam->subject->name }}</td>
+                    <td class="py-3 px-6">{{ $exam->exam_date->format('d M Y') }}</td>
+                    <td class="py-3 px-6">{{ $exam->start_time->format('H:i') }} - {{ $exam->end_time->format('H:i') }}</td>
+                    <td class="py-3 px-6">{{ $exam->room->name }}</td>
+                    <td class="py-3 px-6">{{ ucfirst($exam->type) }}</td>
+                    @if(auth()->user()->hasRole('teacher'))
+                        <td class="py-3 px-6">{{ $exam->group->name }}</td>
+                    @endif
+                    <td class="py-3 px-6">
+                        <a href="{{ route('exams.calendar', ['exam' => $exam->id]) }}"
+                           class="bg-blue-600 text-white px-4 py-2 rounded-lg hover:bg-blue-700  dark:hover:bg-blue-400">
+                            View in Calendar
+                        </a>
+                    </td>
+                </tr>
+            @empty
+                <tr>
+                    <td colspan="7" class="text-center py-6 text-gray-500">
+                        No exams found for the selected filter.
+                    </td>
+                </tr>
+            @endforelse
+        </tbody>
+    </table>
+</div>
+
+<!-- Pagination -->
+<div class="flex justify-end mt-4">
+    {{ $exams->links('vendor.pagination.flowbite') }}
 </div>
 @endsection
 
 @push('scripts')
+
+<link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/hs-select/dist/hs-select.min.css">
+<script src="https://cdn.jsdelivr.net/npm/hs-select/dist/hs-select.min.js"></script>
+
 <script>
     document.addEventListener('DOMContentLoaded', () => {
-        // Toggle Additional Info
-        document.querySelectorAll('.toggle-info').forEach(button => {
-            button.addEventListener('click', () => {
-                const additionalInfo = button.nextElementSibling;
-                if (additionalInfo.classList.contains('hidden')) {
-                    additionalInfo.classList.remove('hidden');
-                    button.textContent = 'Hide Additional Info';
-                } else {
-                    additionalInfo.classList.add('hidden');
-                    button.textContent = 'Show Additional Info';
-                }
+        const filterSubject = document.querySelector('#filter-subject');
+
+        if (filterSubject) {
+            // Initialize HSSelect
+            const selectSubject = HSSelect.getInstance('#filter-subject');
+
+            // Add event listener for subject filter change
+            filterSubject.addEventListener('change', function() {
+                const selectedSubject = this.value;
+                const url = new URL(window.location.href);
+                url.searchParams.set('subject', selectedSubject || '');
+                window.location.href = url.toString();
             });
-        });
+        }
+    });
+
+    // PDF download functionality
+    document.getElementById('download-pdf')?.addEventListener('click', function() {
+        window.location.href = "{{ route('exams.downloadPdf') }}";
     });
 </script>
 @endpush

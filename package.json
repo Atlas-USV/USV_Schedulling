@@ -7,14 +7,16 @@
     },
     "devDependencies": {
         "autoprefixer": "^10.4.20",
-        "axios": "^1.6.4",
         "flowbite": "^2.5.2",
         "laravel-vite-plugin": "^1.0",
-        "postcss": "^8.4.49",
-        "tailwindcss": "^3.4.15",
+        "postcss": "^8.5.0",
+        "tailwindcss": "^3.4.17",
         "vite": "^5.0"
     },
     "dependencies": {
-        "flowbite-typography": "^1.0.5"
+        "@preline/select": "^2.6.0",
+        "axios": "^1.7.9",
+        "flowbite-typography": "^1.0.5",
+        "preline": "^2.6.0"
     }
 }
