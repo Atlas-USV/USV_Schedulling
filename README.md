@@ -70,7 +70,7 @@ For setup instructions, you can also refer to this [tutorial video](https://www.
    ```
 
 8. Seed the database
-   - Copy `subgrupe.php` to the `/storage` folder.
+   - Copy `subgroup_details_2.json` to the `/storage` folder.
    - Run the seeder:
      ```bash
      php artisan db:seed
